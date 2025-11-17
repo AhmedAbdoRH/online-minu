@@ -22,12 +22,7 @@ const formSchema = z.object({
   name: z.string()
     .min(3, 'يجب أن يكون اسم الكتالوج 3 أحرف على الأقل')
     .max(50, 'يجب أن يكون اسم الكتالوج 50 حرفًا على الأكثر')
-    .regex(/^[a-z0-9-]+$/, 'يجب أن يحتوي اسم الكتالوج على أحرف إنجليزية صغيرة وأرقام وشرطات فقط')
-    .refine(async (name) => {
-        if (name.length < 3) return true; // Don't validate if too short
-        const isAvailable = await checkCatalogName(name);
-        return isAvailable;
-    }, 'اسم الكتالوج هذا مستخدم بالفعل. الرجاء اختيار اسم آخر.'),
+    .regex(/^[a-z0-9-]+$/, 'يجب أن يحتوي اسم الكتالوج على أحرف إنجليزية صغيرة وأرقام وشرطات فقط'),
   logo: z.instanceof(File).refine(file => file.size > 0, 'شعار العمل مطلوب.'),
 });
 
@@ -45,6 +40,12 @@ export function OnboardingForm() {
   });
 
   const onSubmit = async (values: z.infer<typeof formSchema>) => {
+    const isAvailable = await checkCatalogName(values.name);
+    if (!isAvailable) {
+        form.setError('name', { message: 'اسم الكتالوج هذا مستخدم بالفعل. الرجاء اختيار اسم آخر.' });
+        return;
+    }
+      
     const formData = new FormData();
     formData.append('name', values.name);
     formData.append('logo', values.logo);
