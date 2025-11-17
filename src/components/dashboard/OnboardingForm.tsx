@@ -16,10 +16,8 @@ import { Input } from '@/components/ui/input';
 import { SubmitButton } from '@/components/common/SubmitButton';
 import { createCatalog } from '@/app/actions/catalog';
 import { useToast } from '@/hooks/use-toast';
-import { useRouter } from 'next/navigation';
-import { useSearchParams } from 'next/navigation';
-import { useEffect } from 'react';
 import { Alert, AlertDescription, AlertTitle } from '../ui/alert';
+import { useState } from 'react';
 
 const MAX_FILE_SIZE = 5 * 1024 * 1024; // 5MB
 const ACCEPTED_IMAGE_TYPES = ["image/jpeg", "image/jpg", "image/png", "image/webp"];
@@ -39,9 +37,8 @@ const formSchema = z.object({
 });
 
 export function OnboardingForm() {
-  const router = useRouter();
-  const searchParams = useSearchParams();
-  const error = searchParams.get('error');
+  const { toast } = useToast();
+  const [serverError, setServerError] = useState<string | null>(null);
 
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
@@ -50,21 +47,39 @@ export function OnboardingForm() {
       logo: undefined,
     },
   });
-  
-  useEffect(() => {
-    if (error === 'name_taken') {
-       form.setError('name', { message: 'اسم الكتالوج هذا مستخدم بالفعل. الرجاء اختيار اسم آخر.' });
+
+  const onSubmit = async (values: z.infer<typeof formSchema>) => {
+    setServerError(null);
+    const formData = new FormData();
+    formData.append('name', values.name);
+    formData.append('logo', values.logo);
+
+    const result = await createCatalog(formData);
+
+    if (result && result.error) {
+      if (result.error === "اسم الكتالوج هذا مستخدم بالفعل.") {
+        form.setError('name', { message: result.error });
+      } else {
+        setServerError(result.error);
+      }
+    } else if (result && result.success) {
+      toast({
+        title: 'نجاح!',
+        description: 'تم إنشاء الكتالوج الخاص بك بنجاح. جاري تحديث الصفحة...',
+      });
+      // Force a full page reload to ensure session is correctly handled
+      window.location.assign('/dashboard');
     }
-  }, [error, form]);
+  };
 
 
   return (
     <Form {...form}>
-      <form action={createCatalog} className="space-y-8">
-        {error && error !== 'name_taken' && (
+      <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8">
+        {serverError && (
             <Alert variant="destructive">
                 <AlertTitle>حدث خطأ</AlertTitle>
-                <AlertDescription>فشل إنشاء الكتالوج. يرجى المحاولة مرة أخرى.</AlertDescription>
+                <AlertDescription>{serverError}</AlertDescription>
             </Alert>
         )}
         <FormField
