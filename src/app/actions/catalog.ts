@@ -38,7 +38,8 @@ export async function createCatalog(formData: FormData) {
   const { data: { user } } = await supabase.auth.getUser();
 
   if (!user) {
-    return { error: "غير مصرح به" };
+    // This case should ideally not be hit if dashboard is protected
+    return redirect('/login');
   }
   
   const validatedFields = catalogSchema.safeParse({
@@ -47,15 +48,18 @@ export async function createCatalog(formData: FormData) {
   });
 
   if (!validatedFields.success) {
-    return { error: "بيانات غير صالحة." };
+    // This is a basic error handling, in a real app you might redirect
+    // with an error message in the query params.
+    console.error("Validation failed:", validatedFields.error.flatten().fieldErrors);
+    return redirect('/dashboard?error=validation_failed');
   }
 
   const { name, logo } = validatedFields.data;
 
-  // Check uniqueness again on server
+  // Re-check uniqueness on the server to be safe
   const isAvailable = await checkCatalogName(name);
   if (!isAvailable) {
-    return { error: "اسم الكتالوج هذا مستخدم بالفعل." };
+    return redirect('/dashboard?error=name_taken');
   }
 
   // Upload logo
@@ -67,7 +71,7 @@ export async function createCatalog(formData: FormData) {
 
   if (uploadError) {
     console.error('Storage Error:', uploadError);
-    return { error: 'فشل تحميل الشعار.' };
+    return redirect('/dashboard?error=logo_upload_failed');
   }
   
   const { data: { publicUrl } } = supabaseService.storage.from('logos').getPublicUrl(uploadData.path);
@@ -83,16 +87,15 @@ export async function createCatalog(formData: FormData) {
     console.error('DB Error:', dbError);
     // Clean up uploaded logo if db insert fails
     await supabaseService.storage.from('logos').remove([logoFileName]);
-    return { error: 'فشل إنشاء الكتالوج في قاعدة البيانات.' };
+    return redirect('/dashboard?error=db_insert_failed');
   }
 
   revalidatePath('/dashboard');
   
-  // Refresh session to ensure middleware has the latest user state
-  await supabase.auth.refreshSession();
-  
-  return { success: true };
+  // The redirect will trigger a full page reload, which will handle session refresh implicitly.
+  redirect('/dashboard');
 }
+
 
 export async function updateCatalog(catalogId: number, formData: FormData) {
     // Similar logic to createCatalog, but for updating.
