@@ -1,4 +1,7 @@
+'use client';
+
 import Link from "next/link"
+import { useRouter } from "next/navigation";
 
 import { Button } from "@/components/ui/button"
 import {
@@ -14,6 +17,13 @@ import { signup } from "@/app/actions/auth"
 import { SubmitButton } from "@/components/common/SubmitButton"
 
 export default function SignupPage() {
+  const router = useRouter();
+  const handleSignup = async (formData: FormData) => {
+    const result = await signup(formData);
+    // The server action will handle the redirect, but we can refresh if needed
+    // or handle messages. For now, the action redirects.
+  };
+
   return (
     <Card className="mx-auto max-w-sm">
       <CardHeader>
@@ -23,7 +33,7 @@ export default function SignupPage() {
         </CardDescription>
       </CardHeader>
       <CardContent>
-        <form action={signup} className="grid gap-4">
+        <form action={handleSignup} className="grid gap-4">
           <div className="grid gap-2">
             <Label htmlFor="email">البريد الإلكتروني</Label>
             <Input
