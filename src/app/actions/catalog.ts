@@ -33,12 +33,12 @@ export async function checkCatalogName(name: string): Promise<boolean> {
   return !data;
 }
 
-export async function createCatalog(formData: FormData) {
+export async function createCatalog(prevState: any, formData: FormData) {
   const supabase = createClient();
   const { data: { user } } = await supabase.auth.getUser();
 
   if (!user) {
-    return { error: 'غير مصرح به' };
+    return { message: 'غير مصرح به' };
   }
   
   const validatedFields = catalogSchema.safeParse({
@@ -48,7 +48,7 @@ export async function createCatalog(formData: FormData) {
 
   if (!validatedFields.success) {
     console.error("Validation failed:", validatedFields.error.flatten().fieldErrors);
-    return { error: 'بيانات غير صالحة.' };
+    return { message: 'بيانات غير صالحة.' };
   }
 
   const { name, logo } = validatedFields.data;
@@ -56,7 +56,7 @@ export async function createCatalog(formData: FormData) {
   // Re-check uniqueness on the server to be safe
   const isAvailable = await checkCatalogName(name);
   if (!isAvailable) {
-    return { error: "اسم الكتالوج هذا مستخدم بالفعل." };
+    return { message: "اسم الكتالوج هذا مستخدم بالفعل." };
   }
 
   // Upload logo
@@ -68,7 +68,7 @@ export async function createCatalog(formData: FormData) {
 
   if (uploadError) {
     console.error('Storage Error:', uploadError);
-    return { error: 'فشل تحميل الشعار.' };
+    return { message: 'فشل تحميل الشعار.' };
   }
   
   const { data: { publicUrl } } = supabaseService.storage.from('logos').getPublicUrl(uploadData.path);
@@ -84,11 +84,11 @@ export async function createCatalog(formData: FormData) {
     console.error('DB Error:', dbError);
     // Clean up uploaded logo if db insert fails
     await supabaseService.storage.from('logos').remove([logoFileName]);
-    return { error: 'فشل إنشاء الكتالوج في قاعدة البيانات.' };
+    return { message: 'فشل إنشاء الكتالوج في قاعدة البيانات.' };
   }
 
   revalidatePath('/dashboard');
-  return { error: null, success: true };
+  redirect('/dashboard');
 }
 
 

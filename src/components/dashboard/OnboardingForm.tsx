@@ -1,5 +1,6 @@
 'use client';
 
+import { useFormState } from 'react-dom';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import * as z from 'zod';
@@ -17,7 +18,7 @@ import { SubmitButton } from '@/components/common/SubmitButton';
 import { createCatalog } from '@/app/actions/catalog';
 import { useToast } from '@/hooks/use-toast';
 import { Alert, AlertDescription, AlertTitle } from '../ui/alert';
-import { useState } from 'react';
+import { useEffect } from 'react';
 
 const MAX_FILE_SIZE = 5 * 1024 * 1024; // 5MB
 const ACCEPTED_IMAGE_TYPES = ["image/jpeg", "image/jpg", "image/png", "image/webp"];
@@ -27,19 +28,22 @@ const formSchema = z.object({
     .min(3, 'يجب أن يكون اسم الكتالوج 3 أحرف على الأقل')
     .max(50, 'يجب أن يكون اسم الكتالوج 50 حرفًا على الأكثر')
     .regex(/^[a-z0-9-]+$/, 'يجب أن يحتوي اسم الكتالوج على أحرف إنجليزية صغيرة وأرقام وشرطات فقط'),
-  logo: z.instanceof(File)
-    .refine(file => file.size > 0, 'شعار العمل مطلوب.')
-    .refine((file) => file.size <= MAX_FILE_SIZE, `Max file size is 5MB.`)
+  logo: z.any()
+    .refine((files) => files?.length == 1, 'شعار العمل مطلوب.')
+    .refine((files) => files?.[0]?.size <= MAX_FILE_SIZE, `الحد الأقصى لحجم الملف 5 ميغابايت.`)
     .refine(
-      (file) => ACCEPTED_IMAGE_TYPES.includes(file.type),
-      ".jpg, .jpeg, .png and .webp files are accepted."
+      (files) => ACCEPTED_IMAGE_TYPES.includes(files?.[0]?.type),
+       ".jpg, .jpeg, .png و .webp هي الملفات المقبولة."
     ),
 });
 
-export function OnboardingForm() {
-  const { toast } = useToast();
-  const [serverError, setServerError] = useState<string | null>(null);
+const initialState = {
+  message: '',
+};
 
+export function OnboardingForm() {
+  const [state, formAction] = useFormState(createCatalog, initialState);
+  
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: {
@@ -48,38 +52,30 @@ export function OnboardingForm() {
     },
   });
 
-  const onSubmit = async (values: z.infer<typeof formSchema>) => {
-    setServerError(null);
-    const formData = new FormData();
-    formData.append('name', values.name);
-    formData.append('logo', values.logo);
+  const { toast } = useToast();
 
-    const result = await createCatalog(formData);
-
-    if (result && result.error) {
-      if (result.error === "اسم الكتالوج هذا مستخدم بالفعل.") {
-        form.setError('name', { message: result.error });
-      } else {
-        setServerError(result.error);
-      }
-    } else if (result && result.success) {
-      toast({
-        title: 'نجاح!',
-        description: 'تم إنشاء الكتالوج الخاص بك بنجاح. جاري تحديث الصفحة...',
-      });
-      // Force a full page reload to ensure session is correctly handled
-      window.location.assign('/dashboard');
+   useEffect(() => {
+    if (state?.message) {
+        if(state.message === "اسم الكتالوج هذا مستخدم بالفعل.") {
+            form.setError('name', { message: state.message });
+        } else {
+            toast({
+                title: 'خطأ',
+                description: state.message,
+                variant: 'destructive'
+            });
+        }
     }
-  };
+  }, [state, toast, form]);
 
 
   return (
     <Form {...form}>
-      <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8">
-        {serverError && (
+      <form action={formAction} className="space-y-8">
+        {state?.message && state.message !== "اسم الكتالوج هذا مستخدم بالفعل." && (
             <Alert variant="destructive">
                 <AlertTitle>حدث خطأ</AlertTitle>
-                <AlertDescription>{serverError}</AlertDescription>
+                <AlertDescription>{state.message}</AlertDescription>
             </Alert>
         )}
         <FormField
@@ -101,11 +97,11 @@ export function OnboardingForm() {
         <FormField
           control={form.control}
           name="logo"
-          render={({ field: { onChange, value, ...rest } }) => (
+          render={({ field }) => (
             <FormItem>
               <FormLabel>شعار العمل</FormLabel>
               <FormControl>
-                <Input type="file" accept="image/*" onChange={(e) => onChange(e.target.files?.[0])} {...rest} />
+                <Input type="file" accept="image/*" {...form.register('logo')} />
               </FormControl>
               <FormMessage />
             </FormItem>
