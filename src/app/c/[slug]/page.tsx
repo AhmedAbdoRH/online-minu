@@ -29,7 +29,9 @@ async function getCatalogData(slug: string): Promise<CatalogData | null> {
             *,
             menu_items ( * )
         `)
-        .eq('catalog_id', catalog.id);
+        .eq('catalog_id', catalog.id)
+        .order('parent_category_id', { ascending: true })
+        .order('name', { ascending: true });
 
     if (categoriesError) {
         console.error("Error fetching categories and items:", categoriesError);
@@ -72,6 +74,53 @@ export default async function CatalogPage({ params }: Props) {
     notFound();
   }
 
+  // Helper function to build hierarchical categories
+  const buildHierarchicalCategories = (parentId: number | null = null) => {
+    return data.categories
+      .filter(cat => cat.parent_category_id === parentId)
+      .map(cat => ({
+        ...cat,
+        children: buildHierarchicalCategories(cat.id)
+      }));
+  };
+
+  const hierarchicalCategories = buildHierarchicalCategories();
+
+  // Helper function to render categories and their items recursively
+  const renderCategories = (categories: any[]) => {
+    return categories.map((category) => (
+      <section key={category.id} id={`category-${category.id}`} className="mb-12">
+        <h2 className="text-3xl font-bold font-headline mb-6 text-secondary-dark">{category.name}</h2>
+        <Separator className="mb-8" />
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+          {category.menu_items.map((item: any) => (
+            <Card key={item.id} className="overflow-hidden shadow-md hover:shadow-xl transition-shadow duration-300">
+              {item.image_url && (
+                <div className="relative h-56 w-full">
+                  <Image src={item.image_url} alt={item.name} layout="fill" objectFit="cover" />
+                </div>
+              )}
+              <CardHeader>
+                <CardTitle className="text-xl">{item.name}</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <CardDescription>{item.description}</CardDescription>
+              </CardContent>
+              <CardFooter>
+                <p className="text-lg font-bold text-primary">{item.price} ر.س</p>
+              </CardFooter>
+            </Card>
+          ))}
+        </div>
+        {category.children.length > 0 && (
+          <div className="ml-8 mt-8">
+            {renderCategories(category.children)}
+          </div>
+        )}
+      </section>
+    ));
+  };
+
   return (
     <div className="bg-background min-h-screen">
       <header className="container mx-auto py-8 text-center">
@@ -97,32 +146,7 @@ export default async function CatalogPage({ params }: Props) {
                 <p className="text-muted-foreground text-lg">قائمة الطعام فارغة حالياً. يرجى التحقق مرة أخرى قريباً!</p>
             </div>
         ) : (
-            data.categories.map((category) => (
-                <section key={category.id} id={`category-${category.id}`} className="mb-12">
-                    <h2 className="text-3xl font-bold font-headline mb-6 text-secondary-dark">{category.name}</h2>
-                    <Separator className="mb-8" />
-                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-                        {category.menu_items.map((item) => (
-                            <Card key={item.id} className="overflow-hidden shadow-md hover:shadow-xl transition-shadow duration-300">
-                                {item.image_url && (
-                                    <div className="relative h-56 w-full">
-                                        <Image src={item.image_url} alt={item.name} layout="fill" objectFit="cover" />
-                                    </div>
-                                )}
-                                <CardHeader>
-                                    <CardTitle className="text-xl">{item.name}</CardTitle>
-                                </CardHeader>
-                                <CardContent>
-                                    <CardDescription>{item.description}</CardDescription>
-                                </CardContent>
-                                <CardFooter>
-                                    <p className="text-lg font-bold text-primary">{item.price} ر.س</p>
-                                </CardFooter>
-                            </Card>
-                        ))}
-                    </div>
-                </section>
-            ))
+            renderCategories(hierarchicalCategories)
         )}
       </main>
       <footer className="text-center py-6 border-t">

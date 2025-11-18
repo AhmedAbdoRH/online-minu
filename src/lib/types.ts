@@ -4,7 +4,7 @@ export type Catalog = Database['public']['Tables']['catalogs']['Row'];
 export type NewCatalog = Database['public']['Tables']['catalogs']['Insert'];
 export type UpdateCatalog = Database['public']['Tables']['catalogs']['Update'];
 
-export type Category = Database['public']['Tables']['categories']['Row'];
+export type Category = Database['public']['Tables']['categories']['Row'] & { parent_category_id: number | null; };
 export type NewCategory = Database['public']['Tables']['categories']['Insert'];
 export type UpdateCategory = Database['public']['Tables']['categories']['Update'];
 

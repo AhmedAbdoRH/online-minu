@@ -43,6 +43,28 @@ interface ItemFormProps {
 
 export function ItemForm({ catalogId, categories, item, onSuccess }: ItemFormProps) {
   const { toast } = useToast();
+
+  // بناء هيكل فئات هرمي
+  const buildHierarchicalCategories = (parentId: number | null = null, depth = 0) => {
+    return categories
+      .filter(cat => cat.parent_category_id === parentId)
+      .map(cat => ({
+        ...cat,
+        depth,
+        children: buildHierarchicalCategories(cat.id, depth + 1)
+      }));
+  };
+
+  // عرض فئات متداخلة مع مسافات
+  const renderCategoryItems = (categories: (Category & { depth: number; children: any[] })[]) => {
+    return categories.flatMap(cat => [
+      <SelectItem key={cat.id} value={cat.id.toString()}>
+        {Array(cat.depth).fill('— ').join('')}{cat.name}
+      </SelectItem>,
+      ...renderCategoryItems(cat.children)
+    ]);
+  };
+
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(item ? updateFormSchema : formSchema),
     defaultValues: {
@@ -126,9 +148,7 @@ export function ItemForm({ catalogId, categories, item, onSuccess }: ItemFormPro
                         </SelectTrigger>
                         </FormControl>
                         <SelectContent>
-                        {categories.map(cat => (
-                            <SelectItem key={cat.id} value={cat.id.toString()}>{cat.name}</SelectItem>
-                        ))}
+                        {renderCategoryItems(buildHierarchicalCategories())}
                         </SelectContent>
                     </Select>
                     <FormMessage />

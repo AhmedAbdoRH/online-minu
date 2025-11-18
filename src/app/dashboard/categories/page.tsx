@@ -1,3 +1,4 @@
+import { getCategories } from '@/app/actions/categories';
 import { createClient } from '@/lib/supabase/server';
 import { notFound, redirect } from 'next/navigation';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
@@ -15,7 +16,11 @@ async function getCatalogAndCategories() {
     const { data: catalog } = await supabase.from('catalogs').select('id').eq('user_id', user.id).single();
     if (!catalog) notFound();
 
-    const { data: categories } = await supabase.from('categories').select('*').eq('catalog_id', catalog.id).order('created_at');
+    const { categories, error } = await getCategories(catalog.id);
+    if (error) {
+        console.error("Error fetching categories:", error);
+        return { catalog, categories: [] };
+    }
 
     return { catalog, categories: categories || [] };
 }
@@ -46,7 +51,7 @@ export default async function CategoriesPage() {
                                 أدخل اسم الفئة الجديدة.
                             </DialogDescription>
                         </DialogHeader>
-                        <CategoryForm catalogId={catalog.id} />
+                        <CategoryForm catalogId={catalog.id} categories={categories} />
                     </DialogContent>
                 </Dialog>
             </CardHeader>

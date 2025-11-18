@@ -2,60 +2,128 @@
 
 import { createClient } from "@/lib/supabase/server";
 import { revalidatePath } from "next/cache";
+import { z } from "zod";
 
-async function verifyCatalogOwnership(catalogId: number) {
-    const supabase = createClient();
-    const { data: { user } } = await supabase.auth.getUser();
-    if (!user) return false;
+const categorySchema = z.object({
+  catalog_id: z.coerce.number(),
+  name: z.string().min(2, 'يجب أن يكون الاسم حرفين على الأقل').max(50),
+  parent_category_id: z.coerce.number().nullable().optional(),
+});
 
-    const { data: catalog, error } = await supabase.from('catalogs').select('id').eq('id', catalogId).eq('user_id', user.id).single();
+const updateCategorySchema = z.object({
+  id: z.coerce.number(),
+  name: z.string().min(2, 'يجب أن يكون الاسم حرفين على الأقل').max(50),
+  parent_category_id: z.coerce.number().nullable().optional(),
+});
 
-    return !!catalog;
+export async function createCategory(prevState: any, formData: FormData) {
+  const supabase = createClient();
+  const { data: { user } } = await supabase.auth.getUser();
+
+  if (!user) {
+    return { message: 'غير مصرح به' };
+  }
+
+  const validatedFields = categorySchema.safeParse({
+    catalog_id: formData.get('catalog_id'),
+    name: formData.get('name'),
+    parent_category_id: formData.get('parent_category_id') || null,
+  });
+
+  if (!validatedFields.success) {
+    const firstError = Object.values(validatedFields.error.flatten().fieldErrors)[0]?.[0] || 'بيانات غير صالحة.';
+    return { message: firstError };
+  }
+
+  const { catalog_id, name, parent_category_id } = validatedFields.data;
+
+  const { error } = await supabase.from('categories').insert({
+    catalog_id,
+    name,
+    parent_category_id,
+  });
+
+  if (error) {
+    console.error('Error creating category:', error);
+    return { message: 'فشل إنشاء الفئة.' };
+  }
+
+  revalidatePath('/dashboard/categories');
+  return { message: 'تم إنشاء الفئة بنجاح.' };
 }
 
+export async function updateCategory(prevState: any, formData: FormData) {
+  const supabase = createClient();
+  const { data: { user } } = await supabase.auth.getUser();
 
-export async function createCategory(catalogId: number, name: string) {
-    const isOwner = await verifyCatalogOwnership(catalogId);
-    if (!isOwner) {
-        return { error: 'غير مصرح به' };
-    }
+  if (!user) {
+    return { message: 'غير مصرح به' };
+  }
 
-    const supabase = createClient();
-    const { error } = await supabase.from('categories').insert({ catalog_id: catalogId, name });
+  const validatedFields = updateCategorySchema.safeParse({
+    id: formData.get('id'),
+    name: formData.get('name'),
+    parent_category_id: formData.get('parent_category_id') || null,
+  });
 
-    if (error) {
-        console.error(error);
-        return { error: 'فشل إنشاء الفئة.' };
-    }
+  if (!validatedFields.success) {
+    const firstError = Object.values(validatedFields.error.flatten().fieldErrors)[0]?.[0] || 'بيانات غير صالحة.';
+    return { message: firstError };
+  }
 
-    revalidatePath('/dashboard/categories');
-    return { error: null };
+  const { id, name, parent_category_id } = validatedFields.data;
+
+  const { error } = await supabase.from('categories').update({
+    name,
+    parent_category_id,
+  }).eq('id', id);
+
+  if (error) {
+    console.error('Error updating category:', error);
+    return { message: 'فشل تحديث الفئة.' };
+  }
+
+  revalidatePath('/dashboard/categories');
+  return { message: 'تم تحديث الفئة بنجاح.' };
 }
 
-export async function updateCategory(categoryId: number, name: string) {
-    const supabase = createClient();
-    // In a real app, you would also verify ownership before updating
-    const { error } = await supabase.from('categories').update({ name }).eq('id', categoryId);
-    
-    if (error) {
-        console.error(error);
-        return { error: 'فشل تحديث الفئة.' };
-    }
+export async function deleteCategory(id: number) {
+  const supabase = createClient();
+  const { data: { user } } = await supabase.auth.getUser();
 
-    revalidatePath('/dashboard/categories');
-    return { error: null };
+  if (!user) {
+    return { error: 'غير مصرح به' };
+  }
+
+  const { error } = await supabase.from('categories').delete().eq('id', id);
+
+  if (error) {
+    console.error('Error deleting category:', error);
+    return { error: 'فشل حذف الفئة.' };
+  }
+
+  revalidatePath('/dashboard/categories');
+  return { error: null };
 }
 
-export async function deleteCategory(categoryId: number) {
-    const supabase = createClient();
-    // In a real app, you would also verify ownership before deleting
-    const { error } = await supabase.from('categories').delete().eq('id', categoryId);
+export async function getCategories(catalogId: number) {
+  const supabase = createClient();
+  const { data: { user } } = await supabase.auth.getUser();
 
-    if (error) {
-        console.error(error);
-        return { error: 'فشل حذف الفئة.' };
-    }
-    
-    revalidatePath('/dashboard/categories');
-    return { error: null };
+  if (!user) {
+    return { categories: [], error: 'غير مصرح به' };
+  }
+
+  const { data, error } = await supabase
+    .from('categories')
+    .select('id, name, parent_category_id')
+    .eq('catalog_id', catalogId)
+    .order('name', { ascending: true });
+
+  if (error) {
+    console.error('Error fetching categories:', error);
+    return { categories: [], error: 'فشل جلب الفئات.' };
+  }
+
+  return { categories: data, error: null };
 }
