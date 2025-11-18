@@ -6,6 +6,7 @@ import { PlusCircle } from 'lucide-react';
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { CategoryForm } from '@/components/dashboard/CategoryForm';
 import { CategoriesTable } from '@/components/dashboard/CategoriesTable';
+import type { Category } from '@/lib/types';
 
 async function getCatalogAndCategories() {
     const supabase = createClient();
@@ -15,9 +16,11 @@ async function getCatalogAndCategories() {
     const { data: catalog } = await supabase.from('catalogs').select('id, enable_subcategories').eq('user_id', user.id).single();
     if (!catalog) notFound();
 
-    const { data: categories } = await supabase.from('categories').select('*').eq('catalog_id', catalog.id).order('created_at');
+    const { data: categoriesData } = await supabase.from('categories').select('*').eq('catalog_id', catalog.id).order('created_at');
+    
+    const categories: Category[] = categoriesData || [];
 
-    return { catalog, categories: categories || [] };
+    return { catalog, categories };
 }
 
 export default async function CategoriesPage() {

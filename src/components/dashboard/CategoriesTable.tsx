@@ -18,9 +18,9 @@ import {
   DropdownMenuLabel,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
-import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { CategoryForm } from './CategoryForm';
-import { useState, useMemo } from 'react';
+import React, { useState, useMemo } from 'react';
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from '../ui/alert-dialog';
 import { deleteCategory } from '@/app/actions/categories';
 import { toast } from '@/hooks/use-toast';
@@ -31,25 +31,33 @@ interface CategoriesTableProps {
     enableSubcategories: boolean;
 }
 
+type CategoryWithChildren = Category & { children: CategoryWithChildren[] };
+
 export function CategoriesTable({ categories, catalogId, enableSubcategories }: CategoriesTableProps) {
   const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
   const [editingCategory, setEditingCategory] = useState<Category | null>(null);
 
   const categoryTree = useMemo(() => {
-    const categoryMap = new Map(categories.map(cat => [cat.id, { ...cat, children: [] as Category[] }]));
-    const tree: (Category & { children: Category[] })[] = [];
+    const categoryMap = new Map<number, CategoryWithChildren>();
+    categories.forEach(cat => {
+      categoryMap.set(cat.id, { ...cat, children: [] });
+    });
+    
+    const tree: CategoryWithChildren[] = [];
 
     categories.forEach(cat => {
+      const node = categoryMap.get(cat.id)!;
       if (cat.parent_id && categoryMap.has(cat.parent_id)) {
-        categoryMap.get(cat.parent_id)!.children.push(categoryMap.get(cat.id)!);
+        categoryMap.get(cat.parent_id)!.children.push(node);
       } else {
-        tree.push(categoryMap.get(cat.id)!);
+        tree.push(node);
       }
     });
+
     return tree;
   }, [categories]);
 
-  const mainCategories = categories.filter(c => c.parent_id === null);
+  const mainCategories = useMemo(() => categories.filter(c => c.parent_id === null), [categories]);
 
   const handleDelete = async (categoryId: number) => {
     const result = await deleteCategory(categoryId);
@@ -78,11 +86,11 @@ export function CategoriesTable({ categories, catalogId, enableSubcategories }: 
     );
   }
   
-  const renderCategoryRow = (category: Category & { children: Category[] }, isSub: boolean) => (
+  const renderCategoryRow = (category: CategoryWithChildren, isSub: boolean): React.ReactNode => (
     <React.Fragment key={category.id}>
         <TableRow>
-            <TableCell className="font-medium">
-                {isSub && <CornerDownRight className="inline-block ml-4 h-4 w-4 text-muted-foreground" />}
+            <TableCell className="font-medium flex items-center gap-2">
+                {isSub && <CornerDownRight className="inline-block h-4 w-4 text-muted-foreground" />}
                 {category.name}
             </TableCell>
             <TableCell>{new Date(category.created_at).toLocaleDateString('ar-SA')}</TableCell>
@@ -121,7 +129,7 @@ export function CategoriesTable({ categories, catalogId, enableSubcategories }: 
               </AlertDialog>
             </TableCell>
         </TableRow>
-        {category.children.map(child => renderCategoryRow(child, true))}
+        {enableSubcategories && category.children.map(child => renderCategoryRow(child, true))}
     </React.Fragment>
   );
 
