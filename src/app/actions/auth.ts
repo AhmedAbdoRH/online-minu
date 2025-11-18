@@ -22,7 +22,9 @@ export async function login(formData: FormData) {
 }
 
 export async function signup(formData: FormData) {
-  const origin = headers().get("origin");
+  const originHeader = headers().get("origin");
+  const fallbackOrigin = "http://localhost:9002";
+  const redirectTo = `${originHeader || fallbackOrigin}/auth/callback`;
   const email = formData.get("email") as string;
   const password = formData.get("password") as string;
   const supabase = createClient();
@@ -31,7 +33,7 @@ export async function signup(formData: FormData) {
     email,
     password,
     options: {
-      emailRedirectTo: `${origin}/auth/callback`,
+      emailRedirectTo: redirectTo,
     },
   });
 

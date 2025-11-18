@@ -25,9 +25,10 @@ const itemSchema = z.object({
 async function uploadImage(image: File, userId: string): Promise<string> {
     const supabaseService = createServiceRoleClient();
     const fileName = `${userId}/${Date.now()}-${image.name}`;
+    const normalizedType = image.type === 'image/jpg' ? 'image/jpeg' : image.type;
     const { data, error } = await supabaseService.storage
         .from('menu_images')
-        .upload(fileName, image);
+        .upload(fileName, image, { contentType: normalizedType });
 
     if (error) {
         throw new Error('فشل تحميل الصورة.');
