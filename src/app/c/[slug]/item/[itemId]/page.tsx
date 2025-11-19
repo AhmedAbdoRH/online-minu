@@ -88,13 +88,13 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
       description: product.description ?? "",
       images: product.image_url
         ? [
-            {
-              url: product.image_url,
-              width: 1200,
-              height: 800,
-              alt: product.name,
-            },
-          ]
+          {
+            url: product.image_url,
+            width: 1200,
+            height: 800,
+            alt: product.name,
+          },
+        ]
         : undefined,
     },
   };
@@ -108,7 +108,7 @@ export default async function ProductPage({ params }: Props) {
   }
 
   const { catalog, product, categoryName, related } = data;
-  const origin = headers().get("origin") ?? process.env.NEXT_PUBLIC_SITE_URL ?? "http://localhost:9003";
+  const origin = (await headers()).get("origin") ?? process.env.NEXT_PUBLIC_SITE_URL ?? "http://localhost:9003";
   const productUrl = `${origin}/c/${catalog.name}/item/${product.id}`;
   const whatsappText = encodeURIComponent(
     `أرغب في طلب ${product.name} من ${catalog.name}. التفاصيل: ${productUrl}`
@@ -148,15 +148,12 @@ export default async function ProductPage({ params }: Props) {
               </div>
             )}
             <div className="pointer-events-none absolute bottom-4 left-4 rounded-full bg-white/85 px-4 py-2 text-sm font-semibold text-brand-primary">
-              {product.price} ر.س
+              {product.price} ج.م
             </div>
           </div>
 
           <div className="flex flex-col gap-4">
-            <div className="inline-flex w-fit items-center gap-2 rounded-full bg-brand-primary/10 px-4 py-1 text-xs text-brand-primary">
-              <Flame className="h-3.5 w-3.5" />
-              منتج حصري
-            </div>
+
             <div className="space-y-2">
               <p className="text-xs uppercase tracking-[0.2em] text-muted-foreground">
                 {catalog.name}
@@ -176,15 +173,8 @@ export default async function ProductPage({ params }: Props) {
 
             <div className="grid gap-3 rounded-2xl border border-dashed border-white/40 bg-white/60 p-4 shadow-inner backdrop-blur dark:bg-slate-950/50">
               <div className="flex items-center justify-between text-sm">
-                <span className="text-muted-foreground">مدة التحضير المتوقعة</span>
-                <span className="inline-flex items-center gap-2 text-foreground">
-                  <Clock className="h-4 w-4 text-brand-primary" />
-                  15 - 20 دقيقة
-                </span>
-              </div>
-              <div className="flex items-center justify-between text-sm">
                 <span className="text-muted-foreground">السعر</span>
-                <span className="font-semibold text-brand-primary">{product.price} ر.س</span>
+                <span className="font-semibold text-brand-primary">{product.price} ج.م</span>
               </div>
             </div>
 
@@ -198,20 +188,10 @@ export default async function ProductPage({ params }: Props) {
                   اطلب عبر واتساب
                 </a>
               </Button>
-              <Button
-                variant="outline"
-                className="rounded-full border-white/60 bg-white/70 text-sm shadow-sm backdrop-blur"
-              >
-                شارك المنتج
-              </Button>
+
             </div>
 
-            <div className="rounded-2xl border border-white/40 bg-white/70 p-3 text-xs text-muted-foreground shadow-sm backdrop-blur dark:bg-slate-950/40">
-              <p>
-                تم تحسين صفحة المنتج لعرضها على الجوال والويب، مع دعم الـ PWA والـ Offline
-                Caching لضمان تجربة فاخرة حتى في الاتصال الضعيف.
-              </p>
-            </div>
+
 
             <ShareButtons catalogName={catalog.name} />
           </div>
@@ -260,7 +240,7 @@ export default async function ProductPage({ params }: Props) {
                     <p className="text-xs text-muted-foreground line-clamp-2">
                       {item.description ?? "تفاصيل المنتج ستظهر هنا."}
                     </p>
-                    <p className="text-sm font-bold text-brand-primary">{item.price} ر.س</p>
+                    <p className="text-sm font-bold text-brand-primary">{item.price} ج.م</p>
                   </div>
                 </Link>
               ))}

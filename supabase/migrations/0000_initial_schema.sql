@@ -4,6 +4,7 @@ CREATE TABLE catalogs (
   user_id UUID REFERENCES auth.users(id) NOT NULL UNIQUE,
   name TEXT NOT NULL UNIQUE,
   logo_url TEXT,
+  cover_url TEXT,
   created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
 );
 

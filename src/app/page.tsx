@@ -1,158 +1,102 @@
-import { createClient } from "@/lib/supabase/server";
-import { notFound } from "next/navigation";
 import Image from "next/image";
+import Link from "next/link";
+import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
-import { Separator } from "@/components/ui/separator";
-import type { Metadata } from "next";
-import { ShareButtons } from "@/components/menu/ShareButtons";
-import { CatalogData } from "@/lib/types";
 
-type Props = {
-  params: { slug: string };
+export const metadata = {
+  title: 'أونلاين منيو - منصة قوائم الطعام الرقمية',
+  description: 'أنشئ قائمة طعامك الإلكترونية بسهولة ووفر تجربة طلب سلسة لعملائك',
 };
 
-async function getCatalogData(slug: string): Promise<CatalogData | null> {
-    const supabase = await createClient();
-    const { data: catalog, error: catalogError } = await supabase
-        .from('catalogs')
-        .select('*')
-        .eq('name', slug)
-        .single();
-    
-    if (catalogError || !catalog) {
-        return null;
-    }
-
-    const { data: categories, error: categoriesError } = await supabase
-        .from('categories')
-        .select(`
-            *,
-            menu_items ( * )
-        `)
-        .eq('catalog_id', catalog.id)
-        .order('parent_category_id', { ascending: true })
-        .order('name', { ascending: true });
-
-    if (categoriesError) {
-        console.error("Error fetching categories and items:", categoriesError);
-        return { ...catalog, categories: [] };
-    }
-
-    return { ...catalog, categories: categories || [] };
-}
-
-
-export async function generateMetadata({ params }: Props): Promise<Metadata> {
-  const data = await getCatalogData(params.slug);
-  if (!data) {
-    return {
-      title: 'الكتالوج غير موجود',
-    };
-  }
-  return {
-    title: `قائمة طعام ${data.name}`,
-    description: `تصفح قائمة الطعام الخاصة بـ ${data.name}`,
-    openGraph: {
-        title: `قائمة طعام ${data.name}`,
-        description: `تصفح قائمة الطعام الخاصة بـ ${data.name}`,
-        images: [
-            {
-                url: data.logo_url || '',
-                width: 800,
-                height: 600,
-                alt: `شعار ${data.name}`,
-            },
-        ],
+export default function HomePage() {
+  const features = [
+    {
+      title: 'تصميم عصري',
+      description: 'قوائم طعام جذابة وسهلة التصفح تعكس هوية مطعمك',
+      icon: '🎨',
     },
-  };
-}
-
-export default async function CatalogPage({ params }: Props) {
-  const data = await getCatalogData(params.slug);
-
-  if (!data) {
-    notFound();
-  }
-
-  // Helper function to build hierarchical categories
-  const buildHierarchicalCategories = (parentId: number | null = null) => {
-    return data.categories
-      .filter(cat => cat.parent_category_id === parentId)
-      .map(cat => ({
-        ...cat,
-        children: buildHierarchicalCategories(cat.id)
-      }));
-  };
-
-  const hierarchicalCategories = buildHierarchicalCategories();
-
-  // Helper function to render categories and their items recursively
-  const renderCategories = (categories: any[]) => {
-    return categories.map((category) => (
-      <section key={category.id} id={`category-${category.id}`} className="mb-12">
-        <h2 className="text-3xl font-bold font-headline mb-6 text-secondary-dark">{category.name}</h2>
-        <Separator className="mb-8" />
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-          {category.menu_items.map((item: any) => (
-            <Card key={item.id} className="overflow-hidden shadow-md hover:shadow-xl transition-shadow duration-300">
-              {item.image_url && (
-                <div className="relative h-56 w-full">
-                  <Image src={item.image_url} alt={item.name} layout="fill" objectFit="cover" />
-                </div>
-              )}
-              <CardHeader>
-                <CardTitle className="text-xl">{item.name}</CardTitle>
-              </CardHeader>
-              <CardContent>
-                <CardDescription>{item.description}</CardDescription>
-              </CardContent>
-              <CardFooter>
-                <p className="text-lg font-bold text-primary">{item.price} ر.س</p>
-              </CardFooter>
-            </Card>
-          ))}
-        </div>
-        {category.children.length > 0 && (
-          <div className="ml-8 mt-8">
-            {renderCategories(category.children)}
-          </div>
-        )}
-      </section>
-    ));
-  };
+    {
+      title: 'سهولة الاستخدام',
+      description: 'واجهة بسيطة وسهلة الاستخدام للعملاء والمسؤولين',
+      icon: '✨',
+    },
+    {
+      title: 'متوافق مع الجوال',
+      description: 'يعمل بشكل ممتاز على جميع الأجهزة الذكية',
+      icon: '📱',
+    },
+  ];
 
   return (
-    <div className="bg-background min-h-screen">
-      <header className="container mx-auto py-8 text-center">
-        {data.logo_url && (
-            <Image 
-                src={data.logo_url} 
-                alt={`شعار ${data.name}`} 
-                width={120} 
-                height={120}
-                className="mx-auto rounded-full object-cover mb-4 shadow-lg border-4 border-white"
-            />
-        )}
-        <h1 className="text-4xl font-bold font-headline text-primary">{data.name}</h1>
-        <p className="text-muted-foreground mt-2">مرحباً بك في قائمة طعامنا الرقمية</p>
-        <div className="mt-4">
-            <ShareButtons catalogName={data.name} />
+    <div className="min-h-screen">
+      {/* Hero Section */}
+      <section className="bg-gradient-to-b from-primary/5 to-background py-20">
+        <div className="container mx-auto px-4 text-center">
+          <h1 className="text-4xl md:text-6xl font-bold font-headline text-primary mb-6">
+            قائمة طعامك الإلكترونية بلمسة عصرية
+          </h1>
+          <p className="text-xl text-muted-foreground max-w-2xl mx-auto mb-8">
+            أنشئ قائمة طعام إلكترونية جذابة لمطعمك أو مقهاك بسهولة وسرعة
+          </p>
+          <div className="flex flex-col sm:flex-row gap-4 justify-center">
+            <Button size="lg" asChild>
+              <Link href="/signup">
+                ابدأ مجاناً
+              </Link>
+            </Button>
+            <Button size="lg" variant="outline" asChild>
+              <Link href="#features">
+                تعرف على المزيد
+              </Link>
+            </Button>
+          </div>
         </div>
-      </header>
-      
-      <main className="container mx-auto px-4 pb-12">
-        {data.categories.length === 0 ? (
-            <div className="text-center py-20">
-                <p className="text-muted-foreground text-lg">قائمة الطعام فارغة حالياً. يرجى التحقق مرة أخرى قريباً!</p>
-            </div>
-        ) : (
-            renderCategories(hierarchicalCategories)
-        )}
-      </main>
-      <footer className="text-center py-6 border-t">
-        <p className="text-sm text-muted-foreground">
-            مدعوم بواسطة <a href="/" className="text-primary hover:underline">قائمة طعامي</a>
-        </p>
+      </section>
+
+      {/* Features Section */}
+      <section id="features" className="py-20 bg-background">
+        <div className="container mx-auto px-4">
+          <h2 className="text-3xl font-bold text-center mb-12">
+            لماذا تختار منصتنا؟
+          </h2>
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+            {features.map((feature, index) => (
+              <Card key={index} className="text-center p-6 hover:shadow-lg transition-shadow">
+                <div className="text-4xl mb-4">{feature.icon}</div>
+                <CardHeader>
+                  <CardTitle className="text-xl">{feature.title}</CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <p className="text-muted-foreground">{feature.description}</p>
+                </CardContent>
+              </Card>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* CTA Section */}
+      <section className="bg-primary/10 py-20">
+        <div className="container mx-auto px-4 text-center">
+          <h2 className="text-3xl font-bold mb-6">جاهز لبدء رحلتك معنا؟</h2>
+          <p className="text-xl text-muted-foreground mb-8 max-w-2xl mx-auto">
+            انشئ قائمة طعامك الإلكترونية اليوم واجعل طلب عملائك أسهل من أي وقت مضى
+          </p>
+          <Button size="lg" asChild>
+            <Link href="/signup">
+              سجل مجاناً الآن
+            </Link>
+          </Button>
+        </div>
+      </section>
+
+      {/* Footer */}
+      <footer className="bg-background border-t py-8">
+        <div className="container mx-auto px-4 text-center">
+          <p className="text-muted-foreground text-sm">
+            © {new Date().getFullYear()} أونلاين منيو. جميع الحقوق محفوظة.
+          </p>
+        </div>
       </footer>
     </div>
   );

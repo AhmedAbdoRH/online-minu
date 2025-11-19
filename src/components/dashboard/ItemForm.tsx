@@ -31,7 +31,7 @@ const formSchema = z.object({
 
 // For update, image is not required
 const updateFormSchema = formSchema.extend({
-    image: formSchema.shape.image.optional()
+  image: formSchema.shape.image.optional()
 });
 
 interface ItemFormProps {
@@ -70,7 +70,7 @@ export function ItemForm({ catalogId, categories, item, onSuccess }: ItemFormPro
     defaultValues: {
       name: item?.name || '',
       description: item?.description || '',
-      price: item?.price || 0,
+      price: item?.price || undefined,
       category_id: item?.category_id.toString() || '',
       image: undefined,
     },
@@ -86,7 +86,7 @@ export function ItemForm({ catalogId, categories, item, onSuccess }: ItemFormPro
     if (values.image) {
       formData.append('image', values.image);
     }
-    
+
     const result = item ? await updateItem(item.id, formData) : await createItem(formData);
 
     if (result.error) {
@@ -102,59 +102,59 @@ export function ItemForm({ catalogId, categories, item, onSuccess }: ItemFormPro
     <Form {...form}>
       <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
         <div className="grid grid-cols-2 gap-4">
-            <FormField
+          <FormField
             control={form.control}
             name="name"
             render={({ field }) => (
-                <FormItem className="col-span-2">
+              <FormItem className="col-span-2">
                 <FormLabel>اسم المنتج</FormLabel>
                 <FormControl><Input {...field} /></FormControl>
                 <FormMessage />
-                </FormItem>
+              </FormItem>
             )}
-            />
-            <FormField
+          />
+          <FormField
             control={form.control}
             name="description"
             render={({ field }) => (
-                <FormItem className="col-span-2">
+              <FormItem className="col-span-2">
                 <FormLabel>الوصف (اختياري)</FormLabel>
                 <FormControl><Textarea {...field} /></FormControl>
                 <FormMessage />
-                </FormItem>
+              </FormItem>
             )}
-            />
-            <FormField
+          />
+          <FormField
             control={form.control}
             name="price"
             render={({ field }) => (
-                <FormItem>
-                <FormLabel>السعر (ر.س)</FormLabel>
+              <FormItem>
+                <FormLabel>السعر (ج.م)</FormLabel>
                 <FormControl><Input type="number" step="0.01" {...field} /></FormControl>
                 <FormMessage />
-                </FormItem>
+              </FormItem>
             )}
-            />
-             <FormField
-                control={form.control}
-                name="category_id"
-                render={({ field }) => (
-                    <FormItem>
-                    <FormLabel>الفئة</FormLabel>
-                    <Select onValueChange={field.onChange} defaultValue={field.value}>
-                        <FormControl>
-                        <SelectTrigger>
-                            <SelectValue placeholder="اختر فئة" />
-                        </SelectTrigger>
-                        </FormControl>
-                        <SelectContent>
-                        {renderCategoryItems(buildHierarchicalCategories())}
-                        </SelectContent>
-                    </Select>
-                    <FormMessage />
-                    </FormItem>
-                )}
-            />
+          />
+          <FormField
+            control={form.control}
+            name="category_id"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>الفئة</FormLabel>
+                <Select onValueChange={field.onChange} defaultValue={field.value}>
+                  <FormControl>
+                    <SelectTrigger>
+                      <SelectValue placeholder="اختر فئة" />
+                    </SelectTrigger>
+                  </FormControl>
+                  <SelectContent>
+                    {renderCategoryItems(buildHierarchicalCategories())}
+                  </SelectContent>
+                </Select>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
         </div>
         <FormField
           control={form.control}

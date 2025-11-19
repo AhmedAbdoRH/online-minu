@@ -67,7 +67,7 @@ function formatPrice(value: MenuItem["price"]) {
   return `${numeric.toLocaleString("ar-SA", {
     minimumFractionDigits: 0,
     maximumFractionDigits: 2,
-  })} ر.س`;
+  })} ج.م`;
 }
 
 function isNewItem(item: MenuItem) {
@@ -107,8 +107,8 @@ function MenuItemCard({ item, catalogName, categoryName, viewMode, index }: Menu
     isList
       ? "w-36 shrink-0 aspect-[4/5]"
       : isCompact
-      ? "w-24 shrink-0 aspect-[3/4]"
-      : "w-full aspect-[4/5]"
+        ? "w-24 shrink-0 aspect-[3/4]"
+        : "w-full aspect-[4/5]"
   );
 
   const contentPadding = isList || isCompact ? "py-4 pr-3" : "pt-5 px-5 pb-6";
@@ -311,7 +311,7 @@ export function StorefrontView({ catalog, categories }: StorefrontViewProps) {
             animate={{ y: 0, opacity: 1, transition: { delay: 0.15, type: "spring", stiffness: 180 } }}
             className="inline-flex items-center gap-3 rounded-full bg-white/15 px-4 py-2 text-[12px] uppercase tracking-[0.4em] text-white backdrop-blur"
           >
-            luxe glass 2025
+
           </motion.div>
           <motion.h1
             initial={{ clipPath: "inset(0 100% 0 0)" }}
@@ -431,7 +431,7 @@ export function StorefrontView({ catalog, categories }: StorefrontViewProps) {
                   className={cn(
                     viewMode === "masonry" && "masonry-columns",
                     viewMode === "grid" &&
-                      "grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3 2xl:grid-cols-4",
+                    "grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3 2xl:grid-cols-4",
                     (viewMode === "list" || viewMode === "compact") && "flex flex-col gap-3"
                   )}
                 >
@@ -481,7 +481,7 @@ export function StorefrontView({ catalog, categories }: StorefrontViewProps) {
                             className={cn(
                               viewMode === "masonry" && "masonry-columns",
                               viewMode === "grid" &&
-                                "grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3 2xl:grid-cols-4",
+                              "grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3 2xl:grid-cols-4",
                               (viewMode === "list" || viewMode === "compact") && "flex flex-col gap-3"
                             )}
                           >
@@ -521,7 +521,7 @@ export function StorefrontView({ catalog, categories }: StorefrontViewProps) {
 
       <AddToHomeCTA show={showInstallHint} onDismiss={() => setShowInstallHint(false)} />
       <BottomNav />
-    </div>
+    </div >
   );
 }
 

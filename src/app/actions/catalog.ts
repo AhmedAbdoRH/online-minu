@@ -13,13 +13,9 @@ const catalogSchema = z.object({
     .min(3, 'يجب أن يكون الاسم 3 أحرف على الأقل')
     .max(50)
     .regex(/^[a-z0-9-]+$/, 'يجب أن يحتوي الاسم على أحرف إنجليزية صغيرة وأرقام وشرطات فقط'),
-  logo: z.instanceof(File)
-    .refine((file) => file.size > 0, "الشعار مطلوب.")
-    .refine((file) => file.size <= MAX_FILE_SIZE, `الحد الأقصى لحجم الملف 5 ميغابايت.`)
-    .refine(
-      (file) => ACCEPTED_IMAGE_TYPES.includes(file.type),
-      ".jpg, .jpeg, .png و .webp هي الملفات المقبولة."
-    ),
+  logo: z.instanceof(File).optional(),
+  cover: z.instanceof(File).optional(),
+  enable_subcategories: z.boolean().default(false),
 });
 
 export async function checkCatalogName(name: string): Promise<boolean> {
@@ -101,19 +97,34 @@ export async function updateCatalog(prevState: any, formData: FormData) {
     }
 
     const catalogId = formData.get('catalogId');
-    const name = formData.get('name') as string;
-    const logo = formData.get('logo') as File;
-    const enableSubcategories = formData.get('enable_subcategories') === 'on';
 
-    // Simplified validation for update
     if (!catalogId) {
         return { message: "معرف الكتالوج مفقود." };
     }
+
+    const validatedFields = catalogSchema.safeParse({
+        name: formData.get('name'),
+        logo: formData.get('logo'),
+        cover: formData.get('cover'),
+        enable_subcategories: formData.get('enable_subcategories') === 'on',
+    });
+
+    if (!validatedFields.success) {
+        console.error("Validation failed:", validatedFields.error.flatten().fieldErrors);
+        const firstError = Object.values(validatedFields.error.flatten().fieldErrors)[0]?.[0] || 'بيانات غير صالحة.';
+        return { message: firstError };
+    }
+
+    const { name, logo, cover, enable_subcategories } = validatedFields.data;
     
-    const updateData: { name: string; logo_url?: string; enable_subcategories: boolean } = {
-        name,
-        enable_subcategories,
-    };
+    const updateData: { name?: string; logo_url?: string; cover_url?: string; enable_subcategories?: boolean } = {};
+
+    if (name) {
+        updateData.name = name;
+    }
+    if (enable_subcategories !== undefined) {
+        updateData.enable_subcategories = enable_subcategories;
+    }
     
     if (logo && logo.size > 0) {
         const logoFileName = `${user.id}-${Date.now()}.${logo.name.split('.').pop()}`;
@@ -125,9 +136,33 @@ export async function updateCatalog(prevState: any, formData: FormData) {
             console.error('Storage Error:', uploadError);
             return { message: 'فشل تحميل الشعار.' };
         }
-        
+
         const { data: { publicUrl } } = supabase.storage.from('logos').getPublicUrl(uploadData.path);
         updateData.logo_url = publicUrl;
+    }
+
+    // Handle cover upload
+    if (cover && cover.size > 0) {
+        // Validate cover file
+        if (cover.size > MAX_FILE_SIZE) {
+            return { message: `الحد الأقصى لحجم صورة الغلاف 5 ميغابايت.` };
+        }
+        if (!ACCEPTED_IMAGE_TYPES.includes(cover.type)) {
+            return { message: `.jpg, .jpeg, .png و .webp هي الملفات المقبولة لصورة الغلاف.` };
+        }
+
+        const coverFileName = `${user.id}-${Date.now()}.${cover.name.split('.').pop()}`;
+        const { data: coverUploadData, error: coverUploadError } = await supabase.storage
+            .from('covers')
+            .upload(coverFileName, cover);
+
+        if (coverUploadError) {
+            console.error('Storage Error (Cover):', coverUploadError);
+            return { message: 'فشل تحميل صورة الغلاف.' };
+        }
+
+        const { data: { publicUrl: coverPublicUrl } } = supabase.storage.from('covers').getPublicUrl(coverUploadData.path);
+        updateData.cover_url = coverPublicUrl;
     }
 
     const { error: dbError } = await supabase.from('catalogs').update(updateData).eq('id', catalogId);

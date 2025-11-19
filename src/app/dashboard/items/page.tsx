@@ -15,7 +15,7 @@ async function getData() {
     const { data: catalog } = await supabase.from('catalogs').select('id, name').eq('user_id', user.id).single();
     if (!catalog) notFound();
 
-    const { data: categories } = await supabase.from('categories').select('id, name').eq('catalog_id', catalog.id);
+    const { data: categories } = await supabase.from('categories').select('*').eq('catalog_id', catalog.id);
     const { data: items } = await supabase.from('menu_items').select('*, categories(name)').eq('catalog_id', catalog.id).order('created_at');
 
     return { catalog, categories: categories || [], items: items || [] };

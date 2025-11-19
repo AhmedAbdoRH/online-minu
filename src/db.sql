@@ -10,6 +10,7 @@ CREATE TABLE public.catalogs (
     user_id uuid NOT NULL,
     name text NOT NULL,
     logo_url text NULL,
+    cover_url text NULL,
     enable_subcategories boolean NOT NULL DEFAULT false,
     CONSTRAINT catalogs_pkey PRIMARY KEY (id),
     CONSTRAINT catalogs_name_key UNIQUE (name),
@@ -27,10 +28,10 @@ CREATE TABLE public.categories (
     created_at timestamp with time zone NOT NULL DEFAULT now(),
     name text NOT NULL,
     catalog_id bigint NOT NULL,
-    parent_id bigint NULL,
+    parent_category_id bigint NULL,
     CONSTRAINT categories_pkey PRIMARY KEY (id),
     CONSTRAINT categories_catalog_id_fkey FOREIGN KEY (catalog_id) REFERENCES public.catalogs (id) ON UPDATE CASCADE ON DELETE CASCADE,
-    CONSTRAINT categories_parent_id_fkey FOREIGN KEY (parent_id) REFERENCES public.categories (id) ON DELETE CASCADE
+    CONSTRAINT categories_parent_category_id_fkey FOREIGN KEY (parent_category_id) REFERENCES public.categories (id) ON DELETE CASCADE
 );
 ALTER TABLE public.categories ENABLE ROW LEVEL SECURITY;
 CREATE POLICY "Allow public read-only access." ON public.categories FOR SELECT USING (true);

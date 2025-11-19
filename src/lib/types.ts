@@ -1,4 +1,94 @@
-import type { Database } from './database.types';
+// Temporary Database type definition
+interface Database {
+  public: {
+    Tables: {
+      catalogs: {
+        Row: {
+          id: number;
+          created_at: string;
+          name: string;
+          description: string | null;
+          logo_url: string | null;
+          user_id: string;
+          enable_subcategories: boolean;
+        };
+        Insert: {
+          id?: number;
+          created_at?: string;
+          name: string;
+          description?: string | null;
+          logo_url?: string | null;
+          user_id: string;
+          enable_subcategories?: boolean;
+        };
+        Update: {
+          id?: number;
+          created_at?: string;
+          name?: string;
+          description?: string | null;
+          logo_url?: string | null;
+          user_id?: string;
+          enable_subcategories?: boolean;
+        };
+      };
+      categories: {
+        Row: {
+          id: number;
+          created_at: string;
+          name: string;
+          catalog_id: number;
+          parent_category_id: number | null;
+        };
+        Insert: {
+          id?: number;
+          created_at?: string;
+          name: string;
+          catalog_id: number;
+          parent_category_id?: number | null;
+        };
+        Update: {
+          id?: number;
+          created_at?: string;
+          name?: string;
+          catalog_id?: number;
+          parent_category_id?: number | null;
+        };
+      };
+      menu_items: {
+        Row: {
+          id: number;
+          created_at: string;
+          name: string;
+          description: string | null;
+          price: number;
+          image_url: string | null;
+          category_id: number;
+          catalog_id: number;
+        };
+        Insert: {
+          id?: number;
+          created_at?: string;
+          name: string;
+          description?: string | null;
+          price: number;
+          image_url?: string | null;
+          category_id: number;
+          catalog_id: number;
+        };
+        Update: {
+          id?: number;
+          created_at?: string;
+          name?: string;
+          description?: string | null;
+          price?: number;
+          image_url?: string | null;
+          category_id?: number;
+          catalog_id?: number;
+        };
+      };
+    };
+  };
+}
 
 export type Catalog = Database['public']['Tables']['catalogs']['Row'];
 export type NewCatalog = Database['public']['Tables']['catalogs']['Insert'];
