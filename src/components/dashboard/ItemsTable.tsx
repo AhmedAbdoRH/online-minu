@@ -48,21 +48,22 @@ function ItemRow({ item, catalogId, categories }: { item: ItemWithCategory, cata
   }
 
   return (
-    <TableRow>
+    <TableRow className="hover:bg-muted/50 transition-colors">
       <TableCell className="hidden sm:table-cell">
-        <Image
-          alt={item.name}
-          className="aspect-square rounded-md object-cover"
-          height="64"
-          src={item.image_url || "https://picsum.photos/seed/placeholder/64/64"}
-          width="64"
-        />
+        <div className="relative h-16 w-16 overflow-hidden rounded-lg border border-border/50">
+          <Image
+            alt={item.name}
+            className="object-cover"
+            fill
+            src={item.image_url || "https://picsum.photos/seed/placeholder/64/64"}
+          />
+        </div>
       </TableCell>
-      <TableCell className="font-medium">{item.name}</TableCell>
+      <TableCell className="font-bold text-base">{item.name}</TableCell>
       <TableCell>
-        <Badge variant="outline">{item.categories?.name || 'غير مصنف'}</Badge>
+        <Badge variant="outline" className="bg-muted/50">{item.categories?.name || 'غير مصنف'}</Badge>
       </TableCell>
-      <TableCell>{item.price} ج.م</TableCell>
+      <TableCell className="font-mono">{item.price} ج.م</TableCell>
       <TableCell>
         <Dialog open={isEditDialogOpen} onOpenChange={setIsEditDialogOpen}>
           <AlertDialog>
@@ -75,9 +76,9 @@ function ItemRow({ item, catalogId, categories }: { item: ItemWithCategory, cata
               </DropdownMenuTrigger>
               <DropdownMenuContent align="end">
                 <DropdownMenuLabel>الإجراءات</DropdownMenuLabel>
-                <DropdownMenuItem onSelect={() => setIsEditDialogOpen(true)}>تعديل</DropdownMenuItem>
+                <DropdownMenuItem onSelect={() => setIsEditDialogOpen(true)} className="cursor-pointer">تعديل</DropdownMenuItem>
                 <AlertDialogTrigger asChild>
-                  <DropdownMenuItem className="text-red-600" onSelect={(e) => e.preventDefault()}>حذف</DropdownMenuItem>
+                  <DropdownMenuItem className="text-destructive focus:text-destructive cursor-pointer" onSelect={(e) => e.preventDefault()}>حذف</DropdownMenuItem>
                 </AlertDialogTrigger>
               </DropdownMenuContent>
             </DropdownMenu >
@@ -117,32 +118,40 @@ function ItemRow({ item, catalogId, categories }: { item: ItemWithCategory, cata
 export function ItemsTable({ items, catalogId, categories }: ItemsTableProps) {
   if (items.length === 0) {
     return (
-      <div className="text-center text-muted-foreground py-8">
-        لم تقم بإضافة أي منتجات بعد.
+      <div className="flex flex-col items-center justify-center rounded-xl border border-dashed border-muted-foreground/25 bg-muted/10 py-16 text-center">
+        <div className="mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-muted">
+          <div className="h-8 w-8 text-muted-foreground/50" />
+        </div>
+        <h3 className="mb-1 text-lg font-semibold">لا توجد منتجات</h3>
+        <p className="mb-6 max-w-sm text-sm text-muted-foreground">
+          لم تقم بإضافة أي منتجات بعد.
+        </p>
       </div>
     );
   }
 
   return (
-    <Table>
-      <TableHeader>
-        <TableRow>
-          <TableHead className="hidden w-[100px] sm:table-cell">
-            <span className="sr-only">الصورة</span>
-          </TableHead>
-          <TableHead>الاسم</TableHead>
-          <TableHead>الفئة</TableHead>
-          <TableHead>السعر</TableHead>
-          <TableHead>
-            <span className="sr-only">الإجراءات</span>
-          </TableHead>
-        </TableRow>
-      </TableHeader>
-      <TableBody>
-        {items.map((item) => (
-          <ItemRow key={item.id} item={item} catalogId={catalogId} categories={categories} />
-        ))}
-      </TableBody>
-    </Table>
+    <div className="rounded-xl border bg-card text-card-foreground shadow-sm overflow-hidden">
+      <Table>
+        <TableHeader className="bg-muted/50">
+          <TableRow>
+            <TableHead className="hidden w-[100px] sm:table-cell">
+              <span className="sr-only">الصورة</span>
+            </TableHead>
+            <TableHead>الاسم</TableHead>
+            <TableHead>الفئة</TableHead>
+            <TableHead>السعر</TableHead>
+            <TableHead className="w-[50px]">
+              <span className="sr-only">الإجراءات</span>
+            </TableHead>
+          </TableRow>
+        </TableHeader>
+        <TableBody>
+          {items.map((item) => (
+            <ItemRow key={item.id} item={item} catalogId={catalogId} categories={categories} />
+          ))}
+        </TableBody>
+      </Table>
+    </div>
   );
 }

@@ -64,6 +64,10 @@ async function getCatalogData(slug: string): Promise<CatalogPageData | null> {
   return { ...catalog, categories: rootCategories };
 }
 
+export async function generateStaticParams() {
+  return [];
+}
+
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const data = await getCatalogData(params.slug);
   if (!data) {

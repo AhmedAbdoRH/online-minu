@@ -9,6 +9,7 @@ interface Database {
           name: string;
           description: string | null;
           logo_url: string | null;
+          cover_url: string | null;
           user_id: string;
           enable_subcategories: boolean;
         };
@@ -18,6 +19,7 @@ interface Database {
           name: string;
           description?: string | null;
           logo_url?: string | null;
+          cover_url?: string | null;
           user_id: string;
           enable_subcategories?: boolean;
         };
@@ -27,6 +29,7 @@ interface Database {
           name?: string;
           description?: string | null;
           logo_url?: string | null;
+          cover_url?: string | null;
           user_id?: string;
           enable_subcategories?: boolean;
         };

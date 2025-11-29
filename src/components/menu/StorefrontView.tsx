@@ -30,7 +30,7 @@ import {
 type ViewMode = "masonry" | "grid" | "list" | "compact";
 
 type LuxeCatalog = Catalog & {
-  cover_image_url?: string | null;
+  cover_url?: string | null;
   description?: string | null;
   status?: string | null;
   is_open?: boolean | null;
@@ -267,10 +267,7 @@ export function StorefrontView({ catalog, categories }: StorefrontViewProps) {
       : `https://online-menu.app/c/${catalog.name}`;
 
   const allItems = useMemo(() => flattenMenuItems(categories), [categories]);
-  const heroImage =
-    luxeCatalog.cover_image_url ??
-    allItems.find((item) => Boolean(item.image_url))?.image_url ??
-    "/public/placeholder.svg";
+  const heroImage = luxeCatalog.cover_url ?? "/public/placeholder.svg";
 
   const catalogDescription = luxeCatalog.description ?? "";
   const isCatalogClosed = luxeCatalog.is_open === false || luxeCatalog.status === "closed";

@@ -13,7 +13,12 @@ import { Label } from "@/components/ui/label"
 import { login } from "@/app/actions/auth"
 import { SubmitButton } from "@/components/common/SubmitButton"
 
-export default function LoginPage() {
+export default async function LoginPage(props: {
+  searchParams: Promise<{ message: string }>
+}) {
+  const searchParams = await props.searchParams;
+  const message = searchParams.message;
+
   return (
     <Card className="mx-auto max-w-sm">
       <CardHeader>
@@ -43,6 +48,11 @@ export default function LoginPage() {
           <SubmitButton pendingText="جاري تسجيل الدخول..." className="w-full">
             تسجيل الدخول
           </SubmitButton>
+          {message && (
+            <div className="bg-destructive/15 p-3 text-sm text-destructive rounded-md text-center">
+              {message}
+            </div>
+          )}
         </form>
         <div className="mt-4 text-center text-sm">
           ليس لديك حساب؟{" "}

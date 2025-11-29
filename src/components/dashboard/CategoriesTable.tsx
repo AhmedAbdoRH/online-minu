@@ -73,7 +73,7 @@ function CategoryRow({ category, catalogId, categories, level = 0, isLast = fals
           "group relative flex items-center justify-between rounded-xl border p-4 transition-all duration-200",
           isSubcategory
             ? "border-border/40 bg-muted/20 hover:bg-muted/40 hover:border-border/60"
-            : "border-border bg-card shadow-sm hover:shadow-md hover:border-primary/20 mb-3"
+            : "glass-surface border-border/50 hover:border-primary/20 mb-3"
         )}
       >
         <div className="flex items-center gap-4">
@@ -130,7 +130,7 @@ function CategoryRow({ category, catalogId, categories, level = 0, isLast = fals
             <Button
               variant="default"
               size="sm"
-              className="h-9 px-4 text-xs font-medium bg-blue-600 hover:bg-blue-700 text-white shadow-sm transition-all hover:shadow-blue-500/20"
+              className="h-9 px-4 text-xs font-medium bg-brand-primary hover:bg-brand-primary/90 text-primary-foreground shadow-sm transition-all"
               onClick={() => setIsAddSubOpen(true)}
             >
               <Plus className="h-3.5 w-3.5 ml-1.5" />

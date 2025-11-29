@@ -25,7 +25,7 @@ export async function checkCatalogName(name: string): Promise<boolean> {
     .select('name')
     .eq('name', name)
     .single();
-  
+
   return !data;
 }
 
@@ -36,10 +36,12 @@ export async function createCatalog(prevState: any, formData: FormData) {
   if (!user) {
     return { message: 'غير مصرح به' };
   }
-  
+
+  const logoFile = formData.get('logo');
+
   const validatedFields = catalogSchema.safeParse({
     name: formData.get('name'),
-    logo: formData.get('logo'),
+    logo: logoFile instanceof File ? logoFile : undefined,
   });
 
   if (!validatedFields.success) {
@@ -56,18 +58,24 @@ export async function createCatalog(prevState: any, formData: FormData) {
     return { message: "اسم الكتالوج هذا مستخدم بالفعل." };
   }
 
-  // Upload logo
-  const logoFileName = `${user.id}-${Date.now()}.${logo.name.split('.').pop()}`;
-  const { data: uploadData, error: uploadError } = await supabase.storage
-    .from('logos')
-    .upload(logoFileName, logo);
+  let publicUrl = '';
+  let logoFileName = '';
 
-  if (uploadError) {
-    console.error('Storage Error:', uploadError);
-    return { message: 'فشل تحميل الشعار.' };
+  // Upload logo if present
+  if (logo) {
+    logoFileName = `${user.id}-${Date.now()}.${logo.name.split('.').pop()}`;
+    const { data: uploadData, error: uploadError } = await supabase.storage
+      .from('logos')
+      .upload(logoFileName, logo);
+
+    if (uploadError) {
+      console.error('Storage Error:', uploadError);
+      return { message: 'فشل تحميل الشعار.' };
+    }
+
+    const { data } = supabase.storage.from('logos').getPublicUrl(uploadData.path);
+    publicUrl = data.publicUrl;
   }
-  
-  const { data: { publicUrl } } = supabase.storage.from('logos').getPublicUrl(uploadData.path);
 
   // Create catalog entry
   const { error: dbError } = await supabase.from('catalogs').insert({
@@ -79,7 +87,9 @@ export async function createCatalog(prevState: any, formData: FormData) {
   if (dbError) {
     console.error('DB Error:', dbError);
     // Clean up uploaded logo if db insert fails
-    await supabase.storage.from('logos').remove([logoFileName]);
+    if (logoFileName) {
+      await supabase.storage.from('logos').remove([logoFileName]);
+    }
     return { message: 'فشل إنشاء الكتالوج في قاعدة البيانات.' };
   }
 
@@ -89,90 +99,104 @@ export async function createCatalog(prevState: any, formData: FormData) {
 
 
 export async function updateCatalog(prevState: any, formData: FormData) {
-    const supabase = await createClient();
-    const { data: { user } } = await supabase.auth.getUser();
+  const supabase = await createClient();
+  const { data: { user } } = await supabase.auth.getUser();
 
-    if (!user) {
-        return { message: 'غير مصرح به' };
+  if (!user) {
+    console.error('Update catalog: No user found');
+    return { message: 'غير مصرح به' };
+  }
+
+  const catalogId = formData.get('catalogId');
+
+  if (!catalogId) {
+    console.error('Update catalog: No catalogId provided');
+    return { message: "معرف الكتالوج مفقود." };
+  }
+
+  console.log('Update catalog: Starting update for catalog', catalogId);
+
+  const logoFile = formData.get('logo');
+  const coverFile = formData.get('cover');
+
+  const validatedFields = catalogSchema.safeParse({
+    name: formData.get('name'),
+    logo: logoFile instanceof File && logoFile.size > 0 ? logoFile : undefined,
+    cover: coverFile instanceof File && coverFile.size > 0 ? coverFile : undefined,
+    enable_subcategories: formData.get('enable_subcategories') === 'on',
+  });
+
+  if (!validatedFields.success) {
+    console.error("Validation failed:", validatedFields.error.flatten().fieldErrors);
+    const firstError = Object.values(validatedFields.error.flatten().fieldErrors)[0]?.[0] || 'بيانات غير صالحة.';
+    return { message: firstError };
+  }
+
+  const { name, logo, cover, enable_subcategories } = validatedFields.data;
+
+  const updateData: { name?: string; logo_url?: string; cover_url?: string; enable_subcategories?: boolean } = {};
+
+  if (name) {
+    updateData.name = name;
+  }
+  if (enable_subcategories !== undefined) {
+    updateData.enable_subcategories = enable_subcategories;
+  }
+
+  // Upload logo if provided
+  if (logo && logo.size > 0) {
+    console.log('Uploading logo:', logo.name, 'Size:', logo.size);
+    const logoFileName = `${user.id}-${Date.now()}.${logo.name.split('.').pop()}`;
+    const { data: uploadData, error: uploadError } = await supabase.storage
+      .from('logos')
+      .upload(logoFileName, logo);
+
+    if (uploadError) {
+      console.error('Logo upload error:', uploadError);
+      return { message: `فشل تحميل الشعار: ${uploadError.message}` };
     }
 
-    const catalogId = formData.get('catalogId');
+    const { data: { publicUrl } } = supabase.storage.from('logos').getPublicUrl(uploadData.path);
+    updateData.logo_url = publicUrl;
+    console.log('Logo uploaded successfully:', publicUrl);
+  }
 
-    if (!catalogId) {
-        return { message: "معرف الكتالوج مفقود." };
+  // Upload cover if provided
+  if (cover && cover.size > 0) {
+    console.log('Uploading cover:', cover.name, 'Size:', cover.size);
+
+    if (cover.size > MAX_FILE_SIZE) {
+      return { message: `الحد الأقصى لحجم صورة الغلاف 5 ميغابايت.` };
+    }
+    if (!ACCEPTED_IMAGE_TYPES.includes(cover.type)) {
+      return { message: `.jpg, .jpeg, .png و .webp هي الملفات المقبولة لصورة الغلاف.` };
     }
 
-    const validatedFields = catalogSchema.safeParse({
-        name: formData.get('name'),
-        logo: formData.get('logo'),
-        cover: formData.get('cover'),
-        enable_subcategories: formData.get('enable_subcategories') === 'on',
-    });
+    const coverFileName = `${user.id}-${Date.now()}.${cover.name.split('.').pop()}`;
+    const { data: coverUploadData, error: coverUploadError } = await supabase.storage
+      .from('covers')
+      .upload(coverFileName, cover);
 
-    if (!validatedFields.success) {
-        console.error("Validation failed:", validatedFields.error.flatten().fieldErrors);
-        const firstError = Object.values(validatedFields.error.flatten().fieldErrors)[0]?.[0] || 'بيانات غير صالحة.';
-        return { message: firstError };
+    if (coverUploadError) {
+      console.error('Cover upload error:', coverUploadError);
+      return { message: `فشل تحميل صورة الغلاف: ${coverUploadError.message}` };
     }
 
-    const { name, logo, cover, enable_subcategories } = validatedFields.data;
-    
-    const updateData: { name?: string; logo_url?: string; cover_url?: string; enable_subcategories?: boolean } = {};
+    const { data: { publicUrl: coverPublicUrl } } = supabase.storage.from('covers').getPublicUrl(coverUploadData.path);
+    updateData.cover_url = coverPublicUrl;
+    console.log('Cover uploaded successfully:', coverPublicUrl);
+  }
 
-    if (name) {
-        updateData.name = name;
-    }
-    if (enable_subcategories !== undefined) {
-        updateData.enable_subcategories = enable_subcategories;
-    }
-    
-    if (logo && logo.size > 0) {
-        const logoFileName = `${user.id}-${Date.now()}.${logo.name.split('.').pop()}`;
-        const { data: uploadData, error: uploadError } = await supabase.storage
-            .from('logos')
-            .upload(logoFileName, logo);
+  console.log('Updating catalog with data:', updateData);
+  const { error: dbError } = await supabase.from('catalogs').update(updateData).eq('id', catalogId);
 
-        if (uploadError) {
-            console.error('Storage Error:', uploadError);
-            return { message: 'فشل تحميل الشعار.' };
-        }
+  if (dbError) {
+    console.error('Database update error:', dbError);
+    return { message: `فشل تحديث الكتالوج: ${dbError.message}` };
+  }
 
-        const { data: { publicUrl } } = supabase.storage.from('logos').getPublicUrl(uploadData.path);
-        updateData.logo_url = publicUrl;
-    }
-
-    // Handle cover upload
-    if (cover && cover.size > 0) {
-        // Validate cover file
-        if (cover.size > MAX_FILE_SIZE) {
-            return { message: `الحد الأقصى لحجم صورة الغلاف 5 ميغابايت.` };
-        }
-        if (!ACCEPTED_IMAGE_TYPES.includes(cover.type)) {
-            return { message: `.jpg, .jpeg, .png و .webp هي الملفات المقبولة لصورة الغلاف.` };
-        }
-
-        const coverFileName = `${user.id}-${Date.now()}.${cover.name.split('.').pop()}`;
-        const { data: coverUploadData, error: coverUploadError } = await supabase.storage
-            .from('covers')
-            .upload(coverFileName, cover);
-
-        if (coverUploadError) {
-            console.error('Storage Error (Cover):', coverUploadError);
-            return { message: 'فشل تحميل صورة الغلاف.' };
-        }
-
-        const { data: { publicUrl: coverPublicUrl } } = supabase.storage.from('covers').getPublicUrl(coverUploadData.path);
-        updateData.cover_url = coverPublicUrl;
-    }
-
-    const { error: dbError } = await supabase.from('catalogs').update(updateData).eq('id', catalogId);
-
-    if (dbError) {
-        console.error('DB Error:', dbError);
-        return { message: 'فشل تحديث الكتالوج.' };
-    }
-
-    revalidatePath('/dashboard/settings');
-    revalidatePath(`/c/${name}`);
-    return { message: 'تم تحديث الإعدادات بنجاح!' };
+  console.log('Catalog updated successfully');
+  revalidatePath('/dashboard/settings');
+  revalidatePath(`/c/${name}`);
+  return { message: 'تم تحديث الإعدادات بنجاح!' };
 }

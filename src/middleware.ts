@@ -13,16 +13,19 @@ export async function middleware(request: NextRequest) {
   } = await supabase.auth.getUser()
 
   const url = new URL(request.url)
+  console.log(`Middleware: Checking ${url.pathname}. User found: ${!!user}`);
 
   if (user && (url.pathname === '/login' || url.pathname === '/signup')) {
+    console.log("Middleware: User logged in, redirecting to dashboard");
     return NextResponse.redirect(new URL('/dashboard', request.url))
   }
 
   if (!user && url.pathname.startsWith('/dashboard')) {
+    console.log("Middleware: No user, redirecting to login");
     return NextResponse.redirect(new URL('/login', request.url))
   }
-  
-  if(session){
+
+  if (session) {
     await supabase.auth.refreshSession()
   }
 

@@ -70,6 +70,10 @@ async function getProductData(slug: string, itemId: string): Promise<ProductPage
   };
 }
 
+export async function generateStaticParams() {
+  return [];
+}
+
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const data = await getProductData(params.slug, params.itemId);
   if (!data) {
