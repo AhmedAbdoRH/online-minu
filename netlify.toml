@@ -1,12 +1,2 @@
-[build]
-  command = "npm run build"
-  publish = ".next/standalone"
+# تم النقل إلى Vercel - لم نعد نستخدم Netlify
 
-[build.environment]
-  NODE_VERSION = "18"
-  NPM_VERSION = "9"
-
-[[redirects]]
-  from = "/*"
-  to = "/.next/index.html"
-  status = 200

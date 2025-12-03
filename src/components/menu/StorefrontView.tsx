@@ -63,10 +63,10 @@ function formatPrice(value: MenuItem["price"]) {
   if (value === null || value === undefined) return "—";
   const numeric = typeof value === "number" ? value : Number(value);
   if (Number.isNaN(numeric)) return `${value}`;
-  return `${numeric.toLocaleString("ar-SA", {
+  return `${numeric.toLocaleString("en-US", {
     minimumFractionDigits: 0,
     maximumFractionDigits: 2,
-  })} ج.م`;
+  })} EGP`;
 }
 
 function isNewItem(item: MenuItem) {
@@ -193,30 +193,6 @@ function MenuItemCard({ item, catalogName, categoryName, viewMode, index }: Menu
   );
 }
 
-function BottomNav() {
-  return (
-    <nav className="fixed inset-x-0 bottom-0 z-40 border-t border-white/10 bg-gradient-to-t from-background/95 via-background/90 to-transparent backdrop-blur-xl md:hidden">
-      <div className="mx-auto flex max-w-md items-center justify-between px-6 py-3 text-[11px] font-medium text-muted-foreground">
-        <button className="flex flex-col items-center gap-1 text-brand-primary">
-          <Home className="h-5 w-5" />
-          <span>الرئيسية</span>
-        </button>
-        <button className="flex flex-col items-center gap-1">
-          <Menu className="h-5 w-5" />
-          <span>التصنيفات</span>
-        </button>
-        <button className="flex flex-col items-center gap-1">
-          <Palette className="h-5 w-5" />
-          <span>المظهر</span>
-        </button>
-        <button className="flex flex-col items-center gap-1">
-          <Settings className="h-5 w-5" />
-          <span>الإعدادات</span>
-        </button>
-      </div>
-    </nav>
-  );
-}
 
 function AddToHomeCTA({ show, onDismiss }: { show: boolean; onDismiss: () => void }) {
   return (
@@ -289,14 +265,14 @@ export function StorefrontView({ catalog, categories }: StorefrontViewProps) {
   }
 
   return (
-    <div className="relative min-h-screen bg-[radial-gradient(circle_at_top,_rgba(0,209,201,0.25),transparent_60%),radial-gradient(circle_at_bottom,_rgba(168,85,247,0.18),transparent_62%)] bg-background pb-32">
-      <div className="relative mx-auto w-[min(92vw,1200px)] pt-6">
+    <div className="relative min-h-screen bg-[radial-gradient(circle_at_top,_rgba(0,209,201,0.25),transparent_60%),radial-gradient(circle_at_bottom,_rgba(168,85,247,0.18),transparent_62%)] bg-background pb-3">
+      <div className="relative mx-auto w-[min(92vw,1200px)] pt-2">
         {/* Hero Image Section */}
         {/* Hero Image Section */}
         <motion.section
           initial={{ opacity: 0, scale: 0.98 }}
           animate={{ opacity: 1, scale: 1, transition: { duration: 0.7, ease: "easeOut" } }}
-          className="relative mt-16 aspect-[16/9] w-full overflow-hidden rounded-[2.5rem] border border-white/15 shadow-[0_55px_120px_rgba(15,23,42,0.55)]"
+          className="relative mt-1 aspect-[16/6] w-full overflow-hidden rounded-[2.5rem] border border-white/15 shadow-[0_55px_120px_rgba(15,23,42,0.55)]"
         >
           {heroImage && (
             <div className="absolute inset-0 top-0 h-full w-full">
@@ -317,13 +293,7 @@ export function StorefrontView({ catalog, categories }: StorefrontViewProps) {
             </div>
           )}
 
-          <motion.div
-            initial={{ opacity: 0, y: -30 }}
-            animate={{ opacity: 1, y: 0, transition: { delay: 0.4, type: "spring" } }}
-            className="absolute top-10 left-10 hidden rounded-full bg-white/15 px-4 py-2 text-xs font-medium text-white backdrop-blur lg:flex"
-          >
-            +{allItems.length} منتج فاخر
-          </motion.div>
+
         </motion.section>
 
         {/* Logo and Title Section */}
@@ -390,7 +360,7 @@ export function StorefrontView({ catalog, categories }: StorefrontViewProps) {
           </div>
         </div>
 
-        <main className="mx-auto mt-8 flex w-[min(94vw,1180px)] flex-col gap-8">
+        <main className="mx-auto mt-8 flex w-[min(94vw,1180px)] flex-col gap-0">
           {/* Category filter toolbar (pills style) */}
           <div className="mx-auto w-full">
             <div className="flex items-center gap-3 overflow-x-auto pb-3 px-2">
@@ -401,7 +371,7 @@ export function StorefrontView({ catalog, categories }: StorefrontViewProps) {
                   "flex-shrink-0 whitespace-nowrap rounded-full px-4 py-2 text-sm font-semibold transition-all",
                   !selectedCategoryId
                     ? "bg-gradient-to-r from-brand-primary to-brand-accent text-white shadow-lg scale-[1.02]"
-                    : "bg-white/6 text-muted-foreground hover:bg-white/10"
+                    : "bg-white/15 text-muted-foreground hover:bg-white/20"
                 )}
               >
                 الكل
@@ -416,11 +386,10 @@ export function StorefrontView({ catalog, categories }: StorefrontViewProps) {
                     "flex items-center gap-2 flex-shrink-0 whitespace-nowrap rounded-full px-4 py-2 text-sm font-semibold transition-all",
                     selectedCategoryId === cat.id
                       ? "bg-gradient-to-r from-brand-primary to-brand-accent text-white shadow-lg scale-[1.02]"
-                      : "bg-white/6 text-muted-foreground hover:bg-white/10"
+                      : "bg-white/15 text-muted-foreground hover:bg-white/20"
                   )}
                 >
                   <span>{cat.name}</span>
-                  <span className="ml-2 inline-flex items-center justify-center rounded-full bg-muted px-2 py-0.5 text-xs font-medium">{cat.menu_items.length}</span>
                 </button>
               ))}
             </div>
@@ -435,7 +404,7 @@ export function StorefrontView({ catalog, categories }: StorefrontViewProps) {
                     onClick={() => setSelectedSubcategoryId(null)}
                     className={cn(
                       "flex-shrink-0 whitespace-nowrap rounded-full px-3 py-1 text-xs font-medium transition",
-                      selectedSubcategoryId === null ? "bg-brand-primary text-white" : "bg-white/5 text-muted-foreground hover:bg-white/10"
+                      selectedSubcategoryId === null ? "bg-brand-primary text-white" : "bg-white/15 text-muted-foreground hover:bg-white/20"
                     )}
                   >
                     الكل
@@ -447,7 +416,7 @@ export function StorefrontView({ catalog, categories }: StorefrontViewProps) {
                       onClick={() => setSelectedSubcategoryId(sub.id)}
                       className={cn(
                         "flex-shrink-0 whitespace-nowrap rounded-full px-3 py-1 text-xs font-medium transition",
-                        selectedSubcategoryId === sub.id ? "bg-brand-primary text-white" : "bg-white/5 text-muted-foreground hover:bg-white/10"
+                        selectedSubcategoryId === sub.id ? "bg-brand-primary text-white" : "bg-white/15 text-muted-foreground hover:bg-white/20"
                       )}
                     >
                       <span>{sub.name}</span>
@@ -458,7 +427,7 @@ export function StorefrontView({ catalog, categories }: StorefrontViewProps) {
               );
             })()}
           </div>
-          <section className="space-y-10">
+          <section className="space-y-6">
             {categories.length === 0 && (
               <div className="rounded-[2rem] border border-dashed border-white/25 bg-white/5 px-6 py-16 text-center text-sm text-muted-foreground">
                 سيتم عرض المنتجات هنا بمجرد إضافتها من لوحة التحكم.
@@ -475,7 +444,7 @@ export function StorefrontView({ catalog, categories }: StorefrontViewProps) {
                   whileInView={{ opacity: 1, y: 0 }}
                   viewport={{ once: true, amount: 0.3 }}
                   transition={{ duration: 0.6, delay: categoryIndex * 0.08 }}
-                  className="space-y-8"
+                  className="space-y-4"
                 >
                   {/* Main Category Header */}
                   <div className="space-y-4">
@@ -519,7 +488,7 @@ export function StorefrontView({ catalog, categories }: StorefrontViewProps) {
 
                   {/* Subcategories Section (appears below main category) */}
                   {category.subcategories?.length > 0 && (
-                    <div className="flex flex-col space-y-8 pt-4 border-t border-white/10">
+                    <div className="flex flex-col space-y-0 pt-4 border-t border-white/10">
                       {category.subcategories
                         .filter((s) => (selectedSubcategoryId ? s.id === selectedSubcategoryId : true))
                         .map((sub, subIndex) => {
@@ -586,14 +555,14 @@ export function StorefrontView({ catalog, categories }: StorefrontViewProps) {
           )}`}
           target="_blank"
           rel="noopener noreferrer"
-          className="fixed bottom-24 left-6 z-40 flex h-12 w-12 items-center justify-center rounded-full bg-[#25D366] text-white shadow-[0_30px_60px_rgba(37,211,102,0.55)] transition-transform hover:-translate-y-1 md:bottom-14"
+          className="fixed bottom-6 left-6 z-40 flex h-12 w-12 items-center justify-center rounded-full bg-[#25D366] text-white shadow-[0_30px_60px_rgba(37,211,102,0.55)] transition-transform hover:-translate-y-1 md:bottom-6"
           aria-label="مشاركة المنيو عبر واتساب"
         >
           <MessageCircle className="h-6 w-6" />
         </a>
 
         <AddToHomeCTA show={showInstallHint} onDismiss={() => setShowInstallHint(false)} />
-        <BottomNav />
+
       </div>
     </div>
   );
