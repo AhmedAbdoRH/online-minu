@@ -3,7 +3,7 @@
 -- شغّل هذه الأوامر واحدة تلو الأخرى في Supabase SQL Editor
 -- =====================================================
 
--- الخطوة 1: حذفجميع السياسات القديمة 
+-- الخطوة 1: حذف جميع السياسات القديمة 
 DROP POLICY IF EXISTS "Allow public read access on catalogs" ON catalogs;
 DROP POLICY IF EXISTS "Allow public read access on categories" ON categories;
 DROP POLICY IF EXISTS "Allow public read access on menu_items" ON menu_items;
