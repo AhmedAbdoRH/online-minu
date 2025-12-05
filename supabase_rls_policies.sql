@@ -1,102 +1,129 @@
 -- =====================================================
--- SQL Policies للسماح بقراءة الكتالوجات للعامة
--- قم بتشغيل هذه الأوامر في Supabase SQL Editor
+-- إصلاح سياسات RLS - نسخة محدثة
+-- شغّل هذه الأوامر واحدة تلو الأخرى في Supabase SQL Editor
 -- =====================================================
 
--- 1. تفعيل RLS على الجداول (إذا لم يكن مفعلاً)
+-- الخطوة 1: حذف جميع السياسات القديمة
+DROP POLICY IF EXISTS "Allow public read access on catalogs" ON catalogs;
+DROP POLICY IF EXISTS "Allow public read access on categories" ON categories;
+DROP POLICY IF EXISTS "Allow public read access on menu_items" ON menu_items;
+DROP POLICY IF EXISTS "Users can insert their own catalogs" ON catalogs;
+DROP POLICY IF EXISTS "Users can update their own catalogs" ON catalogs;
+DROP POLICY IF EXISTS "Users can delete their own catalogs" ON catalogs;
+DROP POLICY IF EXISTS "Users can manage their catalog categories" ON categories;
+DROP POLICY IF EXISTS "Users can manage their catalog items" ON menu_items;
+DROP POLICY IF EXISTS "Public can read catalogs" ON catalogs;
+DROP POLICY IF EXISTS "Public can read categories" ON categories;
+DROP POLICY IF EXISTS "Public can read menu_items" ON menu_items;
+
+-- الخطوة 2: تفعيل RLS
 ALTER TABLE catalogs ENABLE ROW LEVEL SECURITY;
 ALTER TABLE categories ENABLE ROW LEVEL SECURITY;
 ALTER TABLE menu_items ENABLE ROW LEVEL SECURITY;
 
--- 2. إنشاء سياسات القراءة للعامة (Public Read)
--- هذه السياسات تسمح لأي شخص بقراءة البيانات
+-- الخطوة 3: سياسات القراءة للجميع (anon + authenticated)
+-- هذه هي السياسات الأهم لفتح صفحات الكتالوج
 
--- سياسة قراءة الكتالوجات للعامة
-DROP POLICY IF EXISTS "Allow public read access on catalogs" ON catalogs;
-CREATE POLICY "Allow public read access on catalogs" 
-ON catalogs FOR SELECT 
-TO public 
+CREATE POLICY "Public can read catalogs"
+ON catalogs FOR SELECT
 USING (true);
 
--- سياسة قراءة الفئات للعامة
-DROP POLICY IF EXISTS "Allow public read access on categories" ON categories;
-CREATE POLICY "Allow public read access on categories" 
-ON categories FOR SELECT 
-TO public 
+CREATE POLICY "Public can read categories"
+ON categories FOR SELECT
 USING (true);
 
--- سياسة قراءة المنتجات للعامة
-DROP POLICY IF EXISTS "Allow public read access on menu_items" ON menu_items;
-CREATE POLICY "Allow public read access on menu_items" 
-ON menu_items FOR SELECT 
-TO public 
+CREATE POLICY "Public can read menu_items"
+ON menu_items FOR SELECT
 USING (true);
 
--- 3. سياسات الكتابة للمستخدمين المصادق عليهم (للـ Dashboard)
+-- الخطوة 4: سياسات الكتابة للمستخدمين المسجلين
 
--- سياسة إضافة كتالوج (المستخدم يضيف كتالوج خاص به فقط)
-DROP POLICY IF EXISTS "Users can insert their own catalogs" ON catalogs;
-CREATE POLICY "Users can insert their own catalogs" 
-ON catalogs FOR INSERT 
-TO authenticated 
+CREATE POLICY "Users can insert their own catalogs"
+ON catalogs FOR INSERT
+TO authenticated
 WITH CHECK (auth.uid() = user_id);
 
--- سياسة تعديل الكتالوج (المستخدم يعدل كتالوجه فقط)
-DROP POLICY IF EXISTS "Users can update their own catalogs" ON catalogs;
-CREATE POLICY "Users can update their own catalogs" 
-ON catalogs FOR UPDATE 
-TO authenticated 
-USING (auth.uid() = user_id)
-WITH CHECK (auth.uid() = user_id);
-
--- سياسة حذف الكتالوج (المستخدم يحذف كتالوجه فقط)
-DROP POLICY IF EXISTS "Users can delete their own catalogs" ON catalogs;
-CREATE POLICY "Users can delete their own catalogs" 
-ON catalogs FOR DELETE 
-TO authenticated 
+CREATE POLICY "Users can update their own catalogs"
+ON catalogs FOR UPDATE
+TO authenticated
 USING (auth.uid() = user_id);
 
--- سياسات الفئات (المستخدم يدير فئات كتالوجه فقط)
-DROP POLICY IF EXISTS "Users can manage their catalog categories" ON categories;
-CREATE POLICY "Users can manage their catalog categories" 
-ON categories FOR ALL 
-TO authenticated 
-USING (
-  EXISTS (
-    SELECT 1 FROM catalogs 
-    WHERE catalogs.id = categories.catalog_id 
-    AND catalogs.user_id = auth.uid()
-  )
-)
+CREATE POLICY "Users can delete their own catalogs"
+ON catalogs FOR DELETE
+TO authenticated
+USING (auth.uid() = user_id);
+
+-- الخطوة 5: سياسات الفئات للمستخدمين
+
+CREATE POLICY "Users can insert categories"
+ON categories FOR INSERT
+TO authenticated
 WITH CHECK (
   EXISTS (
-    SELECT 1 FROM catalogs 
-    WHERE catalogs.id = categories.catalog_id 
+    SELECT 1 FROM catalogs
+    WHERE catalogs.id = catalog_id
     AND catalogs.user_id = auth.uid()
   )
 );
 
--- سياسات المنتجات (المستخدم يدير منتجات كتالوجه فقط)
-DROP POLICY IF EXISTS "Users can manage their catalog items" ON menu_items;
-CREATE POLICY "Users can manage their catalog items" 
-ON menu_items FOR ALL 
-TO authenticated 
+CREATE POLICY "Users can update categories"
+ON categories FOR UPDATE
+TO authenticated
 USING (
   EXISTS (
-    SELECT 1 FROM catalogs 
-    WHERE catalogs.id = menu_items.catalog_id 
+    SELECT 1 FROM catalogs
+    WHERE catalogs.id = catalog_id
     AND catalogs.user_id = auth.uid()
   )
-)
+);
+
+CREATE POLICY "Users can delete categories"
+ON categories FOR DELETE
+TO authenticated
+USING (
+  EXISTS (
+    SELECT 1 FROM catalogs
+    WHERE catalogs.id = catalog_id
+    AND catalogs.user_id = auth.uid()
+  )
+);
+
+-- الخطوة 6: سياسات المنتجات للمستخدمين
+
+CREATE POLICY "Users can insert menu_items"
+ON menu_items FOR INSERT
+TO authenticated
 WITH CHECK (
   EXISTS (
-    SELECT 1 FROM catalogs 
-    WHERE catalogs.id = menu_items.catalog_id 
+    SELECT 1 FROM catalogs
+    WHERE catalogs.id = catalog_id
+    AND catalogs.user_id = auth.uid()
+  )
+);
+
+CREATE POLICY "Users can update menu_items"
+ON menu_items FOR UPDATE
+TO authenticated
+USING (
+  EXISTS (
+    SELECT 1 FROM catalogs
+    WHERE catalogs.id = catalog_id
+    AND catalogs.user_id = auth.uid()
+  )
+);
+
+CREATE POLICY "Users can delete menu_items"
+ON menu_items FOR DELETE
+TO authenticated
+USING (
+  EXISTS (
+    SELECT 1 FROM catalogs
+    WHERE catalogs.id = catalog_id
     AND catalogs.user_id = auth.uid()
   )
 );
 
 -- =====================================================
--- تأكد من تشغيل كل الأوامر أعلاه في Supabase SQL Editor
--- بعد ذلك، صفحات الكتالوج ستعمل بشكل صحيح
+-- للتحقق من السياسات، شغّل هذا الأمر:
+-- SELECT * FROM pg_policies WHERE tablename IN ('catalogs', 'categories', 'menu_items');
 -- =====================================================
