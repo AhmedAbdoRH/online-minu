@@ -44,7 +44,8 @@ export async function createCatalog(prevState: any, formData: FormData) {
 
   const validatedFields = catalogSchema.safeParse({
     name: formData.get('name'),
-    logo: logoFile instanceof File ? logoFile : undefined,
+    display_name: formData.get('display_name'),
+    logo: logoFile instanceof File && logoFile.size > 0 ? logoFile : undefined,
   });
 
   if (!validatedFields.success) {

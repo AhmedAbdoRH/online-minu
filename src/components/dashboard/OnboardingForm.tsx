@@ -39,6 +39,21 @@ export function OnboardingForm() {
   return (
     <form ref={formRef} action={formAction} className="space-y-8">
       <div className="space-y-2">
+        <Label htmlFor="display_name">اسم المتجر للعرض</Label>
+        <Input
+          id="display_name"
+          name="display_name"
+          placeholder="مطعم الوفاء"
+          required
+          minLength={3}
+          maxLength={50}
+        />
+        <p className="text-sm text-muted-foreground">
+          هذا هو الاسم الذي سيظهر للعملاء في صفحة الكتالوج
+        </p>
+      </div>
+
+      <div className="space-y-2">
         <Label htmlFor="name">اسم الكتالوج (باللغة الإنجليزية)</Label>
         <Input
           id="name"
@@ -61,8 +76,10 @@ export function OnboardingForm() {
           name="logo"
           type="file"
           accept="image/jpeg,image/png,image/webp"
-          required
         />
+        <p className="text-sm text-muted-foreground">
+          اختياري - يمكنك إضافته لاحقاً من الإعدادات
+        </p>
       </div>
 
       <SubmitButton pendingText="جاري الإنشاء..." className="w-full">
