@@ -13,55 +13,72 @@ type CatalogPageData = Catalog & {
 };
 
 async function getCatalogData(slug: string): Promise<CatalogPageData | null> {
-  const supabase = await createClient();
-  const { data: catalog, error: catalogError } = await supabase
-    .from("catalogs")
-    .select("*")
-    .eq("name", slug)
-    .single();
+  try {
+    const supabase = await createClient();
+    console.log(`Fetching catalog for slug: ${slug}`);
 
-  if (catalogError || !catalog) {
+    // Test connection?
+    // const { count, error: countError } = await supabase.from('catalogs').select('*', { count: 'exact', head: true });
+    // if (countError) console.error("Supabase Connection Error:", countError);
+
+    const { data: catalog, error: catalogError } = await supabase
+      .from("catalogs")
+      .select("*")
+      .eq("name", slug)
+      .single();
+
+    if (catalogError) {
+      console.error(`Error fetching catalog '${slug}':`, catalogError);
+      return null;
+    }
+
+    if (!catalog) {
+      console.log(`Catalog '${slug}' not found.`);
+      return null;
+    }
+
+    const { data: categories, error: categoriesError } = await supabase
+      .from("categories")
+      .select(
+        `
+        *,
+        menu_items ( * )
+      `
+      )
+      .eq("catalog_id", catalog.id)
+      .order("parent_category_id", { ascending: true })
+      .order("name", { ascending: true });
+
+    if (categoriesError) {
+      console.error("Error fetching categories and items:", categoriesError);
+      return { ...catalog, categories: [] };
+    }
+
+    const categoriesMap = new Map<number, CategoryWithSubcategories>();
+    const rootCategories: CategoryWithSubcategories[] = [];
+
+    categories?.forEach((category: any) => {
+      categoriesMap.set(category.id, {
+        ...category,
+        subcategories: [],
+        menu_items: category.menu_items || [],
+      });
+    });
+
+    categories?.forEach((category: any) => {
+      const categoryNode = categoriesMap.get(category.id)!;
+      if (category.parent_category_id && categoriesMap.has(category.parent_category_id)) {
+        categoriesMap.get(category.parent_category_id)!.subcategories.push(categoryNode);
+      } else {
+        rootCategories.push(categoryNode);
+      }
+    });
+
+    return { ...catalog, categories: rootCategories };
+  } catch (error) {
+    console.error("Unexpected error in getCatalogData:", error);
     return null;
   }
-
-  const { data: categories, error: categoriesError } = await supabase
-    .from("categories")
-    .select(
-      `
-      *,
-      menu_items ( * )
-    `
-    )
-    .eq("catalog_id", catalog.id)
-    .order("parent_category_id", { ascending: true })
-    .order("name", { ascending: true });
-
-  if (categoriesError) {
-    console.error("Error fetching categories and items:", categoriesError);
-    return { ...catalog, categories: [] };
-  }
-
-  const categoriesMap = new Map<number, CategoryWithSubcategories>();
-  const rootCategories: CategoryWithSubcategories[] = [];
-
-  categories?.forEach((category: any) => {
-    categoriesMap.set(category.id, {
-      ...category,
-      subcategories: [],
-      menu_items: category.menu_items || [],
-    });
-  });
-
-  categories?.forEach((category: any) => {
-    const categoryNode = categoriesMap.get(category.id)!;
-    if (category.parent_category_id && categoriesMap.has(category.parent_category_id)) {
-      categoriesMap.get(category.parent_category_id)!.subcategories.push(categoryNode);
-    } else {
-      rootCategories.push(categoryNode);
-    }
-  });
-
-  return { ...catalog, categories: rootCategories };
 }
 
 export async function generateStaticParams() {
