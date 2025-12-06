@@ -1,6 +1,1 @@
-[build]
-  command = "npm run build"
-  publish = ".next"
-
-[[plugins]]
-  package = "@netlify/next-runtime"
+# تم النقل إلى Vercel - لم نعد نستخدم Netlify

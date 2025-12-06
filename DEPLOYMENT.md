@@ -1,54 +1,47 @@
-# Online Menu - Netlify Deployment Guide
+# Online Menu - Vercel Deployment Guide
 
-## استعداد المشروع للنشر على Netlify
+## استعداد المشروع للنشر على Vercel
 
-تم إعداد المشروع بنجاح للنشر على Netlify! 🚀
+المشروع جاهز تماماً للنشر على Vercel، وهي المنصة الأمثل لتطبيقات Next.js. 🚀
 
 ### الخطوات المنجزة:
-1. ✅ إضافة ملف `netlify.toml` للإعدادات
-2. ✅ تحديث Next.js config للنشر
-3. ✅ إعداد متغيرات البيئة
-4. ✅ اختبار البناء المحلي
+1. ✅ الكود متوافق مع Next.js 15.
+2. ✅ تم تحديث Middleware للعمل بشكل صحيح مع Vercel.
+3. ✅ ملفات تعريف الارتباط (Cookies) تعمل بنظام `getAll`/`setAll` الجديد.
+4. ✅ إعدادات الصور `next.config.ts` جاهزة.
 
-### خطوات النشر على Netlify:
+### خطوات النشر على Vercel:
 
 #### 1. ربط المستودع (Repository)
-- ادخل إلى حساب Netlify
-- اختر "New site from Git"
-- اختر GitHub (أو مزود Git الخاص بك)
-- اختر مستودع المشروع
+- ادخل إلى [Vercel Dashboard](https://vercel.com/dashboard).
+- اضغط على **"Add New..."** ثم **"Project"**.
+- اختر "Import" بجانب مستودع GitHub الخاص بالمشروع.
 
-#### 2. إعدادات البناء (Build Settings)
-```
-Build command: npm run build
-Publish directory: .next
-```
+#### 2. إعدادات المشروع (Project Settings)
+- **Framework Preset**: سيتم اكتشافه تلقائياً كـ `Next.js`.
+- **Root Directory**: `./` (اتركه كما هو).
+- **Build Command**: `next build` (أو `npm run build` - Vercel يعرف كلاهما).
+- **Output Directory**: `.next` (تلقائي).
 
 #### 3. متغيرات البيئة (Environment Variables)
-في لوحة تحكم Netlify، أضف المتغيرات التالية:
-```
-NEXT_PUBLIC_SUPABASE_URL=your_supabase_url_here
-NEXT_PUBLIC_SUPABASE_ANON_KEY=your_supabase_anon_key_here
-SUPABASE_SERVICE_ROLE_KEY=your_supabase_service_role_key_here
-GOOGLE_GENAI_API_KEY=your_google_genai_api_key_here
-NEXT_PUBLIC_APP_URL=https://your-domain.netlify.app
+في خانة **Environment Variables**، أضف القيم التالية (نفس القيم الموجودة في `.env.local`):
+
+```bash
+NEXT_PUBLIC_SUPABASE_URL=your_supabase_url
+NEXT_PUBLIC_SUPABASE_ANON_KEY=your_anon_key
+SUPABASE_SERVICE_ROLE_KEY=your_service_role_key
+NEXT_PUBLIC_APP_URL=https://your-project.vercel.app  # (حدث هذا بعد الحصول على النطاق)
 NODE_ENV=production
 ```
 
-#### 4. النشر
-- اضغط على "Deploy site"
-- انتظر حتى يكتمل البناء
-- سيتم نشر الموقع تلقائيًا
+#### 4. النشر (Deploy)
+- اضغط على **"Deploy"**.
+- انتظر بضع دقائق حتى تكتمل العملية.
+- مبروك! موقعك يعمل الآن. 🎉
 
-### ملاحظات هامة:
-- تم إعداد الصفحات الديناميكية للعمل مع SSG
-- تم تحسين الصور للنشر
-- تم إضافة رؤوس أمان (security headers)
-- البناء يعمل بنجاح محليًا ✅
+### ملاحظات إضافية:
+- **Supabase Auth**: تأكد من إضافة رابط Vercel (مثلاً `https://project-name.vercel.app`) إلى قائمة "Site URL" و "Redirect URLs" في إعدادات Supabase Authentication.
+- **Edge Functions**: إذا كنت تستخدم Supabase Edge Functions، فهي تعمل بشكل ممتاز مع Vercel.
 
-### بعد النشر:
-1. تأكد من تحديث نطاق المتجر في لوحة التحكم
-2. اختبر جميع الروابط والوظائف
-3. تحقق من اتصال Supabase
-
-جاهز للنشر! 🎉
+### الدعم
+إذا واجهت أي مشكلة، تحقق من "Logs" في لوحة تحكم Vercel.
