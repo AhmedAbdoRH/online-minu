@@ -21,19 +21,19 @@ const updateCategorySchema = z.object({
 // Helper function to check for circular references
 function hasCircularReference(categoryId: number, parentCategoryId: number | null, categories: any[]): boolean {
   if (!parentCategoryId) return false;
-  
+
   const visited = new Set<number>();
   let currentId = parentCategoryId;
-  
+
   while (currentId !== null) {
     if (currentId === categoryId) return true;
     if (visited.has(currentId)) return true;
-    
+
     visited.add(currentId);
     const parent = categories.find(cat => cat.id === currentId);
     currentId = parent?.parent_category_id || null;
   }
-  
+
   return false;
 }
 
@@ -65,6 +65,39 @@ export async function createCategory(prevState: any, formData: FormData) {
   if (!validatedFields.success) {
     const firstError = Object.values(validatedFields.error.flatten().fieldErrors)[0]?.[0] || 'بيانات غير صالحة.';
     return { message: firstError };
+  }
+
+  // Check for plan limits
+  const { data: catalog } = await supabase
+    .from('catalogs')
+    .select('id, plan')
+    .eq('user_id', user.id)
+    .single();
+
+  if (!catalog) {
+    return { message: 'الكتالوج غير موجود.' };
+  }
+
+  // Check if plan is basic (or null which defaults to basic logic) and enforce limit
+  if ((!catalog.plan || catalog.plan === 'basic')) {
+    const { count } = await supabase
+      .from('categories')
+      .select('*', { count: 'exact', head: true })
+      .eq('catalog_id', catalog.id);
+
+    const currentCount = count || 0;
+    const newItemsCount = 1 + (parsedSubcategories ? parsedSubcategories.length : 0);
+
+    // Enforce limit: Max 3 categories total
+    if (currentCount + 1 > 3) {
+      return { message: 'LIMIT_REACHED' };
+    }
+
+    // Also check if adding subcategories pushes over limit
+    // (Assuming user is adding 1 parent and N subcategories, all count towards the limit)
+    if (currentCount + newItemsCount > 3) {
+      return { message: 'LIMIT_REACHED' };
+    }
   }
 
   const { catalog_id, name, parent_category_id, subcategories } = validatedFields.data;
@@ -212,7 +245,7 @@ export async function getCategories(catalogId: number) {
   // Second pass: build the hierarchy
   data.forEach(category => {
     const categoryWithSub = categoriesMap.get(category.id)!;
-    
+
     if (category.parent_category_id === null) {
       rootCategories.push(categoryWithSub);
     } else {

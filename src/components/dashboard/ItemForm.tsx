@@ -11,6 +11,8 @@ import { SubmitButton } from '@/components/common/SubmitButton';
 import { createItem, updateItem } from '@/app/actions/items';
 import { useToast } from '@/hooks/use-toast';
 import type { Category, MenuItem } from '@/lib/types';
+import { UpgradeAlert } from './UpgradeAlert';
+import { useState } from 'react';
 
 const MAX_FILE_SIZE = 5 * 1024 * 1024; // 5MB
 const ACCEPTED_IMAGE_TYPES = ["image/jpeg", "image/jpg", "image/png", "image/webp"];
@@ -45,6 +47,7 @@ interface ItemFormProps {
 
 export function ItemForm({ catalogId, categories, item, onSuccess }: ItemFormProps) {
   const { toast } = useToast();
+  const [showUpgradeAlert, setShowUpgradeAlert] = useState(false);
 
   // التحقق من أن categories موجود
   const validCategories = Array.isArray(categories) ? categories : [];
@@ -84,7 +87,7 @@ export function ItemForm({ catalogId, categories, item, onSuccess }: ItemFormPro
   const onSubmit = async (values: z.infer<typeof formSchema>) => {
     try {
       console.log('Form submitted with values:', values);
-      
+
       const formData = new FormData();
       formData.append('catalogId', catalogId.toString());
       formData.append('name', values.name);
@@ -97,10 +100,14 @@ export function ItemForm({ catalogId, categories, item, onSuccess }: ItemFormPro
 
       console.log('Sending form data...');
       const result = item ? await updateItem(item.id, formData) : await createItem(formData);
-      
+
       console.log('Server response:', result);
 
       if (result.error) {
+        if (result.error === 'LIMIT_REACHED') {
+          setShowUpgradeAlert(true);
+          return;
+        }
         toast({ title: 'خطأ', description: result.error, variant: 'destructive' });
       } else {
         toast({ title: 'نجاح!', description: `تم ${item ? 'تحديث' : 'إنشاء'} المنتج بنجاح.` });
@@ -114,83 +121,90 @@ export function ItemForm({ catalogId, categories, item, onSuccess }: ItemFormPro
   };
 
   return (
-    <Form {...form}>
-      <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
-        <div className="grid grid-cols-2 gap-4">
+    <>
+      <UpgradeAlert
+        open={showUpgradeAlert}
+        onOpenChange={setShowUpgradeAlert}
+        resourceType="product"
+      />
+      <Form {...form}>
+        <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
+          <div className="grid grid-cols-2 gap-4">
+            <FormField
+              control={form.control}
+              name="name"
+              render={({ field }) => (
+                <FormItem className="col-span-2">
+                  <FormLabel>اسم المنتج</FormLabel>
+                  <FormControl><Input {...field} /></FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+            <FormField
+              control={form.control}
+              name="description"
+              render={({ field }) => (
+                <FormItem className="col-span-2">
+                  <FormLabel>الوصف (اختياري)</FormLabel>
+                  <FormControl><Textarea {...field} /></FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+            <FormField
+              control={form.control}
+              name="price"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>السعر (ج.م)</FormLabel>
+                  <FormControl><Input type="number" step="0.01" {...field} /></FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+            <FormField
+              control={form.control}
+              name="category_id"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>الفئة</FormLabel>
+                  <Select onValueChange={(val) => {
+                    console.log('Category selected:', val);
+                    field.onChange(val);
+                  }} value={field.value || ''}>
+                    <FormControl>
+                      <SelectTrigger>
+                        <SelectValue placeholder="اختر فئة" />
+                      </SelectTrigger>
+                    </FormControl>
+                    <SelectContent>
+                      {renderCategoryItems(buildHierarchicalCategories())}
+                    </SelectContent>
+                  </Select>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+          </div>
           <FormField
             control={form.control}
-            name="name"
-            render={({ field }) => (
-              <FormItem className="col-span-2">
-                <FormLabel>اسم المنتج</FormLabel>
-                <FormControl><Input {...field} /></FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-          <FormField
-            control={form.control}
-            name="description"
-            render={({ field }) => (
-              <FormItem className="col-span-2">
-                <FormLabel>الوصف (اختياري)</FormLabel>
-                <FormControl><Textarea {...field} /></FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-          <FormField
-            control={form.control}
-            name="price"
-            render={({ field }) => (
+            name="image"
+            render={({ field: { onChange, value, ...rest } }) => (
               <FormItem>
-                <FormLabel>السعر (ج.م)</FormLabel>
-                <FormControl><Input type="number" step="0.01" {...field} /></FormControl>
+                <FormLabel>صورة المنتج {item && '(اختياري للتغيير)'}</FormLabel>
+                <FormControl>
+                  <Input type="file" accept="image/*" onChange={(e) => onChange(e.target.files?.[0])} {...rest} />
+                </FormControl>
                 <FormMessage />
               </FormItem>
             )}
           />
-          <FormField
-            control={form.control}
-            name="category_id"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>الفئة</FormLabel>
-                <Select onValueChange={(val) => {
-                  console.log('Category selected:', val);
-                  field.onChange(val);
-                }} value={field.value || ''}>
-                  <FormControl>
-                    <SelectTrigger>
-                      <SelectValue placeholder="اختر فئة" />
-                    </SelectTrigger>
-                  </FormControl>
-                  <SelectContent>
-                    {renderCategoryItems(buildHierarchicalCategories())}
-                  </SelectContent>
-                </Select>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-        </div>
-        <FormField
-          control={form.control}
-          name="image"
-          render={({ field: { onChange, value, ...rest } }) => (
-            <FormItem>
-              <FormLabel>صورة المنتج {item && '(اختياري للتغيير)'}</FormLabel>
-              <FormControl>
-                <Input type="file" accept="image/*" onChange={(e) => onChange(e.target.files?.[0])} {...rest} />
-              </FormControl>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
-        <SubmitButton pendingText="جاري الحفظ..." className="w-full">
-          {item ? 'حفظ التغييرات' : 'حفظ المنتج'}
-        </SubmitButton>
-      </form>
-    </Form>
+          <SubmitButton pendingText="جاري الحفظ..." className="w-full">
+            {item ? 'حفظ التغييرات' : 'حفظ المنتج'}
+          </SubmitButton>
+        </form>
+      </Form>
+    </>
   );
 }

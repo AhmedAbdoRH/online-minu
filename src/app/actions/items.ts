@@ -42,7 +42,7 @@ async function uploadImage(
     const ext = image instanceof File ? image.name.split('.').pop() || 'jpg' : 'jpg';
     const safeFileName = `${timestamp}-${randomSuffix}.${ext}`;
     const uploadPath = `${userId}/${safeFileName}`;
-    
+
     let contentType = 'image/jpeg';
     if (image instanceof File) {
       contentType = image.type === 'image/jpg' ? 'image/jpeg' : image.type;
@@ -52,9 +52,9 @@ async function uploadImage(
 
     const { data, error } = await supabase.storage
       .from('menu_images')
-      .upload(uploadPath, image, { 
+      .upload(uploadPath, image, {
         contentType,
-        upsert: false 
+        upsert: false
       });
 
     if (error) {
@@ -67,7 +67,7 @@ async function uploadImage(
     const { data: urlData } = supabase.storage
       .from('menu_images')
       .getPublicUrl(data.path);
-    
+
     console.log('Public URL:', urlData?.publicUrl);
     return urlData?.publicUrl || null;
   } catch (err) {
@@ -106,6 +106,28 @@ export async function createItem(formData: FormData) {
 
     const { catalogId, name, description, price, category_id, image } =
       validatedFields.data;
+
+    // Check for plan limits
+    const { data: catalog } = await supabase
+      .from('catalogs')
+      .select('id, plan')
+      .eq('id', catalogId)
+      .single();
+
+    if (!catalog) {
+      return { error: 'الكتالوج غير موجود.' };
+    }
+
+    if ((!catalog.plan || catalog.plan === 'basic')) {
+      const { count } = await supabase
+        .from('menu_items')
+        .select('*', { count: 'exact', head: true })
+        .eq('catalog_id', catalogId);
+
+      if (count !== null && count >= 50) {
+        return { error: 'LIMIT_REACHED' };
+      }
+    }
 
     let imageUrl: string | null = null;
     if (image) {

@@ -11,7 +11,8 @@ import { useToast } from '@/hooks/use-toast';
 import type { CategoryWithSubcategories } from '@/lib/types';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Layers, Tag } from 'lucide-react';
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
+import { UpgradeAlert } from './UpgradeAlert';
 
 const formSchema = z.object({
     name: z.string().min(2, 'يجب أن يكون الاسم حرفين على الأقل.').max(50),
@@ -29,6 +30,7 @@ interface CategoryFormProps {
 
 export function CategoryForm({ catalogId, category, categories, defaultParentId, hideParentSelection, onSuccess }: CategoryFormProps) {
     const { toast } = useToast();
+    const [showUpgradeAlert, setShowUpgradeAlert] = useState(false);
 
     // Function to render categories with hierarchy for dropdown
     const renderCategoryOptions = (cats: CategoryWithSubcategories[], level = 0): JSX.Element[] => {
@@ -95,6 +97,11 @@ export function CategoryForm({ catalogId, category, categories, defaultParentId,
             if (result && typeof result === 'object' && 'message' in result) {
                 const message = (result as any).message;
                 if (typeof message === 'string') {
+                    if (message === 'LIMIT_REACHED') {
+                        setShowUpgradeAlert(true);
+                        return;
+                    }
+
                     toast({
                         title: message.includes('فشل') || message.includes('خطأ') ? 'خطأ' : 'نجاح!',
                         description: message,
@@ -124,72 +131,79 @@ export function CategoryForm({ catalogId, category, categories, defaultParentId,
     };
 
     return (
-        <Form {...form}>
-            <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
-                <FormField
-                    control={form.control}
-                    name="name"
-                    render={({ field }) => (
-                        <FormItem>
-                            <FormLabel className="text-base font-semibold flex items-center gap-2">
-                                <Tag className="h-4 w-4 text-primary" />
-                                اسم الفئة
-                            </FormLabel>
-                            <FormControl>
-                                <div className="relative">
-                                    <Input
-                                        placeholder="مثال: مشروبات ساخنة"
-                                        className="h-11 bg-muted/30 focus:bg-background transition-colors"
-                                        {...field}
-                                    />
-                                </div>
-                            </FormControl>
-                            <FormMessage />
-                        </FormItem>
-                    )}
-                />
-
-                {!hideParentSelection && !defaultParentId && (
+        <>
+            <UpgradeAlert
+                open={showUpgradeAlert}
+                onOpenChange={setShowUpgradeAlert}
+                resourceType="category"
+            />
+            <Form {...form}>
+                <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
                     <FormField
                         control={form.control}
-                        name="parent_category_id"
+                        name="name"
                         render={({ field }) => (
                             <FormItem>
                                 <FormLabel className="text-base font-semibold flex items-center gap-2">
-                                    <Layers className="h-4 w-4 text-primary" />
-                                    الفئة الأم (اختياري)
+                                    <Tag className="h-4 w-4 text-primary" />
+                                    اسم الفئة
                                 </FormLabel>
-                                <Select
-                                    onValueChange={(value) => field.onChange(value === 'none' ? null : Number(value))}
-                                    value={field.value === null || field.value === undefined ? 'none' : String(field.value)}
-                                >
-                                    <FormControl>
-                                        <SelectTrigger className="h-11 bg-muted/30 focus:bg-background transition-colors">
-                                            <SelectValue placeholder="اختر فئة أم" />
-                                        </SelectTrigger>
-                                    </FormControl>
-                                    <SelectContent>
-                                        <SelectItem value="none" className="font-medium text-muted-foreground">
-                                            لا يوجد فئة أم (فئة رئيسية)
-                                        </SelectItem>
-                                        {renderCategoryOptions(categories)}
-                                    </SelectContent>
-                                </Select>
+                                <FormControl>
+                                    <div className="relative">
+                                        <Input
+                                            placeholder="مثال: مشروبات ساخنة"
+                                            className="h-11 bg-muted/30 focus:bg-background transition-colors"
+                                            {...field}
+                                        />
+                                    </div>
+                                </FormControl>
                                 <FormMessage />
                             </FormItem>
                         )}
                     />
-                )}
 
-                <div className="pt-2">
-                    <SubmitButton
-                        pendingText={category ? 'جاري التحديث...' : 'جاري الحفظ...'}
-                        className="w-full h-11 text-base font-medium shadow-md hover:shadow-lg transition-all"
-                    >
-                        {category ? 'حفظ التغييرات' : 'حفظ الفئة'}
-                    </SubmitButton>
-                </div>
-            </form>
-        </Form>
+                    {!hideParentSelection && !defaultParentId && (
+                        <FormField
+                            control={form.control}
+                            name="parent_category_id"
+                            render={({ field }) => (
+                                <FormItem>
+                                    <FormLabel className="text-base font-semibold flex items-center gap-2">
+                                        <Layers className="h-4 w-4 text-primary" />
+                                        الفئة الأم (اختياري)
+                                    </FormLabel>
+                                    <Select
+                                        onValueChange={(value) => field.onChange(value === 'none' ? null : Number(value))}
+                                        value={field.value === null || field.value === undefined ? 'none' : String(field.value)}
+                                    >
+                                        <FormControl>
+                                            <SelectTrigger className="h-11 bg-muted/30 focus:bg-background transition-colors">
+                                                <SelectValue placeholder="اختر فئة أم" />
+                                            </SelectTrigger>
+                                        </FormControl>
+                                        <SelectContent>
+                                            <SelectItem value="none" className="font-medium text-muted-foreground">
+                                                لا يوجد فئة أم (فئة رئيسية)
+                                            </SelectItem>
+                                            {renderCategoryOptions(categories)}
+                                        </SelectContent>
+                                    </Select>
+                                    <FormMessage />
+                                </FormItem>
+                            )}
+                        />
+                    )}
+
+                    <div className="pt-2">
+                        <SubmitButton
+                            pendingText={category ? 'جاري التحديث...' : 'جاري الحفظ...'}
+                            className="w-full h-11 text-base font-medium shadow-md hover:shadow-lg transition-all"
+                        >
+                            {category ? 'حفظ التغييرات' : 'حفظ الفئة'}
+                        </SubmitButton>
+                    </div>
+                </form>
+            </Form>
+        </>
     );
 }
