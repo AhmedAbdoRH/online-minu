@@ -101,7 +101,7 @@ export default async function DashboardPage() {
               <span className="text-xl">رابط الكتالوج الخاص بك</span>
               <span className="inline-flex items-center rounded-full border px-2.5 py-0.5 text-xs font-semibold transition-colors focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 border-transparent bg-brand-primary text-primary-foreground hover:bg-brand-primary/80">نشط</span>
             </CardTitle>
-            <CardDescription>شارك هذا الرابط مع عملائك للوصول إلى قائمتك.</CardDescription>
+            <CardDescription>شارك هذا الرابط مع عملائك للوصول إلى كتالوجك.</CardDescription>
           </CardHeader>
           <CardContent className="flex flex-col sm:flex-row items-center gap-4 z-10 relative">
             <div className="flex-1 bg-background/50 p-3 rounded-lg border border-border/50 w-full font-mono text-sm truncate">
@@ -133,7 +133,7 @@ export default async function DashboardPage() {
                 <Tags className="h-5 w-5 text-brand-accent" />
                 إدارة الفئات
               </CardTitle>
-              <CardDescription>نظم قائمتك عن طريق إضافة وتعديل الفئات.</CardDescription>
+              <CardDescription>نظم كتالوجك عن طريق إضافة وتعديل الفئات.</CardDescription>
             </CardHeader>
             <CardContent className="mt-auto pt-0">
               <Button asChild className="w-full group" variant="ghost">
@@ -157,7 +157,7 @@ export default async function DashboardPage() {
                 <Package className="h-5 w-5 text-brand-luxury" />
                 إدارة المنتجات
               </CardTitle>
-              <CardDescription>أضف صوراً وأسعاراً ووصفاً لأطباقك المميزة.</CardDescription>
+              <CardDescription>أضف صوراً وأسعاراً ووصفاً لمنتجاتك المميزة.</CardDescription>
             </CardHeader>
             <CardContent className="mt-auto pt-0">
               <Button asChild className="w-full group" variant="ghost">
