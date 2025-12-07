@@ -6,8 +6,8 @@ import ClientProviders from '@/components/common/ClientProviders';
 import { ThemeProvider } from "@/components/theme-provider";
 
 export const metadata: Metadata = {
-  title: 'أونلاين منيو',
-  description: 'منصتك الفاخرة لإنشاء قائمة طعام إلكترونية عربية جاهزة للمشاركة خلال دقائق.',
+  title: 'أونلاين كاتلوج | Online Catalog',
+  description: 'منصة إنشاء الكتالوج الرقمي للمحال والمتاجر. سجل مجاناً وأنشئ متجرك خلال دقائق.',
   manifest: '/manifest.json',
 };
 

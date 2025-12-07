@@ -1,4 +1,4 @@
-import type {Config} from 'tailwindcss';
+import type { Config } from 'tailwindcss';
 
 export default {
   darkMode: ['class'],
@@ -16,9 +16,11 @@ export default {
         code: ['monospace'],
       },
       colors: {
-        'brand-primary': '#00D1C9',
-        'brand-accent': '#FF9500',
-        'brand-luxury': '#A855F7',
+        'brand-primary': 'hsl(var(--brand-primary))',
+        'brand-accent': 'hsl(var(--brand-accent))',
+        'brand-luxury': 'hsl(var(--brand-luxury))',
+        'brand-success': 'hsl(var(--brand-success))',
+        'brand-error': 'hsl(var(--brand-error))',
         background: 'hsl(var(--background))',
         foreground: 'hsl(var(--foreground))',
         card: {
@@ -92,10 +94,16 @@ export default {
             height: '0',
           },
         },
+        float: {
+          '0%, 100%': { transform: 'translateY(0)' },
+          '50%': { transform: 'translateY(-20px)' },
+        },
       },
       animation: {
         'accordion-down': 'accordion-down 0.2s ease-out',
         'accordion-up': 'accordion-up 0.2s ease-out',
+        float: 'float 6s ease-in-out infinite',
+        'pulse-slow': 'pulse 4s cubic-bezier(0.4, 0, 0.6, 1) infinite',
       },
     },
   },
