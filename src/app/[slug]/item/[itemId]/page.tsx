@@ -127,7 +127,7 @@ export default async function ProductPage({ params }: Props) {
             العودة للمنيو
           </Link>
           <span className="hidden text-xs text-muted-foreground md:inline-flex">
-            صفحة منتج فاخرة من أونلاين منيو
+            صفحة منتج فاخرة من منظومة أونلاين كاتلوج للمحال والمتاجر
           </span>
         </div>
 

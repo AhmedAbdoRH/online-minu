@@ -138,8 +138,8 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
     };
   }
   return {
-    title: `كتالوج ${data.name} - أونلاين منيو`,
-    description: `تصفح الكتالوج الفاخر الخاص بـ ${data.name} في أونلاين منيو.`,
+    title: `كتالوج ${data.name} - منظومة أونلاين كاتلوج للمحال والمتاجر`,
+    description: `تصفح الكتالوج الفاخر الخاص بـ ${data.name} في منظومة أونلاين كاتلوج للمحال والمتاجر.`,
     openGraph: {
       title: `كتالوج ${data.name}`,
       description: `تصفح الكتالوج الخاص بـ ${data.name}`,
