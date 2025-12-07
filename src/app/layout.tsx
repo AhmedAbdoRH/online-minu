@@ -6,9 +6,39 @@ import ClientProviders from '@/components/common/ClientProviders';
 import { ThemeProvider } from "@/components/theme-provider";
 
 export const metadata: Metadata = {
-  title: 'أونلاين كاتلوج | Online Catalog',
+  title: {
+    default: 'أونلاين كاتلوج | Online Catalog',
+    template: '%s | أونلاين كاتلوج'
+  },
   description: 'منصة إنشاء الكتالوج الرقمي للمحال والمتاجر. سجل مجاناً وأنشئ متجرك خلال دقائق.',
   manifest: '/manifest.json',
+  icons: {
+    icon: '/icon.png',
+    shortcut: '/icon.png',
+    apple: '/icon.png',
+  },
+  openGraph: {
+    type: 'website',
+    locale: 'ar_SA',
+    url: 'https://online-catalog.net',
+    title: 'أونلاين كاتلوج | Online Catalog',
+    description: 'أنشئ متجرك الرقمي والكاتلوج الخاص بك في دقائق. منصة متكاملة تدعم واتساب، بدون الحاجة لمبرمج.',
+    siteName: 'Online Catalog',
+    images: [
+      {
+        url: '/wphoto.png',
+        width: 1200,
+        height: 630,
+        alt: 'Online Catalog Interface Preview',
+      },
+    ],
+  },
+  twitter: {
+    card: 'summary_large_image',
+    title: 'أونلاين كاتلوج | Online Catalog',
+    description: 'أنشئ متجرك الرقمي والكاتلوج الخاص بك في دقائق.',
+    images: ['/wphoto.png'],
+  },
 };
 
 export const viewport: Viewport = {
@@ -33,7 +63,7 @@ export default function RootLayout({
           href="https://fonts.cdnfonts.com/css/satoshi"
           rel="stylesheet"
         />
-        <link rel="icon" href="/favicon.ico" sizes="any" />
+
       </head>
       <body
         className={cn(
