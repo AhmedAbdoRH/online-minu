@@ -114,6 +114,7 @@ export default async function ProductPage({ params }: Props) {
   const whatsappText = encodeURIComponent(
     `أرغب في طلب ${product.name} من ${catalog.display_name}. التفاصيل: ${productUrl}`
   );
+  const sellerWhatsAppNumber = catalog.whatsapp_number;
 
   return (
     <div className="relative min-h-screen bg-[radial-gradient(circle_at_top,_rgba(0,209,201,0.2),transparent_55%),radial-gradient(circle_at_bottom,_rgba(15,23,42,0.8),transparent_60%)] bg-background pb-24">
@@ -180,16 +181,22 @@ export default async function ProductPage({ params }: Props) {
             </div>
 
             <div className="flex flex-wrap gap-3">
-              <Button
-                asChild
-                className="flex-1 rounded-full bg-[#25D366] text-sm font-semibold shadow-[0_18px_40px_rgba(37,211,102,0.35)] hover:bg-[#1fb55b]"
-              >
-                <a href={`https://wa.me/?text=${whatsappText}`} target="_blank" rel="noopener noreferrer">
-                  <MessageCircle className="ml-2 h-5 w-5" />
-                  اطلب عبر واتساب
-                </a>
-              </Button>
-
+              {sellerWhatsAppNumber ? (
+                <Button
+                  asChild
+                  className="flex-1 rounded-full bg-[#25D366] text-sm font-semibold shadow-[0_18px_40px_rgba(37,211,102,0.35)] hover:bg-[#1fb55b]"
+                >
+                  <a href={`https://wa.me/${sellerWhatsAppNumber.replace(/[^\d]/g, '')}?text=${whatsappText}`} target="_blank" rel="noopener noreferrer">
+                    <MessageCircle className="ml-2 h-5 w-5" />
+                    اطلب عبر واتساب
+                  </a>
+                </Button>
+              ) : (
+                <div className="flex-1 rounded-full border border-dashed border-muted-foreground/30 bg-muted/20 px-4 py-3 text-center text-sm text-muted-foreground">
+                  <MessageCircle className="ml-2 inline h-4 w-4" />
+                  رقم الواتساب غير متوفر
+                </div>
+              )}
             </div>
 
 

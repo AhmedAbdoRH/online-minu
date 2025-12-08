@@ -16,9 +16,10 @@ const catalogSchema = z.object({
   display_name: z.string()
     .min(3, 'يجب أن يكون اسم العرض 3 أحرف على الأقل')
     .max(50, 'يجب أن يكون اسم العرض 50 حرفًا على الأكثر'),
+  slogan: z.string().optional(),
   logo: z.instanceof(File).optional(),
   cover: z.instanceof(File).optional(),
-  enable_subcategories: z.boolean().default(false),
+
   whatsapp_number: z.string().optional()
     .refine((val) => !val || /^\+?[0-9]{7,15}$/.test(val), 'رقم الهاتف غير صحيح'),
 });
@@ -44,10 +45,15 @@ export async function createCatalog(prevState: any, formData: FormData) {
 
   const logoFile = formData.get('logo');
 
+  const rawWhatsappCreate = formData.get('whatsapp_number');
+  const whatsappCreateStr = typeof rawWhatsappCreate === 'string' ? rawWhatsappCreate.trim() : '';
+  const whatsappCreateValidated = whatsappCreateStr ? whatsappCreateStr : undefined;
+
   const validatedFields = catalogSchema.safeParse({
-    name: formData.get('name'),
-    display_name: formData.get('display_name'),
-    whatsapp_number: formData.get('whatsapp_number'),
+    name: (formData.get('name') as string || ''),
+    display_name: (formData.get('display_name') as string || ''),
+    whatsapp_number: whatsappCreateValidated,
+    slogan: (formData.get('slogan') as string || ''),
     logo: logoFile instanceof File && logoFile.size > 0 ? logoFile : undefined,
     cover: formData.get('cover') instanceof File && (formData.get('cover') as File).size > 0 ? formData.get('cover') as File : undefined,
   });
@@ -58,7 +64,7 @@ export async function createCatalog(prevState: any, formData: FormData) {
     return { message: firstError };
   }
 
-  const { name, display_name, logo, cover, whatsapp_number } = validatedFields.data;
+  const { name, display_name, logo, cover, whatsapp_number, slogan } = validatedFields.data;
 
   // Re-check uniqueness on the server to be safe
   const isAvailable = await checkCatalogName(name);
@@ -116,6 +122,7 @@ export async function createCatalog(prevState: any, formData: FormData) {
     display_name,
     user_id: user.id,
     whatsapp_number: whatsapp_number || null,
+    slogan: slogan || null,
     logo_url: publicUrl,
     cover_url: coverPublicUrl,
   });
@@ -160,18 +167,24 @@ export async function updateCatalog(prevState: any, formData: FormData) {
     return { message: 'الكتالوج غير موجود' };
   }
 
-  const name = formData.get('name') as string || currentCatalog.name;
-  const display_name = formData.get('display_name') as string || currentCatalog.display_name || currentCatalog.name;
+  const name = (formData.get('name') as string || currentCatalog.name || '').toString();
+  const display_name = (formData.get('display_name') as string || currentCatalog.display_name || currentCatalog.name || '').toString();
+  const slogan = (formData.get('slogan') as string || currentCatalog.slogan || '').toString();
   const logoFile = formData.get('logo') as File | null;
   const coverFile = formData.get('cover') as File | null;
-  const enableSubcategories = formData.get('enable_subcategories') === 'on';
+  const rawWhatsappUpdate = formData.get('whatsapp_number');
+  const whatsappUpdateCandidate = typeof rawWhatsappUpdate === 'string' && rawWhatsappUpdate.trim()
+    ? rawWhatsappUpdate.trim()
+    : (currentCatalog.whatsapp_number ?? '');
+  const whatsappUpdateValidated = whatsappUpdateCandidate ? whatsappUpdateCandidate : undefined;
 
   const validatedFields = catalogSchema.safeParse({
     name,
     display_name,
+    slogan,
     logo: logoFile instanceof File && logoFile.size > 0 ? logoFile : undefined,
     cover: coverFile instanceof File && coverFile.size > 0 ? coverFile : undefined,
-    enable_subcategories: enableSubcategories,
+    whatsapp_number: whatsappUpdateValidated,
   });
 
   if (!validatedFields.success) {
@@ -180,17 +193,27 @@ export async function updateCatalog(prevState: any, formData: FormData) {
     return { message: firstError };
   }
 
-  const { name: validatedName, display_name: validatedDisplayName, logo, cover, enable_subcategories } = validatedFields.data;
+  const { name: validatedName, display_name: validatedDisplayName, logo, cover, whatsapp_number: validatedWhatsappNumber, slogan: validatedSlogan } = validatedFields.data;
 
   let updateData: any = {
     name: validatedName,
     display_name: validatedDisplayName,
-    enable_subcategories: enableSubcategories,
+
+    whatsapp_number: validatedWhatsappNumber ?? null,
+    slogan: validatedSlogan,
   };
 
   // Upload logo if provided
   if (logo && logo.size > 0) {
     console.log('Uploading logo:', logo.name, 'Size:', logo.size);
+
+    if (logo.size > MAX_FILE_SIZE) {
+      return { message: `الحد الأقصى لحجم الشعار 5 ميغابايت.` };
+    }
+    if (!ACCEPTED_IMAGE_TYPES.includes(logo.type)) {
+      return { message: `.jpg, .jpeg, .png و .webp هي الملفات المقبولة للشعار.` };
+    }
+
     const logoFileName = `${user.id}-${Date.now()}.${logo.name.split('.').pop()}`;
     const { data: uploadData, error: uploadError } = await supabase.storage
       .from('logos')
@@ -217,7 +240,7 @@ export async function updateCatalog(prevState: any, formData: FormData) {
       return { message: `.jpg, .jpeg, .png و .webp هي الملفات المقبولة لصورة الغلاف.` };
     }
 
-    const coverFileName = `${user.id}-${Date.now()}.${cover.name.split('.').pop()}`;
+    const coverFileName = `${user.id}-${Date.now()}-cover.${cover.name.split('.').pop()}`;
     const { data: coverUploadData, error: coverUploadError } = await supabase.storage
       .from('covers')
       .upload(coverFileName, cover);

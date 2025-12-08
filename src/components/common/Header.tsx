@@ -43,7 +43,7 @@ export default function Header({ user, catalog }: HeaderProps) {
                 <Button variant="ghost" className="relative h-8 w-8 rounded-full">
                   <Avatar className="h-9 w-9">
                     <AvatarImage src={user.user_metadata.avatar_url} alt={catalog?.display_name || user.email} />
-                    <AvatarFallback>{getInitials(catalog?.display_name, user.email)}</AvatarFallback>
+                    <AvatarFallback>{getInitials(catalog?.display_name ?? undefined, user.email)}</AvatarFallback>
                   </Avatar>
                 </Button>
               </DropdownMenuTrigger>

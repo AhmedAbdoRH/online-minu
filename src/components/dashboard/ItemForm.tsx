@@ -53,7 +53,7 @@ export function ItemForm({ catalogId, categories, item, onSuccess }: ItemFormPro
   const validCategories = Array.isArray(categories) ? categories : [];
 
   // بناء هيكل فئات هرمي
-  const buildHierarchicalCategories = (parentId: number | null = null, depth = 0) => {
+  const buildHierarchicalCategories = (parentId: number | null = null, depth = 0): (Category & { depth: number; children: any[] })[] => {
     return validCategories
       .filter(cat => (cat?.parent_category_id ?? null) === parentId)
       .map(cat => ({
@@ -64,7 +64,7 @@ export function ItemForm({ catalogId, categories, item, onSuccess }: ItemFormPro
   };
 
   // عرض فئات متداخلة مع مسافات
-  const renderCategoryItems = (categories: (Category & { depth: number; children: any[] })[]) => {
+  const renderCategoryItems = (categories: (Category & { depth: number; children: any[] })[]): JSX.Element[] => {
     return categories.flatMap(cat => [
       <SelectItem key={cat.id} value={cat.id.toString()}>
         {Array(cat.depth).fill('— ').join('')}{cat.name}

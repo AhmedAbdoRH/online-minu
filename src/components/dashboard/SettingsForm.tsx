@@ -27,13 +27,18 @@ const formSchema = z.object({
   name: z.string()
     .min(3, 'يجب أن يكون اسم الكتالوج 3 أحرف على الأقل')
     .max(50, 'يجب أن يكون اسم الكتالوج 50 حرفًا على الأكثر')
-    .regex(/^[a-z0-9-]+$/, 'يجب أن يحتوي اسم الكتالوج على أحرف إنجليزية صغيرة وأرقام وشرطات فقط'),
+    .regex(/^[a-zA-Z0-9-]+$/, 'يجب أن يحتوي اسم الكتالوج على أحرف إنجليزية وأرقام وشرطات فقط'),
   display_name: z.string()
     .min(3, 'يجب أن يكون اسم العرض 3 أحرف على الأقل')
     .max(50, 'يجب أن يكون اسم العرض 50 حرفًا على الأكثر'),
+  slogan: z.string().optional(),
   logo: z.any().optional(),
   cover: z.any().optional(),
-  enable_subcategories: z.boolean().default(false),
+
+  whatsapp_number: z.string().optional().refine(
+    (val) => !val || /^\+?[0-9]{6,15}$/.test(val),
+    "رقم الواتساب غير صالح"
+  ),
 });
 
 export function SettingsForm({ catalog }: { catalog: Catalog }) {
@@ -46,7 +51,9 @@ export function SettingsForm({ catalog }: { catalog: Catalog }) {
     defaultValues: {
       name: catalog.name,
       display_name: catalog.display_name || catalog.name,
-      enable_subcategories: catalog.enable_subcategories,
+      slogan: catalog.slogan || '',
+
+      whatsapp_number: catalog.whatsapp_number || '',
     },
   });
 
@@ -56,9 +63,11 @@ export function SettingsForm({ catalog }: { catalog: Catalog }) {
     try {
       const formData = new FormData();
       formData.append('catalogId', catalog.id.toString());
-      formData.append('name', values.name);
+      formData.append('name', values.name.toLowerCase());
       formData.append('display_name', values.display_name);
-      formData.append('enable_subcategories', values.enable_subcategories ? 'on' : 'off');
+      formData.append('slogan', values.slogan || '');
+
+      formData.append('whatsapp_number', values.whatsapp_number || '');
 
       // Handle logo file
       const logoInput = document.querySelector('input[name="logo"]') as HTMLInputElement;
@@ -135,7 +144,40 @@ export function SettingsForm({ catalog }: { catalog: Catalog }) {
               </FormItem>
             )}
           />
+          <FormField
+            control={form.control}
+            name="slogan"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>شعار نصي (سلوغان)</FormLabel>
+                <FormControl>
+                  <Input {...field} disabled={isSubmitting} placeholder="شعار متجرك أو جملة ترويجية" />
+                </FormControl>
+                <FormDescription>
+                  سيظهر هذا النص بخط صغير تحت اسم المتجر.
+                </FormDescription>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
         </div>
+
+        <FormField
+          control={form.control}
+          name="whatsapp_number"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>رقم الواتساب</FormLabel>
+              <FormControl>
+                <Input {...field} disabled={isSubmitting} placeholder="+201234567890" />
+              </FormControl>
+              <FormDescription>
+                رقم الواتساب الخاص بمتجرك (اختياري).
+              </FormDescription>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
 
         <div className="space-y-4">
           <div>
@@ -159,12 +201,12 @@ export function SettingsForm({ catalog }: { catalog: Catalog }) {
               <Input
                 type="file"
                 name="logo"
-                accept="image/*"
+                accept="image/jpeg,image/jpg,image/png,image/webp"
                 disabled={isSubmitting}
               />
             </FormControl>
             <FormDescription>
-              اختر ملفًا جديدًا فقط إذا كنت تريد تغيير الشعار الحالي.
+              اختر ملفًا جديدًا فقط إذا كنت تريد تغيير الشعار الحالي. الحد الأقصى: 5 ميغابايت. الصيغ المقبولة: .jpg, .jpeg, .png, .webp
             </FormDescription>
           </FormItem>
         </div>
@@ -191,37 +233,17 @@ export function SettingsForm({ catalog }: { catalog: Catalog }) {
               <Input
                 type="file"
                 name="cover"
-                accept="image/*"
+                accept="image/jpeg,image/jpg,image/png,image/webp"
                 disabled={isSubmitting}
               />
             </FormControl>
             <FormDescription>
-              اختر ملفًا جديدًا فقط إذا كنت تريد تغيير صورة الغلاف الحالية.
+              اختر ملفًا جديدًا فقط إذا كنت تريد تغيير صورة الغلاف الحالية. الحد الأقصى: 5 ميغابايت. الصيغ المقبولة: .jpg, .jpeg, .png, .webp
             </FormDescription>
           </FormItem>
         </div>
 
-        <FormField
-          control={form.control}
-          name="enable_subcategories"
-          render={({ field }) => (
-            <FormItem className="flex flex-row items-center justify-between rounded-lg border p-4">
-              <div className="space-y-0.5">
-                <FormLabel className="text-base">تفعيل الفئات الفرعية</FormLabel>
-                <FormDescription>
-                  السماح بإنشاء فئات داخل فئات أخرى.
-                </FormDescription>
-              </div>
-              <FormControl>
-                <Switch
-                  checked={field.value}
-                  onCheckedChange={field.onChange}
-                  disabled={isSubmitting}
-                />
-              </FormControl>
-            </FormItem>
-          )}
-        />
+
 
         <Button type="submit" className="w-full" disabled={isSubmitting}>
           {isSubmitting && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}

@@ -23,7 +23,7 @@ export default function HomePage() {
         <Features />
         <MockupPreview />
         <Pricing />
-        <Testimonials />
+        {/* <Testimonials /> */}
         <FAQ />
       </main>
 

@@ -32,6 +32,8 @@ async function getCatalogData(slug: string): Promise<CatalogPageData | null> {
         cover_url: null,
         enable_subcategories: false,
         plan: 'basic',
+        whatsapp_number: null,
+        slogan: null,
         created_at: new Date().toISOString(),
         categories: [
           {
@@ -130,8 +132,7 @@ async function getCatalogData(slug: string): Promise<CatalogPageData | null> {
 
 
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
-  const resolvedParams = await params;
-  const data = await getCatalogData(resolvedParams.slug);
+  const data = await getCatalogData(params.slug);
   if (!data) {
     return {
       title: "الكتالوج غير موجود",
@@ -156,8 +157,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
 }
 
 export default async function CatalogPage({ params }: Props) {
-  const resolvedParams = await params;
-  const data = await getCatalogData(resolvedParams.slug);
+  const data = await getCatalogData(params.slug);
 
   if (!data) {
     notFound();

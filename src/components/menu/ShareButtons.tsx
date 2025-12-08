@@ -73,7 +73,7 @@ export function ShareButtons({ catalogName }: { catalogName: string }) {
 
   return (
     <div className="flex justify-center items-center gap-2">
-      {navigator.share ? (
+      {typeof navigator.share === 'function' ? (
         <Button onClick={handleNativeShare}>
           <Share2 className="ml-2 h-4 w-4" />
           مشاركة

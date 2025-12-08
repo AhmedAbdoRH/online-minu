@@ -3,7 +3,7 @@
 import { createClient } from "@/lib/supabase/server";
 import { revalidatePath } from "next/cache";
 import { z } from "zod";
-import { CategoryWithSubcategories } from "@/lib/types";
+import { Category, CategoryWithSubcategories } from "@/lib/types";
 
 const categorySchema = z.object({
   catalog_id: z.coerce.number(),
@@ -233,7 +233,7 @@ export async function getCategories(catalogId: number) {
   const rootCategories: CategoryWithSubcategories[] = [];
 
   // First pass: create all category objects
-  data.forEach(category => {
+  data.forEach((category: Category) => {
     const categoryWithSub: CategoryWithSubcategories = {
       ...category,
       menu_items: [], // Assuming menu_items are fetched separately or not needed here
@@ -243,7 +243,7 @@ export async function getCategories(catalogId: number) {
   });
 
   // Second pass: build the hierarchy
-  data.forEach(category => {
+  data.forEach((category: Category) => {
     const categoryWithSub = categoriesMap.get(category.id)!;
 
     if (category.parent_category_id === null) {

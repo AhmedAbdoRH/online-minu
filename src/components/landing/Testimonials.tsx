@@ -29,7 +29,7 @@ export default function Testimonials() {
             <div className="container mx-auto px-4">
                 <div className="text-center mb-16 space-y-4">
                     <h2 className="text-3xl md:text-5xl font-bold font-headline">قصص نجاح تجارنا</h2>
-                    <p className="text-xl text-muted-foreground">انضم إلى آلاف التجار الناجحين</p>
+                    <p className="text-xl text-muted-foreground">انضم إلى شركائنا الناجحين</p>
                 </div>
 
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-8">

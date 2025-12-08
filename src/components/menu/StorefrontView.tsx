@@ -549,17 +549,20 @@ export function StorefrontView({ catalog, categories }: StorefrontViewProps) {
           </section>
         </main>
 
-        <a
-          href={`https://wa.me/?text=${encodeURIComponent(
-            `تفضل كتالوج ${catalog.name}: ${catalogUrl}`
-          )}`}
-          target="_blank"
-          rel="noopener noreferrer"
-          className="fixed bottom-6 left-6 z-40 flex h-12 w-12 items-center justify-center rounded-full bg-[#25D366] text-white shadow-[0_30px_60px_rgba(37,211,102,0.55)] transition-transform hover:-translate-y-1 md:bottom-6"
-          aria-label="مشاركة الكتالوج عبر واتساب"
-        >
-          <MessageCircle className="h-6 w-6" />
-        </a>
+        {/* WhatsApp Floating Button */}
+        {catalog.whatsapp_number && (
+          <a
+            href={`https://wa.me/${catalog.whatsapp_number.replace(/[^\d]/g, '')}?text=${encodeURIComponent(
+              `مرحباً، أود الاستفسار عن منتجاتكم من كتالوج ${catalog.name}`
+            )}`}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="fixed bottom-6 left-6 z-40 flex h-14 w-14 items-center justify-center rounded-full bg-[#25D366] text-white shadow-[0_30px_60px_rgba(37,211,102,0.55)] transition-transform hover:-translate-y-1 md:bottom-6"
+            aria-label="تواصل مع البائع عبر واتساب"
+          >
+            <MessageCircle className="h-7 w-7" />
+          </a>
+        )}
 
         <AddToHomeCTA show={showInstallHint} onDismiss={() => setShowInstallHint(false)} />
 

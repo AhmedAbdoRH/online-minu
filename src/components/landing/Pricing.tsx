@@ -1,5 +1,5 @@
 
-import { Check, X } from 'lucide-react';
+import { Check, X, Package, Zap, Crown, Building } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import Link from 'next/link';
 
@@ -8,43 +8,43 @@ const plans = [
         name: "Basic",
         price: "مجاناً",
         description: "للمتاجر الصغيرة والناشئة",
+        icon: Package,
         features: [
             { text: "50 منتج", included: true },
             { text: "لوحة تحكم أساسية", included: true },
             { text: "رابط مخصص", included: true },
-            { text: "دعم عبر البريد", included: true },
+            { text: "دعم فني", included: true },
             { text: "اسم نطاق خاص", included: false },
         ],
         cta: "ابدأ مجاناً",
         ctaLink: "/signup",
-        popular: false
+        popular: true
     },
     {
         name: "Pro",
         price: "2000 ج.م",
         period: "/ سنوياً",
         description: "للمتاجر المتنامية التي تحتاج المزيد",
+        icon: Zap,
         features: [
             { text: "عدد لا نهائي من المنتجات", included: true },
-            { text: "لوحة تحكم متقدمة", included: true },
-            { text: "إحصائيات مفصلة", included: true },
             { text: "دعم فني أولوية", included: true },
             { text: "إزالة شعار المنصة", included: true },
         ],
         cta: "اشترك الآن",
         ctaLink: "/signup?plan=pro",
-        popular: true
+        popular: false
     },
     {
         name: "Business",
         price: "تواصل معنا",
         description: "للشركات التي تحتاج حلولاً مخصصة",
+        icon: Building,
         features: [
             { text: "موقع ومتجر إلكتروني كامل", included: true },
             { text: "نطاق خاص (Domain)", included: true },
             { text: "تصميم مخصص بالكامل", included: true },
-            { text: "مدير حساب خاص", included: true },
-            { text: "تكامل مع أنظمة المحاسبة", included: true },
+            { text: "لوحة تحكم متقدمة", included: true },
         ],
         cta: "تواصل معنا",
         ctaLink: "mailto:support@online-catalog.net",
@@ -72,6 +72,9 @@ export default function Pricing() {
                             )}
 
                             <div className="mb-8">
+                                <div className="w-16 h-16 rounded-2xl bg-primary/10 flex items-center justify-center text-primary mb-4 mx-auto">
+                                    <plan.icon className="w-8 h-8" />
+                                </div>
                                 <h3 className="text-xl font-bold mb-2">{plan.name}</h3>
                                 <div className="text-muted-foreground mb-4 h-10">{plan.description}</div>
                                 <div className="flex items-baseline gap-1">

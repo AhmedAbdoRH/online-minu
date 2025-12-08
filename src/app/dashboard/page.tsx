@@ -5,19 +5,31 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import Link from "next/link";
 import { APP_URL } from "@/lib/constants";
-import { Clipboard, Eye, Settings, Package, Tags, ArrowRight } from "lucide-react";
+import { Clipboard, Eye, Settings, Package, Tags, ArrowRight, Zap, Crown, Building } from "lucide-react";
 import * as motion from "framer-motion/client";
 import { Badge } from "@/components/ui/badge";
 
 const getPlanDetails = (plan: string) => {
   switch (plan?.toLowerCase()) {
     case 'pro':
-      return { label: 'باقة احترافية', className: 'bg-brand-accent hover:bg-brand-accent/90 text-white' };
+      return { 
+        label: 'باقة احترافية', 
+        className: 'bg-brand-accent hover:bg-brand-accent/90 text-white',
+        icon: Zap
+      };
     case 'business':
-      return { label: 'باقة أعمال', className: 'bg-brand-luxury hover:bg-brand-luxury/90 text-white' };
+      return { 
+        label: 'باقة أعمال', 
+        className: 'bg-brand-luxury hover:bg-brand-luxury/90 text-white',
+        icon: Building
+      };
     case 'basic':
     default:
-      return { label: 'باقة أساسية', className: 'bg-brand-primary hover:bg-brand-primary/90 text-white' };
+      return { 
+        label: 'باقة أساسية', 
+        className: 'bg-brand-primary hover:bg-brand-primary/90 text-white',
+        icon: Package
+      };
   }
 };
 
@@ -75,7 +87,8 @@ export default async function DashboardPage() {
         <div className="space-y-1">
           <div className="flex items-center gap-3">
             <h1 className="text-3xl font-bold tracking-tight">لوحة التحكم</h1>
-            <Badge className={`${planDetails.className} text-sm px-3 py-1 items-center gap-1`}>
+            <Badge className={`${planDetails.className} text-sm px-3 py-1 items-center gap-2`}>
+              <planDetails.icon className="h-3 w-3" />
               {planDetails.label}
             </Badge>
           </div>
@@ -102,6 +115,12 @@ export default async function DashboardPage() {
               <span className="inline-flex items-center rounded-full border px-2.5 py-0.5 text-xs font-semibold transition-colors focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 border-transparent bg-brand-primary text-primary-foreground hover:bg-brand-primary/80">نشط</span>
             </CardTitle>
             <CardDescription>شارك هذا الرابط مع عملائك للوصول إلى كتالوجك.</CardDescription>
+            <div className="mt-2 p-3 bg-muted/30 rounded-lg border border-border/30">
+              <div className="text-xs text-muted-foreground mb-1">الرابط النهائي سيظهر كـ:</div>
+              <div className="font-mono text-sm text-foreground font-medium">
+                https://online-catalog.net/{catalog.name}
+              </div>
+            </div>
           </CardHeader>
           <CardContent className="flex flex-col sm:flex-row items-center gap-4 z-10 relative">
             <div className="flex-1 bg-background/50 p-3 rounded-lg border border-border/50 w-full font-mono text-sm truncate">
