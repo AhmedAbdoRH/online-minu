@@ -30,6 +30,7 @@ export function OnboardingForm({ userPhone }: OnboardingFormProps) {
     logo: null as File | null,
     cover: null as File | null,
   });
+  const [nameError, setNameError] = useState('');
   const { toast } = useToast();
 
   useEffect(() => {
@@ -85,6 +86,37 @@ export function OnboardingForm({ userPhone }: OnboardingFormProps) {
     setFormData(prev => ({ ...prev, [field]: value }));
   };
 
+  const validateCatalogName = (value: string) => {
+    const cleanValue = value.toLowerCase();
+    
+    // Check for invalid characters
+    if (!/^[a-z0-9-]*$/.test(cleanValue)) {
+      setNameError('يجب أن يحتوي على أحرف إنجليزية صغيرة وأرقام وشرطات فقط');
+      return false;
+    }
+    
+    // Check minimum length
+    if (cleanValue.length < 3) {
+      setNameError('يجب أن يكون الاسم 3 أحرف على الأقل');
+      return false;
+    }
+    
+    // Check for consecutive dashes
+    if (cleanValue.includes('--')) {
+      setNameError('لا يمكن استخدام شرطتين متتالين');
+      return false;
+    }
+    
+    // Check for starting or ending with dash
+    if (cleanValue.startsWith('-') || cleanValue.endsWith('-')) {
+      setNameError('لا يمكن أن يبدأ أو ينتهي الاسم بشرطة');
+      return false;
+    }
+    
+    setNameError('');
+    return true;
+  };
+
   const nextStep = () => {
     if (currentStep < 3) {
       setCurrentStep(currentStep + 1);
@@ -136,10 +168,17 @@ export function OnboardingForm({ userPhone }: OnboardingFormProps) {
                 minLength={3}
                 value={formData.name}
                 onChange={(e) => {
-                  handleInputChange('name', e.target.value);
-                  setCatalogName(e.target.value);
+                  const value = e.target.value.toLowerCase();
+                  validateCatalogName(value);
+                  handleInputChange('name', value);
+                  setCatalogName(value);
                 }}
               />
+              {nameError && (
+                <p className="text-xs text-red-500 mt-1">
+                  {nameError}
+                </p>
+              )}
               <p className="text-xs text-muted-foreground/70">
                 سيتم استخدام هذا الاسم في رابط الكتالوج الخاص بك
               </p>
