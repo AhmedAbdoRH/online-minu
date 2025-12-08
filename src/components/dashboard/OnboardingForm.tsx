@@ -22,6 +22,7 @@ export function OnboardingForm({ userPhone }: OnboardingFormProps) {
   const formRef = useRef<HTMLFormElement>(null);
   const [catalogName, setCatalogName] = useState('');
   const [currentStep, setCurrentStep] = useState(1);
+  const [isUploading, setIsUploading] = useState(false);
   const [formData, setFormData] = useState({
     display_name: '',
     name: '',
@@ -66,6 +67,18 @@ export function OnboardingForm({ userPhone }: OnboardingFormProps) {
     }
     
     formAction(submitFormData);
+  };
+
+  const handleFileChange = async (field: 'logo' | 'cover', file: File | null) => {
+    if (file) {
+      setIsUploading(true);
+      // Simulate upload delay or add actual upload logic here
+      await new Promise(resolve => setTimeout(resolve, 1000));
+      handleInputChange(field, file);
+      setIsUploading(false);
+    } else {
+      handleInputChange(field, null);
+    }
   };
 
   const handleInputChange = (field: string, value: string | File | null) => {
@@ -222,7 +235,8 @@ export function OnboardingForm({ userPhone }: OnboardingFormProps) {
                     type="file"
                     accept="image/jpeg,image/png,image/webp"
                     className="hidden"
-                    onChange={(e) => handleInputChange('logo', e.target.files?.[0] || null)}
+                    onChange={(e) => handleFileChange('logo', e.target.files?.[0] || null)}
+                    disabled={isUploading}
                   />
                 </label>
               </div>
@@ -270,10 +284,20 @@ export function OnboardingForm({ userPhone }: OnboardingFormProps) {
                   type="file"
                   accept="image/jpeg,image/png,image/webp"
                   className="hidden"
-                  onChange={(e) => handleInputChange('cover', e.target.files?.[0] || null)}
+                  onChange={(e) => handleFileChange('cover', e.target.files?.[0] || null)}
+                  disabled={isUploading}
                 />
               </label>
             </div>
+            
+            {isUploading && (
+              <div className="text-center py-2">
+                <div className="inline-flex items-center gap-2 text-sm text-brand-primary">
+                  <div className="w-4 h-4 border-2 border-brand-primary border-t-transparent rounded-full animate-spin"></div>
+                  جاري تحميل الصور...
+                </div>
+              </div>
+            )}
             
             <div className="text-center pt-2">
               <p className="text-xs text-muted-foreground/60">
@@ -336,7 +360,11 @@ export function OnboardingForm({ userPhone }: OnboardingFormProps) {
             التالي
           </Button>
         ) : (
-          <SubmitButton pendingText="جاري الإنشاء..." className="w-full">
+          <SubmitButton 
+            pendingText="جاري الإنشاء..." 
+            className="w-full"
+            disabled={isUploading}
+          >
             إنشاء كتالوجي
           </SubmitButton>
         )}
