@@ -92,7 +92,7 @@ export default function MockupPreview() {
 
                     <div className="text-center mt-12">
                         <Button size="lg" asChild className="text-lg px-8 rounded-full shadow-lg">
-                            <Link href="/signup">جرب المتجر النموذجي</Link>
+                            <Link href="https://online-catalog.net/fath" target="_blank" rel="noopener noreferrer">شاهد مثال</Link>
                         </Button>
                     </div>
                 </div>

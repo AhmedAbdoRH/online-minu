@@ -1,11 +1,12 @@
 import { createClient } from "@/lib/supabase/server";
 import { redirect } from "next/navigation";
 import { OnboardingForm } from "@/components/dashboard/OnboardingForm";
+import { CopyLinkButton } from "@/components/dashboard/CopyLinkButton";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import Link from "next/link";
 import { APP_URL } from "@/lib/constants";
-import { Clipboard, Eye, Settings, Package, Tags, ArrowRight, Zap, Crown, Building } from "lucide-react";
+import { Eye, Settings, Package, Tags, ArrowRight, Zap, Crown, Building } from "lucide-react";
 import * as motion from "framer-motion/client";
 import { Badge } from "@/components/ui/badge";
 
@@ -41,6 +42,9 @@ export default async function DashboardPage() {
     redirect("/login");
   }
 
+  // Extract phone number from user email (format: phone@catalog.app)
+  const userPhone = user.email?.replace('@catalog.app', '') || '';
+
   const { data: catalog, error } = await supabase
     .from("catalogs")
     .select("*")
@@ -49,7 +53,7 @@ export default async function DashboardPage() {
 
   if (!catalog) {
     return (
-      <div className="max-w-2xl mx-auto pt-10">
+      <div className="max-w-2xl mx-auto pt-4">
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
@@ -57,14 +61,14 @@ export default async function DashboardPage() {
         >
           <Card className="glass-surface border-primary/20">
             <CardHeader>
-              <CardTitle className="text-2xl text-brand-primary">مرحباً بك في كتالوجي!</CardTitle>
+              <CardTitle className="text-2xl text-brand-primary">خطوات بسيطة. لإطلاق متجرك.</CardTitle>
               <CardDescription className="text-lg">
-                أبدأ في انشاء الكاتلوج الخاص بك. الرجاء تعبئة المعلومات التالية للبدء.
+                املأ البيانات لاستكمال المتجر.
               </CardDescription>
             </CardHeader>
-            <CardContent>
-              <OnboardingForm />
-            </CardContent>
+            <div className="px-6 pb-6">
+              <OnboardingForm userPhone={userPhone} />
+            </div>
           </Card>
         </motion.div>
       </div>
@@ -115,12 +119,6 @@ export default async function DashboardPage() {
               <span className="inline-flex items-center rounded-full border px-2.5 py-0.5 text-xs font-semibold transition-colors focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 border-transparent bg-brand-primary text-primary-foreground hover:bg-brand-primary/80">نشط</span>
             </CardTitle>
             <CardDescription>شارك هذا الرابط مع عملائك للوصول إلى كتالوجك.</CardDescription>
-            <div className="mt-2 p-3 bg-muted/30 rounded-lg border border-border/30">
-              <div className="text-xs text-muted-foreground mb-1">الرابط النهائي سيظهر كـ:</div>
-              <div className="font-mono text-sm text-foreground font-medium">
-                https://online-catalog.net/{catalog.name}
-              </div>
-            </div>
           </CardHeader>
           <CardContent className="flex flex-col sm:flex-row items-center gap-4 z-10 relative">
             <div className="flex-1 bg-background/50 p-3 rounded-lg border border-border/50 w-full font-mono text-sm truncate">
@@ -135,6 +133,7 @@ export default async function DashboardPage() {
                   عرض الكتالوج
                 </Link>
               </Button>
+              <CopyLinkButton url={catalogUrl} />
             </div>
           </CardContent>
         </Card>

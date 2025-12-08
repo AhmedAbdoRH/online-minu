@@ -6,7 +6,7 @@ import { ArrowRight, Store } from 'lucide-react';
 
 export default function HeroSection() {
     return (
-        <section className="relative pt-16 sm:pt-18 md:pt-20 pb-20 sm:pb-24 md:pb-32 lg:pt-20 lg:pb-32 overflow-hidden bg-gradient-to-b from-primary/5 via-background to-background">
+        <section className="relative pt-12 sm:pt-14 md:pt-16 pb-12 sm:pb-20 md:pb-28 lg:pt-16 lg:pb-28 overflow-hidden bg-gradient-to-b from-primary/5 via-background to-background">
             {/* Background Decor */}
             <div className="absolute top-0 right-0 -translate-y-1/2 translate-x-1/2 w-[300px] h-[300px] sm:w-[500px] sm:h-[500px] bg-primary/10 rounded-full blur-3xl opacity-50" />
             <div className="absolute bottom-0 left-0 translate-y-1/2 -translate-x-1/2 w-[300px] h-[300px] sm:w-[500px] sm:h-[500px] bg-blue-500/10 rounded-full blur-3xl opacity-50" />
@@ -15,7 +15,7 @@ export default function HeroSection() {
                 <div className="flex flex-col lg:flex-row items-center gap-8 md:gap-12 lg:gap-20 pt-0 sm:pt-1 md:pt-2 lg:pt-0">
 
                     {/* Visuals - First on mobile/tablet */}
-                    <div className="flex-1 w-full max-w-[350px] sm:max-w-[500px] md:max-w-[600px] lg:max-w-none perspective-1000 order-1 lg:order-2">
+                    <div className="flex-1 w-full max-w-[320px] sm:max-w-[480px] md:max-w-[580px] lg:max-w-none perspective-1000 order-1 lg:order-2">
                         <div className="relative animate-float">
                             {/* Main Hero Image/Character */}
                             <div className="relative z-20 rounded-2xl bg-gradient-to-tr from-background to-secondary p-3 sm:p-4 shadow-2xl border border-border/50">
@@ -53,8 +53,9 @@ export default function HeroSection() {
                     {/* Content - Second on mobile/tablet */}
                     <div className="flex-1 text-center lg:text-right space-y-6 md:space-y-8 order-2 lg:order-1">
                         
-                        <h1 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-bold font-headline tracking-tight text-foreground leading-[1.1] sm:leading-[1.2]">
-                            متجرك الرقمي... <span className="text-primary bg-clip-text text-transparent bg-gradient-to-r from-primary to-blue-600">جاهز في دقائق.</span>
+                        <h1 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-bold font-headline tracking-tight text-foreground leading-[1.3] sm:leading-[1.4]">
+                            متجرك الرقمي... <br className="block sm:hidden" />
+                            <span className="text-primary bg-clip-text text-transparent bg-gradient-to-r from-primary to-blue-600">جاهز في دقائق.</span>
                         </h1>
 
                         <p className="text-lg sm:text-xl md:text-2xl text-muted-foreground max-w-2xl mx-auto lg:mx-0 leading-relaxed px-2 sm:px-0">
@@ -65,13 +66,13 @@ export default function HeroSection() {
                         <div className="flex flex-col sm:flex-row items-center gap-3 sm:gap-4 md:gap-6 justify-center lg:justify-start px-4 sm:px-0">
                             <Button size="lg" className="h-12 sm:h-14 md:h-16 px-6 sm:px-8 md:px-10 text-base sm:text-lg md:text-xl rounded-full shadow-lg shadow-primary/25 hover:shadow-primary/40 transition-all font-bold group w-full sm:w-auto" asChild>
                                 <Link href="/signup">
+                                    <ArrowRight className="mr-2 w-4 h-4 sm:w-5 sm:h-5 group-hover:translate-x-1 transition-transform" />
                                     ابدأ مجاناً
-                                    <ArrowRight className="ml-2 w-4 h-4 sm:w-5 sm:h-5 group-hover:translate-x-1 transition-transform" />
                                 </Link>
                             </Button>
                             <Button size="lg" variant="outline" className="h-12 sm:h-14 md:h-16 px-6 sm:px-8 md:px-10 text-base sm:text-lg md:text-xl rounded-full border-2 border-primary/30 bg-primary/5 hover:bg-primary/10 hover:border-primary/50 w-full sm:w-auto transition-all" asChild>
-                                <Link href="#mockup">
-                                    جرب المتجر النموذجي
+                                <Link href="https://online-catalog.net/fath" target="_blank" rel="noopener noreferrer">
+                                    اعرض مثال
                                 </Link>
                             </Button>
                         </div>

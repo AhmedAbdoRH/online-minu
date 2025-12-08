@@ -254,6 +254,7 @@ function CategoryActionsMenu({ category, catalogId, categories, size = 'default'
             catalogId={catalogId}
             category={category}
             categories={categories}
+            hideParentSelection={category.parent_category_id !== null}
             onSuccess={() => setEditOpen(false)}
           />
         </DialogContent>

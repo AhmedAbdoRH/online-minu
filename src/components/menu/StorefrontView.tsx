@@ -10,6 +10,7 @@ import Link from "next/link";
 import type { Catalog, CategoryWithSubcategories, MenuItem } from "@/lib/types";
 import { ShareButtons } from "./ShareButtons";
 import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
 import { cn } from "@/lib/utils";
 import {
   LayoutGrid,
@@ -24,6 +25,8 @@ import {
   Lock,
   Sparkles,
   Crown,
+  Search,
+  X,
 } from "lucide-react";
 
 type ViewMode = "masonry" | "grid" | "list" | "compact";
@@ -46,6 +49,32 @@ type StorefrontViewProps = {
 
 const NEW_ITEM_THRESHOLD_DAYS = 21;
 const cardLiftSteps = [-8, -12, -16, -10];
+
+function filterMenuItems(items: MenuItem[], searchTerm: string): MenuItem[] {
+  if (!searchTerm.trim()) return items;
+  
+  const normalizedSearch = searchTerm.toLowerCase().trim();
+  return items.filter(item => 
+    item.name.toLowerCase().includes(normalizedSearch) ||
+    (item.description && item.description.toLowerCase().includes(normalizedSearch))
+  );
+}
+
+function filterCategoriesBySearch(categories: CategoryWithSubcategories[], searchTerm: string): CategoryWithSubcategories[] {
+  if (!searchTerm.trim()) return categories;
+  
+  return categories.map(category => ({
+    ...category,
+    menu_items: filterMenuItems(category.menu_items, searchTerm),
+    subcategories: category.subcategories.map(subcategory => ({
+      ...subcategory,
+      menu_items: filterMenuItems(subcategory.menu_items, searchTerm)
+    }))
+  })).filter(category => 
+    category.menu_items.length > 0 || 
+    category.subcategories.some(sub => sub.menu_items.length > 0)
+  );
+}
 
 function flattenMenuItems(categories: CategoryWithSubcategories[]): MenuItem[] {
   const items: MenuItem[] = [];
@@ -220,6 +249,8 @@ export function StorefrontView({ catalog, categories }: StorefrontViewProps) {
   const [mounted, setMounted] = useState(false);
   const [selectedCategoryId, setSelectedCategoryId] = useState<number | null>(null);
   const [selectedSubcategoryId, setSelectedSubcategoryId] = useState<number | null>(null);
+  const [searchTerm, setSearchTerm] = useState("");
+  const [isSearchExpanded, setIsSearchExpanded] = useState(false);
   const luxeCatalog = catalog as LuxeCatalog;
 
   useEffect(() => {
@@ -244,12 +275,21 @@ export function StorefrontView({ catalog, categories }: StorefrontViewProps) {
       : `https://online-catalog.net/${catalog.name}`;
 
   const allItems = useMemo(() => flattenMenuItems(categories), [categories]);
+  
+  // Apply search filtering first, then category filtering
+  const searchFilteredCategories = useMemo(() => 
+    filterCategoriesBySearch(categories, searchTerm), 
+    [categories, searchTerm]
+  );
+  
   const displayedCategories = selectedCategoryId
-    ? categories.filter((c) => c.id === selectedCategoryId)
-    : categories;
+    ? searchFilteredCategories.filter((c) => c.id === selectedCategoryId)
+    : searchFilteredCategories;
+    
   const heroImage = luxeCatalog.cover_url ?? "https://placehold.co/1600x600/png?text=Menu+Cover";
 
   const catalogDescription = luxeCatalog.description ?? "";
+  const catalogSlogan = luxeCatalog.slogan ?? "";
   const isCatalogClosed = luxeCatalog.is_open === false || luxeCatalog.status === "closed";
 
   if (!mounted) {
@@ -341,7 +381,7 @@ export function StorefrontView({ catalog, categories }: StorefrontViewProps) {
               {catalog.display_name || catalog.name}
             </motion.h1>
 
-            {catalogDescription && (
+            {(catalogDescription || catalogSlogan) && (
               <motion.p
                 initial={{ y: 10, opacity: 0 }}
                 animate={{
@@ -354,13 +394,64 @@ export function StorefrontView({ catalog, categories }: StorefrontViewProps) {
                 }}
                 className="mx-auto max-w-2xl text-sm text-muted-foreground md:text-base"
               >
-                {catalogDescription}
+                {catalogSlogan || catalogDescription}
               </motion.p>
             )}
           </div>
         </div>
 
         <main className="mx-auto mt-8 flex w-[min(94vw,1180px)] flex-col gap-0">
+          {/* Search Section */}
+          <div className="mx-auto w-full max-w-md px-2 mb-4">
+            <div className="relative">
+              {!isSearchExpanded && !searchTerm ? (
+                // Collapsed search state - small and compact
+                <button
+                  onClick={() => setIsSearchExpanded(true)}
+                  className="flex items-center gap-2 w-full max-w-xs h-6 rounded-full bg-white/8 border border-white/15 backdrop-blur-sm hover:bg-white/12 transition-all duration-300 mx-auto px-3"
+                  aria-label="بحث"
+                >
+                  <Search className="h-3 w-3 text-muted-foreground/50" />
+                  <span className="text-xs font-light text-muted-foreground/50">ابحث عن منتج معين</span>
+                </button>
+              ) : (
+                // Expanded search state
+                <div className="relative">
+                  <Search className="absolute left-1 top-1/2 h-3 w-3 -translate-y-1/2 text-muted-foreground/50" />
+                  <Input
+                    type="text"
+                    placeholder="ابحث عن منتج..."
+                    value={searchTerm}
+                    onChange={(e) => setSearchTerm(e.target.value)}
+                    onFocus={() => setIsSearchExpanded(true)}
+                    onBlur={() => {
+                      if (!searchTerm) {
+                        setTimeout(() => setIsSearchExpanded(false), 200);
+                      }
+                    }}
+                    className="pl-6 text-right bg-white/8 border-white/15 backdrop-blur-sm focus:bg-white/12 focus:border-brand-primary/50 transition-all duration-300 h-6 w-full"
+                  />
+                  {searchTerm && (
+                    <button
+                      onClick={() => {
+                        setSearchTerm("");
+                        setIsSearchExpanded(false);
+                      }}
+                      className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground transition-colors"
+                    >
+                      <X className="h-3 w-3" />
+                    </button>
+                  )}
+                </div>
+              )}
+            </div>
+            {searchTerm && (
+              <div className="mt-2 text-sm text-muted-foreground text-center">
+                تم العثور على {flattenMenuItems(displayedCategories).length} منتج لـ "{searchTerm}"
+              </div>
+            )}
+          </div>
+          
           {/* Category filter toolbar (pills style) */}
           <div className="mx-auto w-full">
             <div className="flex items-center gap-3 overflow-x-auto pb-3 px-2">
@@ -377,21 +468,27 @@ export function StorefrontView({ catalog, categories }: StorefrontViewProps) {
                 الكل
               </button>
 
-              {categories.map((cat) => (
-                <button
-                  key={cat.id}
-                  onClick={() => { setSelectedCategoryId(cat.id); setSelectedSubcategoryId(null); }}
-                  aria-pressed={selectedCategoryId === cat.id}
-                  className={cn(
-                    "flex items-center gap-2 flex-shrink-0 whitespace-nowrap rounded-full px-4 py-2 text-sm font-semibold transition-all",
-                    selectedCategoryId === cat.id
-                      ? "bg-gradient-to-r from-brand-primary to-brand-accent text-white shadow-lg scale-[1.02]"
-                      : "bg-white/15 text-muted-foreground hover:bg-white/20"
-                  )}
-                >
-                  <span>{cat.name}</span>
-                </button>
-              ))}
+              {categories.map((cat) => {
+                const catItemCount = flattenMenuItems([cat]).length;
+                if (catItemCount === 0) return null;
+                
+                return (
+                  <button
+                    key={cat.id}
+                    onClick={() => { setSelectedCategoryId(cat.id); setSelectedSubcategoryId(null); }}
+                    aria-pressed={selectedCategoryId === cat.id}
+                    className={cn(
+                      "flex items-center gap-2 flex-shrink-0 whitespace-nowrap rounded-full px-4 py-2 text-sm font-semibold transition-all",
+                      selectedCategoryId === cat.id
+                        ? "bg-gradient-to-r from-brand-primary to-brand-accent text-white shadow-lg scale-[1.02]"
+                        : "bg-white/15 text-muted-foreground hover:bg-white/20"
+                    )}
+                  >
+                    <span>{cat.name}</span>
+                    <span className="text-xs opacity-70">({catItemCount})</span>
+                  </button>
+                );
+              })}
             </div>
 
             {/* Subcategory strip appears only when a main category is selected */}

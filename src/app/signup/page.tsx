@@ -10,6 +10,7 @@ import {
 } from "@/components/ui/card"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
+import { PasswordInput } from "@/components/auth/PasswordInput"
 
 export default async function SignupPage(props: {
   searchParams: Promise<{ message: string }>
@@ -22,25 +23,60 @@ export default async function SignupPage(props: {
       <CardHeader>
         <CardTitle className="text-xl">إنشاء حساب</CardTitle>
         <CardDescription>
-          أدخل معلوماتك لإنشاء حساب جديد
+          أدخل رقم الهاتف وكلمة المرور لإنشاء حساب جديد
         </CardDescription>
       </CardHeader>
       <CardContent>
         <form action={signup} className="grid gap-4">
           <div className="grid gap-2">
-            <Label htmlFor="email">البريد الإلكتروني</Label>
-            <Input
-              id="email"
-              type="email"
-              name="email"
-              placeholder="m@example.com"
-              required
-            />
+            <Label htmlFor="phone">رقم الهاتف</Label>
+            <div className="flex gap-2">
+              <select 
+                id="countryCode" 
+                name="countryCode" 
+                className="px-3 py-2 border border-input bg-background rounded-md text-sm"
+                defaultValue="+20"
+              >
+                <option value="+20">🇪🇬 +20</option>
+                <option value="+971">🇦🇪 +971</option>
+                <option value="+966">🇸🇦 +966</option>
+                <option value="+212">🇲🇦 +212</option>
+              </select>
+              <Input
+                id="phone"
+                type="tel"
+                name="phone"
+                placeholder="01xxxxxxxxx"
+                required
+                className="flex-1"
+              />
+            </div>
           </div>
           <div className="grid gap-2">
-            <Label htmlFor="password">كلمة المرور</Label>
-            <Input id="password" type="password" name="password" required minLength={6} />
+            <Label htmlFor="confirmPhone">تأكيد رقم الهاتف</Label>
+            <div className="flex gap-2">
+              <select 
+                id="confirmCountryCode" 
+                name="confirmCountryCode" 
+                className="px-3 py-2 border border-input bg-background rounded-md text-sm"
+                defaultValue="+20"
+              >
+                <option value="+20">🇪🇬 +20</option>
+                <option value="+971">🇦🇪 +971</option>
+                <option value="+966">🇸🇦 +966</option>
+                <option value="+212">🇲🇦 +212</option>
+              </select>
+              <Input
+                id="confirmPhone"
+                type="tel"
+                name="confirmPhone"
+                placeholder="01xxxxxxxxx"
+                required
+                className="flex-1"
+              />
+            </div>
           </div>
+          <PasswordInput />
           <SubmitButton pendingText="جاري إنشاء الحساب..." className="w-full">
             إنشاء حساب
           </SubmitButton>

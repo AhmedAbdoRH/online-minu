@@ -5,17 +5,20 @@ import { headers } from "next/headers";
 import { redirect } from "next/navigation";
 
 export async function login(formData: FormData) {
-    const email = formData.get("email") as string;
+    const phone = formData.get("phone") as string;
     const password = formData.get("password") as string;
     
     // Basic validation
-    if (!email || !password) {
-        return redirect(`/login?message=${encodeURIComponent("البريد الإلكتروني وكلمة المرور مطلوبة")}`);
+    if (!phone || !password) {
+        return redirect(`/login?message=${encodeURIComponent("رقم الهاتف وكلمة المرور مطلوبة")}`);
     }
+    
+    // Convert phone to email format for Supabase (since Supabase uses email as primary identifier)
+    const email = `${phone}@catalog.app`;
     
     const supabase = await createClient();
 
-    console.log("Attempting login for:", email);
+    console.log("Attempting login for phone:", phone);
     const { data, error } = await supabase.auth.signInWithPassword({
         email,
         password,
@@ -26,7 +29,7 @@ export async function login(formData: FormData) {
         // More user-friendly error messages
         let errorMessage = "حدث خطأ أثناء تسجيل الدخول";
         if (error.message.includes("Invalid login credentials")) {
-            errorMessage = "البريد الإلكتروني أو كلمة المرور غير صحيحة";
+            errorMessage = "رقم الهاتف أو كلمة المرور غير صحيحة";
         }
         return redirect(`/login?message=${encodeURIComponent("خطأ: " + errorMessage)}`);
     }
@@ -42,18 +45,44 @@ export async function signup(formData: FormData) {
         : "http://localhost:9003";
     const redirectTo = `${originHeader || fallbackOrigin}/auth/callback`;
     
-    const email = formData.get("email") as string;
+    const phone = formData.get("phone") as string;
+    const confirmPhone = formData.get("confirmPhone") as string;
     const password = formData.get("password") as string;
     
     // Basic validation
-    if (!email || !password) {
-        return redirect(`/signup?message=${encodeURIComponent("البريد الإلكتروني وكلمة المرور مطلوبة")}`);
+    if (!phone || !confirmPhone || !password) {
+        return redirect(`/signup?message=${encodeURIComponent("جميع الحقول مطلوبة")}`);
     }
     
-    // Password strength check (minimum 6 characters)
-    if (password.length < 6) {
-        return redirect(`/signup?message=${encodeURIComponent("كلمة المرور يجب أن تكون 6 أحرف على الأقل")}`);
+    // Phone validation
+    if (phone !== confirmPhone) {
+        return redirect(`/signup?message=${encodeURIComponent("رقم الهاتف وتأكيد الرقم لا يتطابقان")}`);
     }
+    
+    // Basic phone format validation (Egyptian numbers)
+    if (!/^01[0-9]{9}$/.test(phone)) {
+        return redirect(`/signup?message=${encodeURIComponent("رقم الهاتف غير صحيح")}`);
+    }
+    
+    // Password strength check (minimum 8 characters with uppercase, lowercase, and number)
+    if (password.length < 8) {
+        return redirect(`/signup?message=${encodeURIComponent("كلمة المرور يجب أن تكون 8 أحرف على الأقل")}`);
+    }
+    
+    if (!/(?=.*[a-z])/.test(password)) {
+        return redirect(`/signup?message=${encodeURIComponent("كلمة المرور يجب أن تحتوي على حرف صغير واحد على الأقل")}`);
+    }
+    
+    if (!/(?=.*[A-Z])/.test(password)) {
+        return redirect(`/signup?message=${encodeURIComponent("كلمة المرور يجب أن تحتوي على حرف كبير واحد على الأقل")}`);
+    }
+    
+    if (!/(?=.*\d)/.test(password)) {
+        return redirect(`/signup?message=${encodeURIComponent("كلمة المرور يجب أن تحتوي على رقم واحد على الأقل")}`);
+    }
+    
+    // Convert phone to email format for Supabase
+    const email = `${phone}@catalog.app`;
     
     const supabase = await createClient();
 
@@ -70,12 +99,12 @@ export async function signup(formData: FormData) {
         // More user-friendly error messages
         let errorMessage = "حدث خطأ أثناء إنشاء الحساب";
         if (error.message.includes("User already registered")) {
-            errorMessage = "هذا البريد الإلكتروني مسجل بالفعل";
+            errorMessage = "رقم الهاتف مسجل بالفعل";
         }
         return redirect(`/signup?message=${encodeURIComponent("خطأ: " + errorMessage)}`);
     }
 
-    return redirect(`/login?message=${encodeURIComponent("تم إرسال رابط التأكيد إلى بريدك الإلكتروني")}`);
+    return redirect(`/login?message=${encodeURIComponent("تم إنشاء الحساب بنجاح! يمكنك الآن تسجيل الدخول")}`);
 }
 
 export async function logout() {

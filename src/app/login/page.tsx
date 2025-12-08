@@ -24,18 +24,18 @@ export default async function LoginPage(props: {
       <CardHeader>
         <CardTitle className="text-2xl">تسجيل الدخول</CardTitle>
         <CardDescription>
-          أدخل بريدك الإلكتروني وكلمة المرور للدخول إلى حسابك
+          أدخل رقم الهاتف وكلمة المرور للدخول إلى حسابك
         </CardDescription>
       </CardHeader>
       <CardContent>
         <form action={login} className="grid gap-4">
           <div className="grid gap-2">
-            <Label htmlFor="email">البريد الإلكتروني</Label>
+            <Label htmlFor="phone">رقم الهاتف</Label>
             <Input
-              id="email"
-              type="email"
-              name="email"
-              placeholder="m@example.com"
+              id="phone"
+              type="tel"
+              name="phone"
+              placeholder="01xxxxxxxxx"
               required
             />
           </div>
