@@ -14,6 +14,7 @@ interface Database {
           user_id: string;
           enable_subcategories: boolean;
           plan: string;
+          whatsapp_number: string | null;
         };
         Insert: {
           id?: number;
@@ -25,6 +26,7 @@ interface Database {
           cover_url?: string | null;
           user_id: string;
           enable_subcategories?: boolean;
+          whatsapp_number?: string | null;
         };
         Update: {
           id?: number;
@@ -37,6 +39,7 @@ interface Database {
           user_id?: string;
           enable_subcategories?: boolean;
           plan?: string;
+          whatsapp_number?: string | null;
         };
       };
       categories: {

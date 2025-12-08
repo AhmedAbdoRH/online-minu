@@ -19,6 +19,8 @@ const catalogSchema = z.object({
   logo: z.instanceof(File).optional(),
   cover: z.instanceof(File).optional(),
   enable_subcategories: z.boolean().default(false),
+  whatsapp_number: z.string().optional()
+    .refine((val) => !val || /^\+?[0-9]{7,15}$/.test(val), 'رقم الهاتف غير صحيح'),
 });
 
 export async function checkCatalogName(name: string): Promise<boolean> {
@@ -45,7 +47,9 @@ export async function createCatalog(prevState: any, formData: FormData) {
   const validatedFields = catalogSchema.safeParse({
     name: formData.get('name'),
     display_name: formData.get('display_name'),
+    whatsapp_number: formData.get('whatsapp_number'),
     logo: logoFile instanceof File && logoFile.size > 0 ? logoFile : undefined,
+    cover: formData.get('cover') instanceof File && (formData.get('cover') as File).size > 0 ? formData.get('cover') as File : undefined,
   });
 
   if (!validatedFields.success) {
@@ -54,7 +58,7 @@ export async function createCatalog(prevState: any, formData: FormData) {
     return { message: firstError };
   }
 
-  const { name, display_name, logo } = validatedFields.data;
+  const { name, display_name, logo, cover, whatsapp_number } = validatedFields.data;
 
   // Re-check uniqueness on the server to be safe
   const isAvailable = await checkCatalogName(name);
@@ -64,6 +68,8 @@ export async function createCatalog(prevState: any, formData: FormData) {
 
   let publicUrl = '';
   let logoFileName = '';
+  let coverPublicUrl = '';
+  let coverFileName = '';
 
   // Upload logo if present
   if (logo) {
@@ -81,12 +87,37 @@ export async function createCatalog(prevState: any, formData: FormData) {
     publicUrl = data.publicUrl;
   }
 
+  // Upload cover if present
+  if (cover) {
+    coverFileName = `${user.id}-${Date.now()}-cover.${cover.name.split('.').pop()}`;
+    const { data: uploadData, error: uploadError } = await supabase.storage
+      .from('covers')
+      .upload(coverFileName, cover);
+
+    if (uploadError) {
+      console.error('Storage Error (Cover):', uploadError);
+      // Don't fail the whole request if cover fails, just log it? Or fail? 
+      // User expects it to work. Let's return error.
+      // But first clean up logo if it was uploaded? 
+      // For simplicity, let's fail.
+      if (logoFileName) {
+        await supabase.storage.from('logos').remove([logoFileName]);
+      }
+      return { message: 'فشل تحميل صورة الغلاف.' };
+    }
+
+    const { data } = supabase.storage.from('covers').getPublicUrl(uploadData.path);
+    coverPublicUrl = data.publicUrl;
+  }
+
   // Create catalog entry
   const { error: dbError } = await supabase.from('catalogs').insert({
     name,
     display_name,
     user_id: user.id,
+    whatsapp_number: whatsapp_number || null,
     logo_url: publicUrl,
+    cover_url: coverPublicUrl,
   });
 
   if (dbError) {
@@ -94,6 +125,9 @@ export async function createCatalog(prevState: any, formData: FormData) {
     // Clean up uploaded logo if db insert fails
     if (logoFileName) {
       await supabase.storage.from('logos').remove([logoFileName]);
+    }
+    if (coverFileName) {
+      await supabase.storage.from('covers').remove([coverFileName]);
     }
     return { message: 'فشل إنشاء الكتالوج في قاعدة البيانات.' };
   }

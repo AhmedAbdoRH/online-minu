@@ -70,10 +70,41 @@ export function OnboardingForm() {
       </div>
 
       <div className="space-y-2">
+        <Label htmlFor="whatsapp_number">رقم واتساب المتجر</Label>
+        <div dir="ltr">
+          <Input
+            id="whatsapp_number"
+            name="whatsapp_number"
+            placeholder="+966500000000"
+            required
+            type="tel"
+            pattern="^\+?[0-9]{7,15}$"
+            title="يرجى إدخال رقم هاتف صحيح (مثال: +966...)"
+          />
+        </div>
+        <p className="text-sm text-muted-foreground">
+          هذا الرقم سيستخدم لاستقبال طلبات العملاء عبر واتساب
+        </p>
+      </div>
+
+      <div className="space-y-2">
         <Label htmlFor="logo">شعار العمل</Label>
         <Input
           id="logo"
           name="logo"
+          type="file"
+          accept="image/jpeg,image/png,image/webp"
+        />
+        <p className="text-sm text-muted-foreground">
+          اختياري - يمكنك إضافته لاحقاً من الإعدادات
+        </p>
+      </div>
+
+      <div className="space-y-2">
+        <Label htmlFor="cover">صورة الغلاف</Label>
+        <Input
+          id="cover"
+          name="cover"
           type="file"
           accept="image/jpeg,image/png,image/webp"
         />
