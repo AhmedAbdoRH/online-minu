@@ -235,8 +235,8 @@ export function OnboardingForm({ userPhone }: OnboardingFormProps) {
                     type="file"
                     accept="image/jpeg,image/png,image/webp"
                     className="hidden"
-                    onChange={(e) => handleFileChange('logo', e.target.files?.[0] || null)}
-                    disabled={isUploading}
+                    onChange={(e) => handleInputChange('logo', e.target.files?.[0] || null)}
+                    disabled={false}
                   />
                 </label>
               </div>
@@ -284,8 +284,8 @@ export function OnboardingForm({ userPhone }: OnboardingFormProps) {
                   type="file"
                   accept="image/jpeg,image/png,image/webp"
                   className="hidden"
-                  onChange={(e) => handleFileChange('cover', e.target.files?.[0] || null)}
-                  disabled={isUploading}
+                  onChange={(e) => handleInputChange('cover', e.target.files?.[0] || null)}
+                  disabled={false}
                 />
               </label>
             </div>
@@ -313,7 +313,7 @@ export function OnboardingForm({ userPhone }: OnboardingFormProps) {
   };
 
   return (
-    <form ref={formRef} onSubmit={handleSubmit} className="space-y-4">
+    <form ref={formRef} action={formAction} className="space-y-4">
       {/* Step indicators */}
       <div className="flex items-center justify-between mb-2">
         <div className="flex items-center space-x-4 space-x-reverse">
@@ -343,6 +343,11 @@ export function OnboardingForm({ userPhone }: OnboardingFormProps) {
 
       {renderStep()}
 
+      {/* Hidden inputs to submit form data */}
+      <input type="hidden" name="display_name" value={formData.display_name} />
+      <input type="hidden" name="name" value={formData.name} />
+      <input type="hidden" name="whatsapp_number" value={formData.whatsapp_number} />
+
       {/* Navigation buttons */}
       <div className="flex justify-between pt-2">
         <Button
@@ -363,7 +368,7 @@ export function OnboardingForm({ userPhone }: OnboardingFormProps) {
           <SubmitButton 
             pendingText="جاري الإنشاء..." 
             className="w-full"
-            disabled={isUploading}
+            disabled={false}
           >
             إنشاء كتالوجي
           </SubmitButton>
