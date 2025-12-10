@@ -37,7 +37,7 @@ const plans = [
     },
     {
         name: "Business",
-        price: "تواصل معنا",
+        price: "ابتداء من 5000 ج.م",
         description: "للشركات التي تحتاج حلولاً مخصصة",
         icon: Building,
         features: [
@@ -46,8 +46,8 @@ const plans = [
             { text: "تصميم مخصص بالكامل", included: true },
             { text: "لوحة تحكم متقدمة", included: true },
         ],
-        cta: "تواصل معنا",
-        ctaLink: "mailto:support@online-catalog.net",
+        cta: "اعرف اكثر",
+        ctaLink: "https://onlinecatalog.netlify.app/",
         popular: false
     }
 ];
