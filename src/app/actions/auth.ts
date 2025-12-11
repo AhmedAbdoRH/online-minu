@@ -316,7 +316,7 @@ export async function updatePassword(formData: FormData) {
         
         if (sessionError) {
             console.error("Session verification error:", sessionError.message);
-            return { error: "رابط إعادة تعيين كلمة المرور غير صحيح أو منتهي الصلاحية" };
+            return redirect(`/reset-password?message=${encodeURIComponent("خطأ: رابط إعادة تعيين كلمة المرور غير صحيح أو منتهي الصلاحية")}`);
         }
         
         // Update the user's password
@@ -326,14 +326,14 @@ export async function updatePassword(formData: FormData) {
         
         if (updateError) {
             console.error("Password update error:", updateError.message);
-            return { error: "حدث خطأ أثناء تحديث كلمة المرور" };
+            return redirect(`/reset-password?message=${encodeURIComponent("خطأ: حدث خطأ أثناء تحديث كلمة المرور")}`);
         }
         
         console.log("Password updated successfully");
-        return { success: true };
+        return redirect(`/login?message=${encodeURIComponent("تم تحديث كلمة المرور بنجاح! يمكنك الآن تسجيل الدخول")}`);
         
     } catch (error) {
         console.error("Password update error:", error);
-        return { error: "حدث خطأ غير متوقع أثناء تحديث كلمة المرور" };
+        return redirect(`/reset-password?message=${encodeURIComponent("خطأ: حدث خطأ غير متوقع أثناء تحديث كلمة المرور")}`);
     }
 }
