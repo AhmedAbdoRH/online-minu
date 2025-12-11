@@ -10,6 +10,7 @@ import Link from "next/link";
 import type { Catalog, CategoryWithSubcategories, MenuItem } from "@/lib/types";
 import { ShareButtons } from "./ShareButtons";
 import { Button } from "@/components/ui/button";
+import { Footer } from "@/components/layout/Footer";
 import { Input } from "@/components/ui/input";
 import { cn } from "@/lib/utils";
 import {
@@ -27,7 +28,13 @@ import {
   Crown,
   Search,
   X,
+  Plus,
+  ShoppingCart,
 } from "lucide-react";
+import { CartProvider } from '@/components/cart/CartContext'
+import { useCart } from '@/components/cart/CartContext'
+import { CartDrawer } from '@/components/cart/CartDrawer'
+import { CartButton } from '@/components/cart/CartButton'
 
 type ViewMode = "masonry" | "grid" | "list" | "compact";
 
@@ -129,6 +136,7 @@ function MenuItemCard({ item, catalogName, categoryName, viewMode, index }: Menu
   const lift = cardLiftSteps[index % cardLiftSteps.length];
   const newItem = isNewItem(item);
   const popular = isPopularItem(item);
+  const { addItem, openCart } = useCart()
 
   const imageWrapperClasses = cn(
     "relative overflow-hidden rounded-[1.5rem] bg-muted/40",
@@ -150,7 +158,7 @@ function MenuItemCard({ item, catalogName, categoryName, viewMode, index }: Menu
         isList || isCompact ? "flex gap-4" : "flex flex-col gap-4"
       )}
     >
-      <Link href={href} className={cn("flex flex-col gap-4", isList || isCompact ? "flex-1" : "")}>
+      <Link href={href} className={cn("flex flex-col gap-4", isList || isCompact ? "flex-1" : "")}> 
         <div className={imageWrapperClasses}>
           {item.image_url ? (
             <Image
@@ -183,7 +191,7 @@ function MenuItemCard({ item, catalogName, categoryName, viewMode, index }: Menu
             </p>
             <div className="flex items-center gap-2 text-[11px] font-semibold">
               {newItem && (
-                <span className="inline-flex -rotate-2 items-center rounded-full bg-gradient-to-r from-brand-primary to-brand-accent px-3 py-0.5 text-[10px] text-white shadow-lg">
+                <span className="inline-flex -rotate-2 items-center rounded-full bg-gradient-to-r from-[#ffb347] to-[#61ffd0] px-3 py-0.5 text-[10px] text-white shadow-lg">
                   جديد
                 </span>
               )}
@@ -204,19 +212,32 @@ function MenuItemCard({ item, catalogName, categoryName, viewMode, index }: Menu
           </div>
           <div className="flex items-center justify-between">
             <p className="text-[18px] font-black text-brand-primary">{formatPrice(item.price)}</p>
-            {popular && (
-              <span className="inline-flex items-center gap-1 rounded-full border border-brand-primary/40 bg-brand-primary/10 px-2.5 py-1 text-[11px] font-semibold text-brand-primary">
-                <Crown className="h-3.5 w-3.5" />
-                الأكثر طلبًا
-              </span>
-            )}
-          </div>
+                      </div>
         </div>
       </Link>
 
       <div className="pointer-events-none absolute inset-0 opacity-0 transition-opacity duration-300 group-hover:opacity-100">
         <div className="absolute inset-y-4 right-4 w-9 rounded-full bg-brand-primary/20 blur-2xl" />
         <div className="absolute inset-y-4 left-4 w-9 rounded-full bg-brand-primary/10 blur-2xl" />
+      </div>
+
+      <div className="pointer-events-none absolute bottom-4 left-4">
+        <Button
+            type="button"
+            variant="ghost"
+            size={isCompact ? 'sm' : 'default'}
+            className="pointer-events-auto rounded-full text-white/80 hover:text-white bg-white/5 hover:bg-white/10 shadow-md transition-colors flex items-center justify-center gap-0.5 w-16 h-8"
+            onClick={(e) => {
+              e.preventDefault();
+              e.stopPropagation();
+              const price = typeof item.price === 'number' ? item.price : Number(item.price || 0)
+              addItem({ id: item.id, name: item.name, price: Number.isNaN(price) ? 0 : price }, 1)
+            }}
+            aria-label="أضف إلى العربة"
+          >
+            <Plus className="h-3 w-3 opacity-60" />
+            <ShoppingCart className="h-3 w-3" />
+          </Button>
       </div>
     </motion.article>
   );
@@ -235,7 +256,7 @@ function AddToHomeCTA({ show, onDismiss }: { show: boolean; onDismiss: () => voi
           onClick={onDismiss}
           className="fixed inset-x-0 bottom-4 z-40 mx-auto flex w-[min(90%,400px)] items-center justify-between rounded-full bg-brand-primary px-4 py-3 text-sm font-semibold text-white shadow-[0_30px_65px_rgba(0,209,201,0.45)]"
         >
-          <span>أضف المنيو للشاشة الرئيسية</span>
+          <span>أضف الكتالوج للشاشة الرئيسية</span>
           <span className="text-xs opacity-80">تم</span>
         </motion.button>
       )}
@@ -274,7 +295,7 @@ export function StorefrontView({ catalog, categories }: StorefrontViewProps) {
       ? window.location.href
       : `https://online-catalog.net/${catalog.name}`;
 
-  const allItems = useMemo(() => flattenMenuItems(categories), [categories]);
+
   
   // Apply search filtering first, then category filtering
   const searchFilteredCategories = useMemo(() => 
@@ -294,7 +315,7 @@ export function StorefrontView({ catalog, categories }: StorefrontViewProps) {
 
   if (!mounted) {
     return (
-      <div className="min-h-screen bg-gradient-to-b from-background via-background/95 to-background p-6">
+      <div className="relative h-40 bg-gradient-to-r from-[#ffb347] to-[#61ffd0] flex-shrink-0">
         <div className="mx-auto flex max-w-4xl flex-col gap-4">
           <div className="glass-surface h-48 animate-pulse rounded-[2rem]" />
           <div className="glass-surface h-32 animate-pulse rounded-[2rem]" />
@@ -305,6 +326,7 @@ export function StorefrontView({ catalog, categories }: StorefrontViewProps) {
   }
 
   return (
+    <CartProvider storageKey={`oc_cart_${catalog.name}`}>
     <div className="relative min-h-screen bg-[radial-gradient(circle_at_top,_rgba(0,209,201,0.25),transparent_60%),radial-gradient(circle_at_bottom,_rgba(168,85,247,0.18),transparent_62%)] bg-background pb-3">
       <div className="relative mx-auto w-[min(92vw,1200px)] pt-2">
         {/* Hero Image Section */}
@@ -397,54 +419,123 @@ export function StorefrontView({ catalog, categories }: StorefrontViewProps) {
                 {catalogSlogan || catalogDescription}
               </motion.p>
             )}
+
+            {luxeCatalog.whatsapp_number && (
+              <motion.div
+                initial={{ y: 10, opacity: 0 }}
+                animate={{
+                  y: 0,
+                  opacity: 1,
+                  transition: {
+                    delay: 0.6,
+                    duration: 0.5
+                  }
+                }}
+                className="mt-4"
+              >
+                <Button
+                  asChild
+                  variant="ghost"
+                  className="rounded-full text-white/80 hover:text-white bg-[#25D366]/10 hover:bg-[#25D366]/20 transition-colors"
+                >
+                  <a
+                    href={`https://wa.me/${luxeCatalog.whatsapp_number.replace(/[^\d]/g, '')}`}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                  >
+                    <MessageCircle className="ml-2 h-5 w-5" />
+                    تواصل معنا عبر واتساب
+                  </a>
+                </Button>
+              </motion.div>
+            )}
           </div>
         </div>
 
         <main className="mx-auto mt-8 flex w-[min(94vw,1180px)] flex-col gap-0">
           {/* Search Section */}
           <div className="mx-auto w-full max-w-md px-2 mb-4">
-            <div className="relative">
-              {!isSearchExpanded && !searchTerm ? (
-                // Collapsed search state - small and compact
-                <button
-                  onClick={() => setIsSearchExpanded(true)}
-                  className="flex items-center gap-2 w-full max-w-xs h-6 rounded-full bg-white/8 border border-white/15 backdrop-blur-sm hover:bg-white/12 transition-all duration-300 mx-auto px-3"
-                  aria-label="بحث"
-                >
-                  <Search className="h-3 w-3 text-muted-foreground/50" />
-                  <span className="text-xs font-light text-muted-foreground/50">ابحث عن منتج معين</span>
-                </button>
-              ) : (
-                // Expanded search state
-                <div className="relative">
-                  <Search className="absolute left-1 top-1/2 h-3 w-3 -translate-y-1/2 text-muted-foreground/50" />
-                  <Input
-                    type="text"
-                    placeholder="ابحث عن منتج..."
-                    value={searchTerm}
-                    onChange={(e) => setSearchTerm(e.target.value)}
-                    onFocus={() => setIsSearchExpanded(true)}
-                    onBlur={() => {
-                      if (!searchTerm) {
-                        setTimeout(() => setIsSearchExpanded(false), 200);
-                      }
+            <motion.div 
+              className="relative search-container"
+              initial={false}
+              animate={{
+                width: isSearchExpanded || searchTerm ? '100%' : 'auto',
+                transition: { duration: 0.3, ease: [0.16, 1, 0.3, 1] }
+              }}
+            >
+              <AnimatePresence mode="wait">
+                {!isSearchExpanded && !searchTerm ? (
+                  // Collapsed search state - small and compact
+                  <motion.button
+                    key="collapsed-search"
+                    initial={{ opacity: 1, scale: 1 }}
+                    exit={{ opacity: 0, scale: 0.95 }}
+                    transition={{ duration: 0.2 }}
+                    onClick={() => {
+                      setIsSearchExpanded(true);
                     }}
-                    className="pl-6 text-right bg-white/8 border-white/15 backdrop-blur-sm focus:bg-white/12 focus:border-brand-primary/50 transition-all duration-300 h-6 w-full"
-                  />
-                  {searchTerm && (
-                    <button
-                      onClick={() => {
-                        setSearchTerm("");
+                    className="absolute inset-0 flex items-center gap-2 w-full h-6 rounded-full bg-white/8 border border-white/15 backdrop-blur-sm hover:bg-white/12 transition-all duration-300 mx-auto px-3 z-10"
+                    aria-label="بحث"
+                  >
+                    <Search className="h-3 w-3 text-muted-foreground/50 flex-shrink-0" />
+                    <span className="text-xs font-light text-muted-foreground/50 truncate">ابحث عن منتج معين</span>
+                  </motion.button>
+                ) : (
+                  // Expanded search state
+                  <motion.div 
+                    key="expanded-search"
+                    initial={{ opacity: 0, y: -5 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    exit={{ opacity: 0, y: -5 }}
+                    transition={{ duration: 0.2 }}
+                    onAnimationComplete={() => {
+                      const input = document.querySelector('input[type="text"]') as HTMLInputElement;
+                      input?.focus();
+                    }}
+                    className="relative w-full"
+                  >
+                    <motion.div 
+                      className="absolute inset-0 rounded-full bg-white/8 border border-white/15 backdrop-blur-sm"
+                      initial={false}
+                      animate={{
+                        backgroundColor: isSearchExpanded ? 'rgba(255, 255, 255, 0.12)' : 'rgba(255, 255, 255, 0.08)',
+                        borderColor: isSearchExpanded ? 'rgba(255, 255, 255, 0.2)' : 'rgba(255, 255, 255, 0.15)',
+                      }}
+                      transition={{ duration: 0.2 }}
+                    />
+                    <Search className="absolute left-3 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-muted-foreground/60" />
+                    <Input
+                      type="text"
+                      placeholder="ابحث عن منتج..."
+                      value={searchTerm}
+                      onChange={(e) => setSearchTerm(e.target.value)}
+                      onFocus={() => setIsSearchExpanded(true)}
+                      onBlur={() => {
                         setIsSearchExpanded(false);
                       }}
-                      className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground transition-colors"
-                    >
-                      <X className="h-3 w-3" />
-                    </button>
-                  )}
-                </div>
-              )}
-            </div>
+                      className="relative z-10 pl-10 pr-8 text-sm bg-transparent border-none focus-visible:ring-0 focus-visible:ring-offset-0 h-10 w-full"
+                      style={{ boxShadow: 'none' }}
+                    />
+                    {searchTerm && (
+                      <motion.button
+                        initial={{ opacity: 0, scale: 0.8 }}
+                        animate={{ opacity: 1, scale: 1 }}
+                        exit={{ opacity: 0, scale: 0.8 }}
+                        onClick={() => {
+                          setSearchTerm("");
+                          const input = document.querySelector('input[type="text"]') as HTMLInputElement;
+                          input?.focus();
+                        }}
+                        className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground transition-colors z-20"
+                        aria-label="مسح البحث"
+                      >
+                        <X className="h-3.5 w-3.5" />
+                      </motion.button>
+                    )}
+                  </motion.div>
+                )}
+              </AnimatePresence>
+            </motion.div>
             {searchTerm && (
               <div className="mt-2 text-sm text-muted-foreground text-center">
                 تم العثور على {flattenMenuItems(displayedCategories).length} منتج لـ "{searchTerm}"
@@ -453,7 +544,7 @@ export function StorefrontView({ catalog, categories }: StorefrontViewProps) {
           </div>
           
           {/* Category filter toolbar (pills style) */}
-          <div className="mx-auto w-full">
+          <div className="mx-auto w-full mt-6">
             <div className="flex items-center gap-3 overflow-x-auto pb-3 px-2">
               <button
                 onClick={() => { setSelectedCategoryId(null); setSelectedSubcategoryId(null); }}
@@ -461,7 +552,7 @@ export function StorefrontView({ catalog, categories }: StorefrontViewProps) {
                 className={cn(
                   "flex-shrink-0 whitespace-nowrap rounded-full px-4 py-2 text-sm font-semibold transition-all",
                   !selectedCategoryId
-                    ? "bg-gradient-to-r from-brand-primary to-brand-accent text-white shadow-lg scale-[1.02]"
+                    ? "bg-gradient-to-r from-[#ffb347] to-[#61ffd0] text-white shadow-lg scale-[1.02]"
                     : "bg-white/15 text-muted-foreground hover:bg-white/20"
                 )}
               >
@@ -480,7 +571,7 @@ export function StorefrontView({ catalog, categories }: StorefrontViewProps) {
                     className={cn(
                       "flex items-center gap-2 flex-shrink-0 whitespace-nowrap rounded-full px-4 py-2 text-sm font-semibold transition-all",
                       selectedCategoryId === cat.id
-                        ? "bg-gradient-to-r from-brand-primary to-brand-accent text-white shadow-lg scale-[1.02]"
+                        ? "bg-gradient-to-r from-[#ffb347] to-[#61ffd0] text-white shadow-lg scale-[1.02]"
                         : "bg-white/15 text-muted-foreground hover:bg-white/20"
                     )}
                   >
@@ -654,16 +745,24 @@ export function StorefrontView({ catalog, categories }: StorefrontViewProps) {
             )}`}
             target="_blank"
             rel="noopener noreferrer"
-            className="fixed bottom-6 left-6 z-40 flex h-14 w-14 items-center justify-center rounded-full bg-[#25D366] text-white shadow-[0_30px_60px_rgba(37,211,102,0.55)] transition-transform hover:-translate-y-1 md:bottom-6"
+            className="fixed bottom-6 left-6 z-40 flex h-14 w-14 items-center justify-center rounded-full bg-[#25D366] text-white shadow-[0_30px_60px_rgba(37,211,102,0.55)] transition-transform hover:-translate-y-1 md:bottom-6 hover:bg-[#25D366]"
             aria-label="تواصل مع البائع عبر واتساب"
           >
             <MessageCircle className="h-7 w-7" />
           </a>
         )}
 
-        <AddToHomeCTA show={showInstallHint} onDismiss={() => setShowInstallHint(false)} />
+        <CartDrawer catalog={catalog} />
+        <CartButton />
+
+
 
       </div>
+      
+      {/* Fixed Footer */}
+      <Footer />
+      
     </div>
+    </CartProvider>
   );
 }

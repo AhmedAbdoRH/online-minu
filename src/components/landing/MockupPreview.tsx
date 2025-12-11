@@ -28,7 +28,7 @@ export default function MockupPreview() {
                             </div>
 
                             {/* Header/Cover */}
-                            <div className="relative h-40 bg-gradient-to-r from-blue-500 to-purple-600 flex-shrink-0">
+                            <div className="relative h-40 bg-gradient-to-r from-[#ffb347] to-[#61ffd0] flex-shrink-0">
                                 <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 text-white/50 text-4xl font-bold opacity-20">Cover</div>
                             </div>
 

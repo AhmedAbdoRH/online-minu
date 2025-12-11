@@ -8,6 +8,7 @@ import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { SubmitButton } from '@/components/common/SubmitButton';
+import { Button } from '@/components/ui/button';
 import { createItem, updateItem } from '@/app/actions/items';
 import { useToast } from '@/hooks/use-toast';
 import type { Category, MenuItem } from '@/lib/types';
@@ -43,11 +44,13 @@ interface ItemFormProps {
   categories: Category[];
   item?: MenuItem;
   onSuccess?: () => void;
+  onCancel?: () => void;
 }
 
-export function ItemForm({ catalogId, categories, item, onSuccess }: ItemFormProps) {
+export function ItemForm({ catalogId, categories, item, onSuccess, onCancel }: ItemFormProps) {
   const { toast } = useToast();
   const [showUpgradeAlert, setShowUpgradeAlert] = useState(false);
+  const [submissionId, setSubmissionId] = useState<string>('');
 
   // التحقق من أن categories موجود
   const validCategories = Array.isArray(categories) ? categories : [];
@@ -79,12 +82,25 @@ export function ItemForm({ catalogId, categories, item, onSuccess }: ItemFormPro
       name: item?.name || '',
       description: item?.description || '',
       price: item?.price || 0,
-      category_id: item?.category_id ? item.category_id.toString() : (validCategories[0]?.id ? validCategories[0].id.toString() : ''),
+      category_id: item?.category_id ? item.category_id.toString() : '',
       image: undefined,
     },
   });
 
   const onSubmit = async (values: z.infer<typeof formSchema>) => {
+    // Prevent multiple submissions
+    const isSubmitting = form.formState.isSubmitting;
+    if (isSubmitting) {
+      return;
+    }
+
+    // Create unique submission ID
+    const currentSubmissionId = `${Date.now()}-${Math.random().toString(36).substring(2)}`;
+    if (submissionId === currentSubmissionId) {
+      return;
+    }
+    setSubmissionId(currentSubmissionId);
+
     try {
       console.log('Form submitted with values:', values);
 
@@ -112,7 +128,11 @@ export function ItemForm({ catalogId, categories, item, onSuccess }: ItemFormPro
       } else {
         toast({ title: 'نجاح!', description: `تم ${item ? 'تحديث' : 'إنشاء'} المنتج بنجاح.` });
         form.reset();
-        onSuccess?.();
+        console.log('onSuccess called');
+        // Introduce a small delay to allow revalidatePath to complete
+        setTimeout(() => {
+          onSuccess?.();
+        }, 100);
       }
     } catch (error) {
       console.error('Form submission error:', error);
@@ -200,9 +220,19 @@ export function ItemForm({ catalogId, categories, item, onSuccess }: ItemFormPro
               </FormItem>
             )}
           />
-          <SubmitButton pendingText="جاري الحفظ..." className="w-full">
-            {item ? 'حفظ التغييرات' : 'حفظ المنتج'}
-          </SubmitButton>
+          <div className="flex gap-2">
+            <Button
+                type="button"
+                variant="destructive"
+                onClick={onCancel}
+                className="w-full"
+            >
+                إلغاء
+            </Button>
+            <SubmitButton pendingText="جاري الحفظ..." className="w-full">
+              {item ? 'حفظ التغييرات' : 'حفظ المنتج'}
+            </SubmitButton>
+          </div>
         </form>
       </Form>
     </>

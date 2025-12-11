@@ -1,5 +1,6 @@
+'use client';
+
 import { getCategories } from '@/app/actions/categories';
-import { createClient } from '@/lib/supabase/server';
 import { notFound, redirect } from 'next/navigation';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -7,30 +8,53 @@ import { PlusCircle } from 'lucide-react';
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { CategoryForm } from '@/components/dashboard/CategoryForm';
 import { CategoriesTable } from '@/components/dashboard/CategoriesTable';
+import { useState } from 'react';
+import React from 'react';
+import type { CategoryWithSubcategories } from '@/lib/types';
 
 async function getCatalogAndCategories() {
-    const supabase = await createClient();
-    const { data: { user } } = await supabase.auth.getUser();
-    if (!user) redirect('/login');
-
-    const { data: catalog } = await supabase.from('catalogs').select('id').eq('user_id', user.id).single();
-    if (!catalog) notFound();
-
-    const { categories, error } = await getCategories(catalog.id);
-    if (error) {
-        console.error("Error fetching categories:", error);
-        return { catalog, categories: [] };
+    const result = await getCategories();
+    if (!result.catalog) {
+        redirect('/login');
+    }
+    
+    if (result.error) {
+        console.error("Error fetching categories:", result.error);
+        return { catalog: result.catalog, categories: [] };
     }
 
-    return { catalog, categories: categories || [] };
+    return { catalog: result.catalog, categories: result.categories || [] };
 }
 
-export default async function CategoriesPage() {
-    const { catalog, categories } = await getCatalogAndCategories();
+export default function CategoriesPage() {
+    const [isDialogOpen, setIsDialogOpen] = useState(false);
+    const [categories, setCategories] = useState<CategoryWithSubcategories[]>([]);
+    const [catalog, setCatalog] = useState<{id: number} | null>(null);
+
+    // Fetch data on component mount
+    React.useEffect(() => {
+        async function fetchData() {
+            const result = await getCatalogAndCategories();
+            setCatalog(result.catalog?.id ? { id: result.catalog.id } : null);
+            setCategories(result.categories);
+        }
+        fetchData();
+    }, []);
 
     // Calculate stats
     const totalCategories = categories.length;
     const totalSubcategories = categories.reduce((acc, cat) => acc + (cat.subcategories?.length || 0), 0);
+
+    const handleCategorySuccess = () => {
+        setIsDialogOpen(false);
+        // Refetch categories
+        async function fetchData() {
+            const result = await getCatalogAndCategories();
+            setCatalog(result.catalog?.id ? { id: result.catalog.id } : null);
+            setCategories(result.categories);
+        }
+        fetchData();
+    };
 
     return (
         <div className="space-y-6">
@@ -41,7 +65,7 @@ export default async function CategoriesPage() {
                         إدارة هيكلية الكتالوج وتنظيم الأصناف في مجموعات.
                     </p>
                 </div>
-                <Dialog>
+                <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
                     <DialogTrigger asChild>
                         <Button className="gap-2 shadow-sm">
                             <PlusCircle className="h-4 w-4" />
@@ -55,7 +79,13 @@ export default async function CategoriesPage() {
                                 قم بإنشاء فئة رئيسية جديدة لتنظيم منتجاتك.
                             </DialogDescription>
                         </DialogHeader>
-                        <CategoryForm catalogId={catalog.id} categories={categories} hideParentSelection />
+                        <CategoryForm 
+                            catalogId={catalog?.id || 0} 
+                            categories={categories} 
+                            hideParentSelection 
+                            onSuccess={handleCategorySuccess}
+                            onCancel={() => setIsDialogOpen(false)}
+                        />
                     </DialogContent>
                 </Dialog>
             </div>
@@ -84,7 +114,7 @@ export default async function CategoriesPage() {
                     </CardDescription>
                 </CardHeader>
                 <CardContent className="px-0">
-                    <CategoriesTable categories={categories} catalogId={catalog.id} />
+                    {catalog && <CategoriesTable categories={categories} catalogId={catalog.id} />}
                 </CardContent>
             </Card>
         </div>

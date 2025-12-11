@@ -6,6 +6,7 @@ import * as z from 'zod';
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
 import { Input } from '@/components/ui/input';
 import { SubmitButton } from '@/components/common/SubmitButton';
+import { Button } from '@/components/ui/button';
 import { createCategory, updateCategory } from '@/app/actions/categories';
 import { useToast } from '@/hooks/use-toast';
 import type { CategoryWithSubcategories } from '@/lib/types';
@@ -26,11 +27,13 @@ interface CategoryFormProps {
     defaultParentId?: number | null;
     hideParentSelection?: boolean;
     onSuccess?: () => void;
+    onCancel?: () => void;
 }
 
-export function CategoryForm({ catalogId, category, categories, defaultParentId, hideParentSelection, onSuccess }: CategoryFormProps) {
+export function CategoryForm({ catalogId, category, categories, defaultParentId, hideParentSelection, onSuccess, onCancel }: CategoryFormProps) {
     const { toast } = useToast();
     const [showUpgradeAlert, setShowUpgradeAlert] = useState(false);
+    const [submissionId, setSubmissionId] = useState<string>('');
 
     // Function to render categories with hierarchy for dropdown
     const renderCategoryOptions = (cats: CategoryWithSubcategories[], level = 0): JSX.Element[] => {
@@ -64,8 +67,8 @@ export function CategoryForm({ catalogId, category, categories, defaultParentId,
     const form = useForm<z.infer<typeof formSchema>>({
         resolver: zodResolver(formSchema),
         defaultValues: {
-            name: category?.name || '',
-            parent_category_id: category?.parent_category_id ?? defaultParentId ?? null,
+            name: category?.name || undefined,
+            parent_category_id: category?.parent_category_id ?? null,
         },
     });
 
@@ -78,6 +81,19 @@ export function CategoryForm({ catalogId, category, categories, defaultParentId,
     }, [defaultParentId, setValue]);
 
     const onSubmit = async (values: z.infer<typeof formSchema>) => {
+        // Prevent multiple submissions
+        const isSubmitting = form.formState.isSubmitting;
+        if (isSubmitting) {
+            return;
+        }
+
+        // Create unique submission ID
+        const currentSubmissionId = `${Date.now()}-${Math.random().toString(36).substring(2)}`;
+        if (submissionId === currentSubmissionId) {
+            return;
+        }
+        setSubmissionId(currentSubmissionId);
+
         try {
             const formData = new FormData();
             formData.append('catalog_id', String(catalogId));
@@ -110,7 +126,11 @@ export function CategoryForm({ catalogId, category, categories, defaultParentId,
 
                     if (!message.includes('فشل') && !message.includes('خطأ')) {
                         form.reset();
-                        onSuccess?.();
+                        console.log('onSuccess called in CategoryForm');
+                        // Introduce a small delay to allow revalidatePath to complete
+                        setTimeout(() => {
+                          onSuccess?.();
+                        }, 100);
                     }
                 }
             } else {
@@ -151,7 +171,6 @@ export function CategoryForm({ catalogId, category, categories, defaultParentId,
                                 <FormControl>
                                     <div className="relative">
                                         <Input
-                                            placeholder="مثال: مشروبات ساخنة"
                                             className="h-11 bg-muted/30 focus:bg-background transition-colors"
                                             {...field}
                                         />
@@ -194,7 +213,15 @@ export function CategoryForm({ catalogId, category, categories, defaultParentId,
                         />
                     )}
 
-                    <div className="pt-2">
+                    <div className="pt-2 flex gap-2">
+                        <Button
+                            type="button"
+                            variant="destructive"
+                            onClick={onCancel}
+                            className="w-full h-11 text-base font-medium shadow-md hover:shadow-lg transition-all"
+                        >
+                            إلغاء
+                        </Button>
                         <SubmitButton
                             pendingText={category ? 'جاري التحديث...' : 'جاري الحفظ...'}
                             className="w-full h-11 text-base font-medium shadow-md hover:shadow-lg transition-all"

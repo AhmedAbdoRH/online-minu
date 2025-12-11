@@ -88,14 +88,14 @@ export async function createCategory(prevState: any, formData: FormData) {
     const currentCount = count || 0;
     const newItemsCount = 1 + (parsedSubcategories ? parsedSubcategories.length : 0);
 
-    // Enforce limit: Max 3 categories total
-    if (currentCount + 1 > 3) {
+    // Enforce limit: Max 5 categories total
+    if (currentCount + 1 > 5) {
       return { message: 'LIMIT_REACHED' };
     }
 
     // Also check if adding subcategories pushes over limit
     // (Assuming user is adding 1 parent and N subcategories, all count towards the limit)
-    if (currentCount + newItemsCount > 3) {
+    if (currentCount + newItemsCount > 5) {
       return { message: 'LIMIT_REACHED' };
     }
   }
@@ -209,23 +209,33 @@ export async function deleteCategory(id: number) {
   return { error: null };
 }
 
-export async function getCategories(catalogId: number) {
+export async function getCategories(catalogId?: number) {
   const supabase = await createClient();
   const { data: { user } } = await supabase.auth.getUser();
 
   if (!user) {
-    return { categories: [], error: 'غير مصرح به' };
+    return { categories: [], catalog: null, error: 'غير مصرح به' };
+  }
+
+  // If no catalogId provided, get user's catalog
+  let targetCatalogId = catalogId;
+  if (!targetCatalogId) {
+    const { data: catalog } = await supabase.from('catalogs').select('id').eq('user_id', user.id).single();
+    if (!catalog) {
+      return { categories: [], catalog: null, error: 'لا يوجد كتالوج' };
+    }
+    targetCatalogId = catalog.id;
   }
 
   const { data, error } = await supabase
     .from('categories')
     .select('id, name, parent_category_id, catalog_id, created_at')
-    .eq('catalog_id', catalogId)
+    .eq('catalog_id', targetCatalogId)
     .order('name', { ascending: true });
 
   if (error) {
     console.error('Error fetching categories:', error);
-    return { categories: [], error: 'فشل جلب الفئات.' };
+    return { categories: [], catalog: { id: targetCatalogId }, error: 'فشل جلب الفئات.' };
   }
 
   // Build category hierarchy properly
@@ -259,5 +269,5 @@ export async function getCategories(catalogId: number) {
     }
   });
 
-  return { categories: rootCategories, error: null };
+  return { categories: rootCategories, catalog: { id: targetCatalogId }, error: null };
 }

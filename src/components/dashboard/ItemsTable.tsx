@@ -89,7 +89,13 @@ function ItemRow({ item, catalogId, categories }: { item: ItemWithCategory, cata
                 <DialogTitle>تعديل المنتج</DialogTitle>
                 <DialogDescription>قم بتحديث تفاصيل المنتج.</DialogDescription>
               </DialogHeader>
-              <ItemForm catalogId={catalogId} categories={categories} item={item} onSuccess={() => setIsEditDialogOpen(false)} />
+              <ItemForm
+                catalogId={catalogId}
+                categories={categories}
+                item={item}
+                onSuccess={() => setIsEditDialogOpen(false)}
+                onCancel={() => setIsEditDialogOpen(false)}
+              />
             </DialogContent >
 
             {/* Delete Dialog */}

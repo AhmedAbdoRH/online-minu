@@ -6,7 +6,7 @@ import { ArrowRight, Store } from 'lucide-react';
 
 export default function HeroSection() {
     return (
-        <section className="relative pt-12 sm:pt-14 md:pt-16 pb-12 sm:pb-20 md:pb-28 lg:pt-16 lg:pb-28 overflow-hidden bg-gradient-to-b from-primary/5 via-background to-background">
+        <section className="relative pt-12 sm:pt-14 md:pt-16 pb-12 sm:pb-20 md:pb-28 lg:pt-16 lg:pb-28 overflow-hidden bg-gradient-to-b from-[#0C9974]/10 via-background to-background">
             {/* Background Decor */}
             <div className="absolute top-0 right-0 -translate-y-1/2 translate-x-1/2 w-[300px] h-[300px] sm:w-[500px] sm:h-[500px] bg-primary/10 rounded-full blur-3xl opacity-50" />
             <div className="absolute bottom-0 left-0 translate-y-1/2 -translate-x-1/2 w-[300px] h-[300px] sm:w-[500px] sm:h-[500px] bg-blue-500/10 rounded-full blur-3xl opacity-50" />
@@ -55,7 +55,7 @@ export default function HeroSection() {
                         
                         <h1 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-bold font-headline tracking-tight text-foreground leading-[1.3] sm:leading-[1.4]">
                             متجرك الرقمي... <br className="block sm:hidden" />
-                            <span className="text-primary bg-clip-text text-transparent bg-gradient-to-r from-primary to-blue-600">جاهز في دقائق.</span>
+                            <span className="text-primary bg-clip-text text-transparent bg-gradient-to-r from-[#ffb347] to-[#61ffd0]">جاهز في دقائق.</span>
                         </h1>
 
                         <p className="text-lg sm:text-xl md:text-2xl text-muted-foreground max-w-2xl mx-auto lg:mx-0 leading-relaxed px-2 sm:px-0">

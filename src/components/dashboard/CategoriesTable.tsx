@@ -154,6 +154,7 @@ function CategoryRow({ category, catalogId, categories, level = 0, isLast = fals
             categories={categories}
             defaultParentId={category.id}
             onSuccess={() => setIsAddSubOpen(false)}
+            onCancel={() => setIsAddSubOpen(false)}
           />
         </DialogContent>
       </Dialog>
@@ -256,6 +257,7 @@ function CategoryActionsMenu({ category, catalogId, categories, size = 'default'
             categories={categories}
             hideParentSelection={category.parent_category_id !== null}
             onSuccess={() => setEditOpen(false)}
+            onCancel={() => setEditOpen(false)}
           />
         </DialogContent>
       </Dialog>

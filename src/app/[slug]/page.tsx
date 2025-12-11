@@ -3,13 +3,15 @@ import { notFound } from "next/navigation";
 import type { Metadata } from "next";
 import type { Catalog, CategoryWithSubcategories } from "@/lib/types";
 import { StorefrontView } from "@/components/menu/StorefrontView";
+import { Head } from "@/components/common/Head";
+import { InstallPrompt } from "@/components/common/InstallPrompt";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
 export const revalidate = 0;
 
 type Props = {
-  params: { slug: string };
+  params: Promise<{ slug: string }>;
 };
 
 type CatalogPageData = Catalog & {
@@ -132,36 +134,56 @@ async function getCatalogData(slug: string): Promise<CatalogPageData | null> {
 
 
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
-  const data = await getCatalogData(params.slug);
+  const resolvedParams = await params;
+  const data = await getCatalogData(resolvedParams.slug);
   if (!data) {
     return {
       title: "الكتالوج غير موجود",
     };
   }
+  const storeName = data.display_name || data.name;
+  const titleWithSlogan = data.slogan ? `${storeName} | ${data.slogan}` : storeName;
+  
   return {
-    title: `كتالوج ${data.name} - منظومة أونلاين كاتلوج للمحال والمتاجر`,
-    description: `تصفح الكتالوج الفاخر الخاص بـ ${data.name} في منظومة أونلاين كاتلوج للمحال والمتاجر.`,
+    title: titleWithSlogan,
+    description: `تصفح الكتالوج الفاخر الخاص بـ ${storeName}`,
     openGraph: {
-      title: `كتالوج ${data.name}`,
-      description: `تصفح الكتالوج الخاص بـ ${data.name}`,
+      title: titleWithSlogan,
+      description: `تصفح الكتالوج الخاص بـ ${storeName}`,
       images: [
         {
           url: data.logo_url || "",
           width: 800,
           height: 600,
-          alt: `شعار ${data.name}`,
+          alt: `شعار ${storeName}`,
         },
       ],
     },
-  };
+      };
 }
 
 export default async function CatalogPage({ params }: Props) {
-  const data = await getCatalogData(params.slug);
+  const resolvedParams = await params;
+  const data = await getCatalogData(resolvedParams.slug);
 
   if (!data) {
     notFound();
   }
 
-  return <StorefrontView catalog={data} categories={data.categories} />;
+  const storeName = data.display_name || data.name;
+  const titleWithSlogan = data.slogan ? `${storeName} | ${data.slogan}` : storeName;
+
+  return (
+    <>
+      <Head 
+        faviconUrl={data.logo_url || undefined} 
+        storeName={titleWithSlogan}
+      />
+      <InstallPrompt 
+        storeName={data.display_name || data.name}
+        storeLogo={data.logo_url || undefined}
+      />
+      <StorefrontView catalog={data} categories={data.categories} />
+    </>
+  );
 }

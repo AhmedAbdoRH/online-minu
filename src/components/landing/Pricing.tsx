@@ -32,7 +32,7 @@ const plans = [
             { text: "إزالة شعار المنصة", included: true },
         ],
         cta: "اشترك الآن",
-        ctaLink: "/signup?plan=pro",
+        ctaLink: "https://wa.me/201008116452?text=أرغب%20في%20الاشتراك%20في%20باقة%20البرو%20المهنية%20(2000%20ج.م%20سنوياً)",
         popular: false
     },
     {

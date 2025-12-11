@@ -36,7 +36,7 @@ export function UpgradeAlert({ open, onOpenChange, resourceType }: UpgradeAlertP
                             لقد وصلت إلى الحد المسموح به في الباقة الأساسية.
                         </p>
                         <p className="font-semibold text-foreground">
-                            {resourceType === 'product' ? '50 منتج فقط' : '3 فئات فقط'}
+                            {resourceType === 'product' ? '50 منتج فقط' : '5 فئات فقط'}
                         </p>
                         <p>
                             لإضافة المزيد، يرجى الترقية إلى الباقة الاحترافية.

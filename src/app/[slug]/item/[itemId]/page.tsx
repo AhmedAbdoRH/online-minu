@@ -9,12 +9,14 @@ import { ShareButtons } from "@/components/menu/ShareButtons";
 import type { Catalog, MenuItem } from "@/lib/types";
 import { cn } from "@/lib/utils";
 import { ArrowRight, Sparkles, Clock, Flame, MessageCircle } from "lucide-react";
+import ProductImage from "@/components/ProductImage";
+import RelatedProductImage from "@/components/RelatedProductImage";
 
 type Props = {
-  params: {
+  params: Promise<{
     slug: string;
     itemId: string;
-  };
+  }>;
 };
 
 type ProductPageData = {
@@ -72,7 +74,8 @@ async function getProductData(slug: string, itemId: string): Promise<ProductPage
 
 
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
-  const data = await getProductData(params.slug, params.itemId);
+  const resolvedParams = await params;
+  const data = await getProductData(resolvedParams.slug, resolvedParams.itemId);
   if (!data) {
     return {
       title: "المنتج غير متاح",
@@ -99,11 +102,12 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
         ]
         : undefined,
     },
-  };
+      };
 }
 
 export default async function ProductPage({ params }: Props) {
-  const data = await getProductData(params.slug, params.itemId);
+  const resolvedParams = await params;
+  const data = await getProductData(resolvedParams.slug, resolvedParams.itemId);
 
   if (!data) {
     notFound();
@@ -125,28 +129,24 @@ export default async function ProductPage({ params }: Props) {
             className="inline-flex items-center gap-2 text-brand-primary hover:text-brand-primary/80"
           >
             <ArrowRight className="h-4 w-4" />
-            العودة للمنيو
+            العودة للكتالوج
           </Link>
-          <span className="hidden text-xs text-muted-foreground md:inline-flex">
-            صفحة منتج فاخرة من منظومة أونلاين كاتلوج للمحال والمتاجر
-          </span>
-        </div>
+                  </div>
 
         <section className="glass-surface grid gap-6 rounded-3xl bg-white/80 p-4 shadow-2xl backdrop-blur-2xl dark:bg-slate-900/80 md:grid-cols-[1.15fr_0.85fr] md:p-6">
-          <div className="relative overflow-hidden rounded-[1.5rem] border border-white/30 bg-gradient-to-br from-slate-900/60 to-slate-900/30 text-white shadow-[0_20px_55px_rgba(15,23,42,0.4)]">
+          <div className="relative aspect-square overflow-hidden rounded-[1.5rem] border border-white/30 bg-gradient-to-br from-slate-900/60 to-slate-900/30 text-white shadow-[0_20px_55px_rgba(15,23,42,0.4)] md:aspect-auto md:h-[400px]">
             <div className="absolute inset-0 bg-gradient-to-t from-black/65 via-black/10 to-transparent" />
-            {product.image_url ? (
-              <Image
+            {product.image_url && product.image_url.trim() !== '' ? (
+              <ProductImage
                 src={product.image_url}
                 alt={product.name}
-                fill
-                className="object-cover"
                 priority
               />
             ) : (
               <div className="absolute inset-0 flex flex-col items-center justify-center gap-3 text-center">
                 <Sparkles className="h-10 w-10 text-brand-primary" />
                 <p className="text-sm">صورة المنتج ستظهر هنا بعد رفعها من لوحة التحكم</p>
+                <p className="text-xs text-muted-foreground">رابط الصورة: {product.image_url || 'غير متوفر'}</p>
               </div>
             )}
             <div className="pointer-events-none absolute bottom-4 left-4 rounded-full bg-white/85 px-4 py-2 text-sm font-semibold text-brand-primary">
@@ -216,7 +216,7 @@ export default async function ProductPage({ params }: Props) {
                 href={`/${catalog.name}`}
                 className="text-sm text-brand-primary hover:text-brand-primary/80"
               >
-                استعرض المنيو كاملة
+                استعرض الكتالوج كامل
               </Link>
             </div>
             <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
@@ -230,12 +230,10 @@ export default async function ProductPage({ params }: Props) {
                   )}
                 >
                   <div className="relative h-36 overflow-hidden rounded-xl bg-muted/40">
-                    {item.image_url ? (
-                      <Image
+                    {item.image_url && item.image_url.trim() !== '' ? (
+                      <RelatedProductImage
                         src={item.image_url}
                         alt={item.name}
-                        fill
-                        className="object-cover transition-transform duration-300 group-hover:scale-105"
                       />
                     ) : (
                       <div className="flex h-full items-center justify-center text-xs text-muted-foreground">

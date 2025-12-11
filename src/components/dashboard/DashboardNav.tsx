@@ -51,7 +51,13 @@ export function DashboardNav({ user }: { user: User }) {
                 <Link href={item.href} className={cn(
                   "flex h-9 w-9 items-center justify-center rounded-lg text-muted-foreground transition-colors hover:text-foreground md:h-8 md:w-8",
                   pathname === item.href ? "bg-accent text-accent-foreground" : ""
-                )}>
+                )} onClick={() => {
+                  // Close mobile sheet if open
+                  const sheetTrigger = document.querySelector('[data-state="open"] button') as HTMLButtonElement;
+                  if (sheetTrigger) {
+                    sheetTrigger.click();
+                  }
+                }}>
                   <item.icon className="h-5 w-5" />
                   <span className="sr-only">{item.label}</span>
                 </Link>
@@ -70,6 +76,13 @@ export function DashboardNav({ user }: { user: User }) {
                   "flex h-9 w-9 items-center justify-center rounded-lg text-muted-foreground transition-colors hover:text-foreground md:h-8 md:w-8",
                   pathname === '/dashboard/settings' ? 'bg-accent text-accent-foreground' : ''
                 )}
+                onClick={() => {
+                  // Close mobile sheet if open
+                  const sheetTrigger = document.querySelector('[data-state="open"] button') as HTMLButtonElement;
+                  if (sheetTrigger) {
+                    sheetTrigger.click();
+                  }
+                }}
               >
                 <Settings className="h-5 w-5" />
                 <span className="sr-only">الإعدادات</span>
@@ -108,7 +121,14 @@ export function DashboardNav({ user }: { user: User }) {
                 <span className="sr-only">{APP_NAME}</span>
               </Link>
               {navItems.map((item) => (
-                <Link key={item.href} href={item.href} className={cn("flex items-center gap-4 px-2.5 text-muted-foreground hover:text-foreground", pathname === item.href ? "text-foreground" : "")}>
+                <Link key={item.href} href={item.href} className={cn("flex items-center gap-4 px-2.5 text-muted-foreground hover:text-foreground", pathname === item.href ? "text-foreground" : "")} onClick={() => {
+                  // Close mobile sheet
+                  const sheetContent = document.querySelector('[data-state="open"][role="dialog"]') as HTMLElement;
+                  const closeButton = sheetContent?.querySelector('button[data-state="open"]') as HTMLButtonElement;
+                  if (closeButton) {
+                    closeButton.click();
+                  }
+                }}>
                   <item.icon className="h-5 w-5" />
                   {item.label}
                 </Link>
@@ -119,6 +139,14 @@ export function DashboardNav({ user }: { user: User }) {
               <Link
                 href="/dashboard/settings"
                 className={cn("flex items-center gap-4 px-2.5 text-muted-foreground hover:text-foreground", pathname === '/dashboard/settings' ? "text-foreground" : "")}
+                onClick={() => {
+                  // Close mobile sheet
+                  const sheetContent = document.querySelector('[data-state="open"][role="dialog"]') as HTMLElement;
+                  const closeButton = sheetContent?.querySelector('button[data-state="open"]') as HTMLButtonElement;
+                  if (closeButton) {
+                    closeButton.click();
+                  }
+                }}
               >
                 <Settings className="h-5 w-5" />
                 الإعدادات
