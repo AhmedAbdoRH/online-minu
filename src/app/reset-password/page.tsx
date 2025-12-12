@@ -1,7 +1,7 @@
 'use client'
 
-import { useState, useEffect } from "react"
-import { useRouter, useSearchParams } from "next/navigation"
+import { useState, useEffect, Suspense } from "react"
+import { useRouter } from "next/navigation"
 import Link from "next/link"
 import { updatePassword } from "@/app/actions/auth"
 import { SubmitButton } from "@/components/common/SubmitButton"
@@ -15,9 +15,8 @@ import {
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 
-export default function ResetPasswordPage() {
+function ResetPasswordContent() {
   const router = useRouter()
-  const searchParams = useSearchParams()
   const [message, setMessage] = useState<{text: string, isError: boolean} | null>(null)
   const [token, setToken] = useState<string | null>(null)
   
@@ -130,5 +129,13 @@ export default function ResetPasswordPage() {
         </div>
       </CardContent>
     </Card>
+  )
+}
+
+export default function ResetPasswordPage() {
+  return (
+    <Suspense fallback={<div>جاري التحميل...</div>}>
+      <ResetPasswordContent />
+    </Suspense>
   )
 }
