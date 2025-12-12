@@ -437,7 +437,7 @@ export function OnboardingForm({ userPhone }: OnboardingFormProps) {
       {/* Hidden inputs to submit form data */}
       <input type="hidden" name="display_name" value={formData.display_name} />
       <input type="hidden" name="name" value={formData.name} />
-      <input type="hidden" name="whatsapp_number" value={formData.whatsapp_number} />
+      <input type="hidden" name="whatsapp_number" value={selectedCountry.code + formData.whatsapp_number} />
 
       {/* Navigation buttons */}
       <div className="flex justify-between pt-2">
