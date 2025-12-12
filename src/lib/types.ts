@@ -16,6 +16,7 @@ interface Database {
           plan: string;
           whatsapp_number: string | null;
           slogan: string | null;
+          country_code: string | null;
         };
         Insert: {
           id?: number;
@@ -25,10 +26,11 @@ interface Database {
           description?: string | null;
           logo_url?: string | null;
           cover_url?: string | null;
-          user_id: string;
+          user_id?: string;
           enable_subcategories?: boolean;
           whatsapp_number?: string | null;
           slogan?: string | null;
+          country_code?: string | null;
         };
         Update: {
           id?: number;
@@ -43,6 +45,7 @@ interface Database {
           plan?: string;
           whatsapp_number?: string | null;
           slogan?: string | null;
+          country_code?: string | null;
         };
       };
       categories: {

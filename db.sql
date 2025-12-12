@@ -5,6 +5,7 @@ CREATE TABLE public.catalogs (
     name text NOT NULL,
     user_id uuid NOT NULL,
     logo_url text,
+    country_code text DEFAULT '+20',
     CONSTRAINT catalogs_pkey PRIMARY KEY (id),
     CONSTRAINT catalogs_name_key UNIQUE (name),
     CONSTRAINT catalogs_user_id_fkey FOREIGN KEY (user_id) REFERENCES auth.users (id) ON DELETE CASCADE

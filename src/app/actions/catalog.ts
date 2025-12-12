@@ -19,7 +19,7 @@ const catalogSchema = z.object({
   slogan: z.string().optional(),
   logo: z.instanceof(File).optional(),
   cover: z.instanceof(File).optional(),
-
+  country_code: z.string().optional(),
   whatsapp_number: z.string().optional()
     .refine((val) => !val || /^\+?[0-9]{7,15}$/.test(val), 'رقم الهاتف غير صحيح'),
 });
@@ -56,6 +56,7 @@ export async function createCatalog(prevState: any, formData: FormData) {
     slogan: (formData.get('slogan') as string || ''),
     logo: logoFile instanceof File && logoFile.size > 0 ? logoFile : undefined,
     cover: formData.get('cover') instanceof File && (formData.get('cover') as File).size > 0 ? formData.get('cover') as File : undefined,
+    country_code: (formData.get('country_code') as string) || '+20',
   });
 
   if (!validatedFields.success) {
@@ -64,7 +65,7 @@ export async function createCatalog(prevState: any, formData: FormData) {
     return { message: firstError };
   }
 
-  const { name, display_name, logo, cover, whatsapp_number, slogan } = validatedFields.data;
+  const { name, display_name, logo, cover, whatsapp_number, slogan, country_code } = validatedFields.data;
 
   // Re-check uniqueness on the server to be safe
   const isAvailable = await checkCatalogName(name);
@@ -125,6 +126,7 @@ export async function createCatalog(prevState: any, formData: FormData) {
     slogan: slogan || null,
     logo_url: publicUrl,
     cover_url: coverPublicUrl,
+    country_code: country_code || '+20',
   });
 
   if (dbError) {

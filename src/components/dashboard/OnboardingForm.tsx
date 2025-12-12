@@ -69,6 +69,7 @@ export function OnboardingForm({ userPhone }: OnboardingFormProps) {
     submitFormData.append('display_name', formData.display_name);
     submitFormData.append('name', formData.name);
     submitFormData.append('whatsapp_number', selectedCountry.code + formData.whatsapp_number);
+    submitFormData.append('country_code', selectedCountry.code);
     
     // Add file objects if they exist
     if (formData.logo) {
