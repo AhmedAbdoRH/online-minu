@@ -48,7 +48,7 @@ export default async function DashboardPage() {
   // Extract phone number from user email (format: phone@catalog.app)
   const userPhone = user.email?.replace('@catalog.app', '') || '';
 
-  const { data: catalog, error } = await supabase
+  const { data: catalog } = await supabase
     .from("catalogs")
     .select("*")
     .eq("user_id", user.id)
@@ -77,6 +77,18 @@ export default async function DashboardPage() {
       </div>
     );
   }
+
+  // Get categories count
+  const { count: categoriesCount } = await supabase
+    .from("categories")
+    .select("*", { count: 'exact', head: true })
+    .eq("catalog_id", catalog.id);
+
+  // Get items count
+  const { count: itemsCount } = await supabase
+    .from("menu_items")
+    .select("*", { count: 'exact', head: true })
+    .eq("catalog_id", catalog.id);
 
   const catalogUrl = process.env.NODE_ENV === 'production'
     ? `https://online-catalog.net/${catalog.name}`
@@ -148,23 +160,26 @@ export default async function DashboardPage() {
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.2 }}
         >
-          <Card className="glass-surface-hover h-full flex flex-col">
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2">
-                <Tags className="h-5 w-5 text-brand-accent" />
-                إدارة التصنيفات
-              </CardTitle>
-              <CardDescription>نظم متجرك عن طريق إضافة وتعديل التصنيفات.</CardDescription>
-            </CardHeader>
-            <CardContent className="mt-auto pt-0">
-              <Button asChild className="w-full group" variant="ghost">
-                <Link href="/dashboard/categories" className="justify-between">
+          <Link href="/dashboard/categories" className="block h-full">
+            <Card className="glass-surface-hover h-full flex flex-col cursor-pointer transition-all hover:scale-[1.02]">
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  <Tags className="h-5 w-5 text-brand-accent" />
+                  إدارة التصنيفات
+                </CardTitle>
+                <CardDescription>نظم متجرك عن طريق إضافة وتعديل التصنيفات.</CardDescription>
+                <div className="mt-2 text-sm text-muted-foreground">
+                  إجمالي التصنيفات: <span className="font-semibold text-foreground">{categoriesCount || 0}</span>
+                </div>
+              </CardHeader>
+              <CardContent className="mt-auto pt-0">
+                <div className="w-full group bg-cyan-500/25 hover:bg-cyan-500/40 border border-cyan-400/40 text-white rounded-md px-4 py-2 flex items-center justify-between">
                   الانتقال إلى التصنيفات
                   <ArrowRight className="h-4 w-4 transition-transform group-hover:-translate-x-1" />
-                </Link>
-              </Button>
-            </CardContent>
-          </Card>
+                </div>
+              </CardContent>
+            </Card>
+          </Link>
         </motion.div>
 
         <motion.div
@@ -172,23 +187,50 @@ export default async function DashboardPage() {
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.3 }}
         >
-          <Card className="glass-surface-hover h-full flex flex-col">
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2">
-                <Package className="h-5 w-5 text-brand-luxury" />
-                إدارة المنتجات
-              </CardTitle>
-              <CardDescription>أضف صوراً وأسعاراً ووصفاً لمنتجاتك المميزة.</CardDescription>
-            </CardHeader>
-            <CardContent className="mt-auto pt-0">
-              <Button asChild className="w-full group" variant="ghost">
-                <Link href="/dashboard/items" className="justify-between">
+          <Link href="/dashboard/items" className="block h-full">
+            <Card className="glass-surface-hover h-full flex flex-col cursor-pointer transition-all hover:scale-[1.02]">
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  <Package className="h-5 w-5 text-brand-luxury" />
+                  إدارة المنتجات
+                </CardTitle>
+                <CardDescription>أضف صوراً وأسعاراً ووصفاً لمنتجاتك المميزة.</CardDescription>
+                <div className="mt-2 text-sm text-muted-foreground">
+                  إجمالي المنتجات: <span className="font-semibold text-foreground">{itemsCount || 0}</span>
+                </div>
+              </CardHeader>
+              <CardContent className="mt-auto pt-0">
+                <div className="w-full group bg-cyan-500/25 hover:bg-cyan-500/40 border border-cyan-400/40 text-white rounded-md px-4 py-2 flex items-center justify-between">
                   الانتقال إلى المنتجات
                   <ArrowRight className="h-4 w-4 transition-transform group-hover:-translate-x-1" />
-                </Link>
-              </Button>
-            </CardContent>
-          </Card>
+                </div>
+              </CardContent>
+            </Card>
+          </Link>
+        </motion.div>
+
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.4 }}
+        >
+          <Link href="/dashboard/settings" className="block h-full">
+            <Card className="glass-surface-hover h-full flex flex-col cursor-pointer transition-all hover:scale-[1.02]">
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  <Settings className="h-5 w-5 text-brand-primary" />
+                  إعدادات المتجر
+                </CardTitle>
+                <CardDescription>تخصيص مظهر المتجر والمعلومات الأساسية.</CardDescription>
+              </CardHeader>
+              <CardContent className="mt-auto pt-0">
+                <div className="w-full group bg-cyan-500/25 hover:bg-cyan-500/40 border border-cyan-400/40 text-white rounded-md px-4 py-2 flex items-center justify-between">
+                  الانتقال إلى الإعدادات
+                  <ArrowRight className="h-4 w-4 transition-transform group-hover:-translate-x-1" />
+                </div>
+              </CardContent>
+            </Card>
+          </Link>
         </motion.div>
       </div>
     </div>
