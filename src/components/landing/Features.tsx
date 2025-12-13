@@ -59,12 +59,9 @@ export default function Features() {
                                 <feature.icon className="w-4 h-4 sm:w-5 sm:h-5 md:w-6 md:h-6" />
                             </div>
                             <h3 className="text-base sm:text-lg md:text-xl font-bold mb-2 sm:mb-3">{feature.title}</h3>
-                            <p className="text-muted-foreground mb-3 sm:mb-4 md:mb-6 line-clamp-2 text-sm sm:text-sm md:text-base">
+                            <p className="text-muted-foreground text-sm sm:text-sm md:text-base">
                                 {feature.description}
                             </p>
-                            <Button variant="link" className="p-0 h-auto text-primary group-hover:underline text-xs sm:text-sm md:text-base">
-                                شاهد كيف <ArrowRight className="mr-2 w-3 h-3 sm:w-3 sm:h-3 md:w-4 md:h-4" />
-                            </Button>
                         </div>
                     ))}
                 </div>

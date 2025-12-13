@@ -8,6 +8,7 @@ import MockupPreview from '@/components/landing/MockupPreview';
 import Pricing from '@/components/landing/Pricing';
 import Testimonials from '@/components/landing/Testimonials';
 import FAQ from '@/components/landing/FAQ';
+import CTASection from '@/components/landing/CTASection';
 import StickyCTA from '@/components/landing/StickyCTA';
 import LandingFooter from '@/components/landing/LandingFooter';
 
@@ -25,6 +26,7 @@ export default function HomePage() {
         <Pricing />
         {/* <Testimonials /> */}
         <FAQ />
+        <CTASection />
       </main>
 
       <StickyCTA />

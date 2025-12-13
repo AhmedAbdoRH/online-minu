@@ -14,7 +14,6 @@ export default function LandingHeader() {
         { name: "الميزات", href: "#features" },
         { name: "كيف تعمل", href: "#how-it-works" },
         { name: "الأسعار", href: "#pricing" },
-        { name: "تجارب", href: "#testimonials" },
         { name: "الأسئلة", href: "#faq" },
     ];
 
@@ -50,10 +49,6 @@ export default function LandingHeader() {
 
                 {/* CTAs */}
                 <div className="hidden md:flex items-center gap-2 lg:gap-4">
-                    {/* Micro Note */}
-                    <span className="text-[10px] text-muted-foreground hidden xl:inline-block">
-                        احصل على متجرك المصغّر خلال دقائق
-                    </span>
                     <Button variant="ghost" size="sm" asChild className="px-2 md:px-3">
                         <Link href="/login">تسجيل دخول</Link>
                     </Button>
@@ -98,9 +93,6 @@ export default function LandingHeader() {
                                 <Button asChild className="w-full h-12">
                                     <Link href="/signup">ابدأ مجاناً</Link>
                                 </Button>
-                            </div>
-                            <div className="text-center text-xs text-muted-foreground mt-4 px-4">
-                                احصل على متجرك المصغّر خلال دقائق
                             </div>
                         </div>
                     </SheetContent>
