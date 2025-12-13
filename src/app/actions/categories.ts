@@ -79,7 +79,7 @@ export async function createCategory(prevState: any, formData: FormData) {
   }
 
   // Check if plan is basic (or null which defaults to basic logic) and enforce limit
-  if ((!catalog.plan || catalog.plan === 'basic')) {
+  if (!catalog.plan || catalog.plan === 'basic') {
     const { count } = await supabase
       .from('categories')
       .select('*', { count: 'exact', head: true })
@@ -89,12 +89,12 @@ export async function createCategory(prevState: any, formData: FormData) {
     const newItemsCount = 1 + (parsedSubcategories ? parsedSubcategories.length : 0);
 
     // Enforce limit: Max 5 categories total
-    if (currentCount + 1 > 5) {
+    // If already at or over limit, block new additions
+    if (currentCount >= 5) {
       return { message: 'LIMIT_REACHED' };
     }
 
     // Also check if adding subcategories pushes over limit
-    // (Assuming user is adding 1 parent and N subcategories, all count towards the limit)
     if (currentCount + newItemsCount > 5) {
       return { message: 'LIMIT_REACHED' };
     }

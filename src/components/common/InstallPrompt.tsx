@@ -22,8 +22,15 @@ export function InstallPrompt({ storeName, storeLogo }: InstallPromptProps) {
   const [deferredPrompt, setDeferredPrompt] = useState<BeforeInstallPromptEvent | null>(null);
   const [showPrompt, setShowPrompt] = useState(false);
   const [isInstalled, setIsInstalled] = useState(false);
+  const [isDismissed, setIsDismissed] = useState(false);
 
   useEffect(() => {
+    // Check if dismissed in this session
+    if (sessionStorage.getItem('installPromptDismissed')) {
+      setIsDismissed(true);
+      return;
+    }
+
     // Check if app is already installed
     const checkInstalled = () => {
       const isInStandaloneMode = 
@@ -85,12 +92,13 @@ export function InstallPrompt({ storeName, storeLogo }: InstallPromptProps) {
 
   const handleDismiss = () => {
     setShowPrompt(false);
+    setIsDismissed(true);
     // Don't show again for this session
     sessionStorage.setItem('installPromptDismissed', 'true');
   };
 
   // Don't show if already installed or dismissed
-  if (isInstalled || !showPrompt || sessionStorage.getItem('installPromptDismissed')) {
+  if (isInstalled || !showPrompt || isDismissed) {
     return null;
   }
 

@@ -206,4 +206,48 @@
   .animate-loading-bar {
     animation: loading-bar 1.5s ease-in-out infinite;
   }
+
+  /* Store Theme Gradients */
+  .bg-gradient-default {
+    background: 
+      radial-gradient(circle at top, rgba(0,209,201,0.25), transparent 60%),
+      radial-gradient(circle at bottom, rgba(168,85,247,0.18), transparent 62%),
+      hsl(var(--background));
+  }
+
+  .bg-gradient-1 {
+    background-image: linear-gradient(to bottom right, #2D1F3D, #1A1F2C, #3D1F2C);
+  }
+
+  .bg-gradient-2 {
+    background-image: linear-gradient(to bottom right, #3B0A0A, #5C1A1A, #3D1F2C);
+  }
+
+  .bg-gradient-3 {
+    background-image: linear-gradient(to bottom right, #14090e, #4a1e34, #9c3d1a);
+  }
+
+  .bg-gradient-4 {
+    background-image: linear-gradient(to bottom right, #0A0E0A, #1F2D24, #3B4A36);
+  }
+
+  .bg-gradient-5 {
+    background-image: linear-gradient(to bottom right, #0A1628, #1A2D4A, #0D2035);
+  }
+
+  .bg-gradient-6 {
+    background-image: linear-gradient(to bottom right, #2D1A2D, #4A1A3D, #3D1A35);
+  }
+
+  .bg-gradient-7 {
+    background-image: linear-gradient(to bottom right, #2D2A1A, #4A3D1A, #3D351A);
+  }
+
+  .bg-gradient-8 {
+    background-image: linear-gradient(to bottom right, #0A2828, #1A3D3D, #0D3535);
+  }
+
+  .bg-gradient-9 {
+    background-image: linear-gradient(to bottom right, #1A1A1A, #2D2D2D, #252525);
+  }
 }

@@ -1,117 +1,125 @@
-import { NextResponse } from 'next/server';
-import { createClient } from '@/lib/supabase/server';
+import { createClient } from "@/lib/supabase/server";
+import { NextRequest, NextResponse } from "next/server";
 
-export async function GET(
-  request: Request,
-  { params }: { params: Promise<{ slug: string }> }
-) {
-  let resolvedParams: { slug: string };
-  
+export const runtime = "nodejs";
+export const dynamic = "force-dynamic";
+
+type RouteContext = {
+  params: Promise<{ slug: string }>;
+};
+
+export async function GET(request: NextRequest, context: RouteContext) {
+  const { slug } = await context.params;
+
   try {
-    resolvedParams = await params;
     const supabase = await createClient();
-    
-    // Fetch store data
+
     const { data: catalog, error } = await supabase
-      .from('catalogs')
-      .select('*')
-      .eq('name', resolvedParams.slug)
+      .from("catalogs")
+      .select("name, display_name, logo_url, slogan")
+      .eq("name", slug)
       .single();
 
     if (error || !catalog) {
-      // Return default manifest if store not found
+      // Return default manifest if catalog not found
       return NextResponse.json({
-        name: "كتالوج",
-        short_name: "كتالوج",
-        description: "منصة إنشاء الكتالوجات الإلكترونية",
-        start_url: `/${resolvedParams.slug}`,
+        name: "متجر",
+        short_name: "متجر",
+        description: "متجر إلكتروني",
+        start_url: `/${slug}`,
         display: "standalone",
-        background_color: "#000000",
+        background_color: "#1A1F2C",
         theme_color: "#00D1C9",
         orientation: "portrait-primary",
         icons: [
           {
-            src: "/icon.png",
+            src: "/icons/icon-192.png",
+            type: "image/png",
             sizes: "192x192",
-            type: "image/png"
           },
           {
-            src: "/icon.png",
+            src: "/icons/icon-512.png",
+            type: "image/png",
             sizes: "512x512",
-            type: "image/png"
-          }
-        ]
+          },
+        ],
       });
     }
 
     const storeName = catalog.display_name || catalog.name;
-    const description = catalog.description || `كتالوج ${storeName} الإلكتروني`;
+    const logoUrl = catalog.logo_url;
 
-    // Build manifest with store-specific data
+    // Build icons array
+    const icons = [];
+    
+    if (logoUrl) {
+      // Use store logo for PWA icons
+      icons.push(
+        {
+          src: logoUrl,
+          type: "image/png",
+          sizes: "192x192",
+          purpose: "any maskable",
+        },
+        {
+          src: logoUrl,
+          type: "image/png",
+          sizes: "512x512",
+          purpose: "any maskable",
+        }
+      );
+    } else {
+      // Fallback to default icons
+      icons.push(
+        {
+          src: "/icons/icon-192.png",
+          type: "image/png",
+          sizes: "192x192",
+        },
+        {
+          src: "/icons/icon-512.png",
+          type: "image/png",
+          sizes: "512x512",
+        }
+      );
+    }
+
     const manifest = {
       name: storeName,
-      short_name: storeName,
-      description: description,
-      start_url: `/${resolvedParams.slug}`,
-      display: "standalone" as const,
-      background_color: "#000000",
-      theme_color: "#00D1C9",
-      orientation: "portrait-primary" as const,
-      icons: catalog.logo_url ? [
-        {
-          src: catalog.logo_url,
-          sizes: "192x192",
-          type: "image/png",
-          purpose: "any maskable"
-        },
-        {
-          src: catalog.logo_url,
-          sizes: "512x512",
-          type: "image/png",
-          purpose: "any maskable"
-        }
-      ] : [
-        {
-          src: "/icon.png",
-          sizes: "192x192",
-          type: "image/png"
-        },
-        {
-          src: "/icon.png",
-          sizes: "512x512",
-          type: "image/png"
-        }
-      ]
-    };
-
-    return NextResponse.json(manifest);
-  } catch (error) {
-    console.error('Error generating manifest:', error);
-    
-    // Try to get params for fallback
-    try {
-      resolvedParams = await params;
-    } catch {
-      resolvedParams = { slug: 'default' };
-    }
-    
-    // Return fallback manifest
-    return NextResponse.json({
-      name: "كتالوج",
-      short_name: "كتالوج",
-      description: "منصة إنشاء الكتالوجات الإلكترونية",
-      start_url: `/${resolvedParams.slug}`,
+      short_name: storeName.length > 12 ? storeName.substring(0, 12) : storeName,
+      description: catalog.slogan || `متجر ${storeName}`,
+      start_url: `/${slug}`,
+      scope: `/${slug}`,
       display: "standalone",
-      background_color: "#000000",
+      background_color: "#1A1F2C",
       theme_color: "#00D1C9",
       orientation: "portrait-primary",
+      icons,
+    };
+
+    return NextResponse.json(manifest, {
+      headers: {
+        "Content-Type": "application/manifest+json",
+        "Cache-Control": "public, max-age=3600",
+      },
+    });
+  } catch (error) {
+    console.error("Error generating manifest:", error);
+    
+    return NextResponse.json({
+      name: "متجر",
+      short_name: "متجر",
+      start_url: `/${slug}`,
+      display: "standalone",
+      background_color: "#1A1F2C",
+      theme_color: "#00D1C9",
       icons: [
         {
-          src: "/icon.png",
+          src: "/icons/icon-192.png",
+          type: "image/png",
           sizes: "192x192",
-          type: "image/png"
-        }
-      ]
+        },
+      ],
     });
   }
 }

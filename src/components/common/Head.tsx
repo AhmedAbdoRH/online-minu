@@ -9,9 +9,13 @@ interface HeadProps {
 
 export function Head({ faviconUrl, storeName }: HeadProps) {
   useEffect(() => {
-    // Remove existing favicons
+    // Remove existing favicons and manifest
     const existingFavicons = document.querySelectorAll('link[rel*="icon"]');
     existingFavicons.forEach(favicon => favicon.remove());
+    
+    // Remove existing manifest
+    const existingManifest = document.querySelectorAll('link[rel="manifest"]');
+    existingManifest.forEach(manifest => manifest.remove());
 
     // Add new favicon if provided
     if (faviconUrl) {
@@ -46,10 +50,11 @@ export function Head({ faviconUrl, storeName }: HeadProps) {
       // Set dynamic manifest for PWA
       const manifest = document.createElement('link');
       manifest.rel = 'manifest';
-      // Use dynamic manifest route based on current URL
+      // Use dynamic manifest route based on current URL with cache busting
       const currentPath = window.location.pathname;
       const slug = currentPath.split('/')[1];
-      manifest.href = slug ? `/${slug}/manifest` : '/manifest.json';
+      const timestamp = Date.now();
+      manifest.href = slug ? `/${slug}/manifest?v=${timestamp}` : '/manifest.json';
       document.head.appendChild(manifest);
 
       // Add theme-color meta tag

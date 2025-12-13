@@ -17,6 +17,7 @@ interface Database {
           whatsapp_number: string | null;
           slogan: string | null;
           country_code: string | null;
+          theme: string | null;
         };
         Insert: {
           id?: number;
@@ -31,6 +32,7 @@ interface Database {
           whatsapp_number?: string | null;
           slogan?: string | null;
           country_code?: string | null;
+          theme?: string | null;
         };
         Update: {
           id?: number;
@@ -46,6 +48,7 @@ interface Database {
           whatsapp_number?: string | null;
           slogan?: string | null;
           country_code?: string | null;
+          theme?: string | null;
         };
       };
       categories: {

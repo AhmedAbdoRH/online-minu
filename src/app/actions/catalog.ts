@@ -22,6 +22,7 @@ const catalogSchema = z.object({
   country_code: z.string().optional(),
   whatsapp_number: z.string().optional()
     .refine((val) => !val || /^\+?[0-9]{7,15}$/.test(val), 'رقم الهاتف غير صحيح'),
+  theme: z.string().optional(),
 });
 
 export async function checkCatalogName(name: string): Promise<boolean> {
@@ -197,12 +198,14 @@ export async function updateCatalog(prevState: any, formData: FormData) {
 
   const { name: validatedName, display_name: validatedDisplayName, logo, cover, whatsapp_number: validatedWhatsappNumber, slogan: validatedSlogan } = validatedFields.data;
 
+  const theme = formData.get('theme') as string | null;
+
   let updateData: any = {
     name: validatedName,
     display_name: validatedDisplayName,
-
     whatsapp_number: validatedWhatsappNumber ?? null,
     slogan: validatedSlogan,
+    theme: theme || null,
   };
 
   // Upload logo if provided

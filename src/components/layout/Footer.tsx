@@ -2,11 +2,11 @@
 
 import Image from 'next/image';
 import Link from 'next/link';
-import { MessageCircle, ShoppingCart } from 'lucide-react';
+import { cn } from '@/lib/utils';
 
 export function Footer() {
   return (
-    <footer className="border-t border-white/5 bg-background/95 backdrop-blur-sm h-7 flex items-center justify-center mt-auto">
+    <footer className="border-t border-white/5 backdrop-blur-sm h-7 flex items-center justify-center mt-auto bg-black/40">
       <div className="w-full max-w-7xl px-3 text-center">
         <div className="flex items-center justify-center gap-1 text-[10px] text-muted-foreground">
           <span>تم تنفيذ هذا المتجر بواسطة</span>

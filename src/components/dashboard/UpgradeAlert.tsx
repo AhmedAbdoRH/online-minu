@@ -1,17 +1,12 @@
 import {
-    AlertDialog,
-    AlertDialogAction,
-    AlertDialogCancel,
-    AlertDialogContent,
-    AlertDialogDescription,
-    AlertDialogFooter,
-    AlertDialogHeader,
-    AlertDialogTitle,
-} from "@/components/ui/alert-dialog";
+    Dialog,
+    DialogContent,
+    DialogDescription,
+    DialogHeader,
+    DialogTitle,
+} from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
-import { MessageCircle } from "lucide-react";
-import Link from "next/link";
-import { APP_NAME } from "@/lib/constants";
+import { Crown, Sparkles, Palette, MessageCircle } from "lucide-react";
 
 interface UpgradeAlertProps {
     open: boolean;
@@ -20,39 +15,56 @@ interface UpgradeAlertProps {
 }
 
 export function UpgradeAlert({ open, onOpenChange, resourceType }: UpgradeAlertProps) {
-    const whatsappNumber = "201008116452";
-    const message = `مرحباً، أرغب في ترقية باقتي في ${APP_NAME} للباقة الاحترافية لإضافة المزيد من ${resourceType === 'product' ? 'المنتجات' : 'التصنيفات'}.`;
-    const whatsappUrl = `https://wa.me/${whatsappNumber}?text=${encodeURIComponent(message)}`;
+    const limitText = resourceType === 'product' ? '50 منتج' : '5 تصنيفات';
 
     return (
-        <AlertDialog open={open} onOpenChange={onOpenChange}>
-            <AlertDialogContent className="max-w-md">
-                <AlertDialogHeader>
-                    <AlertDialogTitle className="text-2xl font-bold text-center text-brand-primary">
-                        🚀 ترقية الباقة
-                    </AlertDialogTitle>
-                    <AlertDialogDescription className="text-center text-lg space-y-2">
-                        <p>
-                            لقد وصلت إلى الحد المسموح به في الباقة الأساسية.
-                        </p>
-                        <p className="font-semibold text-foreground">
-                            {resourceType === 'product' ? '50 منتج فقط' : '5 فئات فقط'}
-                        </p>
-                        <p>
-                            لإضافة المزيد، يرجى الترقية إلى الباقة الاحترافية.
-                        </p>
-                    </AlertDialogDescription>
-                </AlertDialogHeader>
-                <AlertDialogFooter className="flex-col sm:flex-col gap-3 mt-4">
-                    <Button asChild className="w-full bg-[#25D366] hover:bg-[#128C7E] text-white font-bold h-12 text-lg gap-2">
-                        <Link href={whatsappUrl} target="_blank">
-                            <MessageCircle className="w-6 h-6" />
-                            طلب الباقة عبر واتساب
-                        </Link>
+        <Dialog open={open} onOpenChange={onOpenChange}>
+            <DialogContent className="sm:max-w-md">
+                <DialogHeader className="text-center">
+                    <DialogTitle className="flex items-center justify-center gap-2 text-2xl">
+                        <Crown className="h-7 w-7 text-amber-500" />
+                        ترقية إلى باقة البرو
+                    </DialogTitle>
+                    <DialogDescription className="text-center text-base">
+                        لقد وصلت إلى الحد الأقصى ({limitText}) في الباقة الأساسية
+                    </DialogDescription>
+                </DialogHeader>
+                <div className="space-y-4 py-4">
+                    <div className="space-y-3">
+                        <div className="flex items-start gap-3 p-3 rounded-lg bg-muted/50">
+                            <Sparkles className="h-5 w-5 text-brand-primary mt-0.5" />
+                            <div>
+                                <p className="font-medium text-sm">عدد غير محدود من المنتجات والتصنيفات</p>
+                                <p className="text-xs text-muted-foreground">أضف عدد لا نهائي من المنتجات والتصنيفات</p>
+                            </div>
+                        </div>
+                        <div className="flex items-start gap-3 p-3 rounded-lg bg-muted/50">
+                            <Palette className="h-5 w-5 text-brand-primary mt-0.5" />
+                            <div>
+                                <p className="font-medium text-sm">أنماط مظهر متعددة</p>
+                                <p className="text-xs text-muted-foreground">اختر من بين 10 أنماط ألوان مختلفة لمتجرك</p>
+                            </div>
+                        </div>
+                        <div className="flex items-start gap-3 p-3 rounded-lg bg-muted/50">
+                            <Crown className="h-5 w-5 text-brand-primary mt-0.5" />
+                            <div>
+                                <p className="font-medium text-sm">دعم فني مميز</p>
+                                <p className="text-xs text-muted-foreground">أولوية في الرد والدعم الفني</p>
+                            </div>
+                        </div>
+                    </div>
+                    <Button asChild className="w-full bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-600 hover:to-orange-600">
+                        <a
+                            href="https://wa.me/201008116452?text=مرحباً، أريد الترقية إلى باقة البرو لمتجري"
+                            target="_blank"
+                            rel="noopener noreferrer"
+                        >
+                            <MessageCircle className="h-4 w-4 ml-2" />
+                            طلب الترقية
+                        </a>
                     </Button>
-                    <AlertDialogCancel className="w-full mt-0">إلغاء</AlertDialogCancel>
-                </AlertDialogFooter>
-            </AlertDialogContent>
-        </AlertDialog>
+                </div>
+            </DialogContent>
+        </Dialog>
     );
 }

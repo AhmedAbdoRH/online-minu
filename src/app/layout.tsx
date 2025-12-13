@@ -11,7 +11,6 @@ export const metadata: Metadata = {
     template: '%s | أونلاين كاتلوج'
   },
   description: 'منصة إنشاء المتجر الرقمي للمحال والمتاجر. سجل مجاناً وأنشئ متجرك خلال دقائق.',
-  manifest: '/manifest.json',
   icons: {
     icon: '/mainlogo.png',
     shortcut: '/mainlogo.png',
@@ -63,7 +62,6 @@ export default function RootLayout({
           href="https://fonts.cdnfonts.com/css/satoshi"
           rel="stylesheet"
         />
-
       </head>
       <body
         className={cn(
