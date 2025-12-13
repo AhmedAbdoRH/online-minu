@@ -244,29 +244,10 @@ function MenuItemCard({ item, catalogName, categoryName, viewMode, index }: Menu
 }
 
 
-function AddToHomeCTA({ show, onDismiss, catalogName }: { show: boolean; onDismiss: () => void; catalogName: string }) {
-  return (
-    <AnimatePresence>
-      {show && (
-        <motion.button
-          type="button"
-          initial={{ opacity: 0, y: 50 }}
-          animate={{ opacity: 1, y: 0, transition: { type: "spring", stiffness: 220 } }}
-          exit={{ opacity: 0, y: 50 }}
-          onClick={onDismiss}
-          className="fixed inset-x-0 bottom-4 z-50 mx-auto flex w-[min(90%,400px)] items-center justify-between rounded-full bg-brand-primary px-4 py-3 text-sm font-semibold text-white shadow-[0_30px_65px_rgba(0,209,201,0.45)]"
-        >
-          <span>أضف {catalogName} للشاشة الرئيسية</span>
-          <span className="text-xs opacity-80">تم</span>
-        </motion.button>
-      )}
-    </AnimatePresence>
-  );
-}
+
 
 export function StorefrontView({ catalog, categories }: StorefrontViewProps) {
   const [viewMode, setViewMode] = useState<ViewMode>("masonry");
-  const [showInstallHint, setShowInstallHint] = useState(false);
   const [mounted, setMounted] = useState(false);
   const [selectedCategoryId, setSelectedCategoryId] = useState<number | null>(null);
   const [selectedSubcategoryId, setSelectedSubcategoryId] = useState<number | null>(null);
@@ -291,17 +272,7 @@ export function StorefrontView({ catalog, categories }: StorefrontViewProps) {
   useEffect(() => {
     setMounted(true);
     if (typeof window === "undefined") return;
-    const alreadyShown = window.localStorage.getItem("om-pwa-install-hint");
-    const isStandalone =
-      window.matchMedia?.("(display-mode: standalone)").matches ||
-      (window.navigator as any).standalone;
-    if (!alreadyShown && !isStandalone) {
-      const timer = setTimeout(() => {
-        setShowInstallHint(true);
-        window.localStorage.setItem("om-pwa-install-hint", "1");
-      }, 2600);
-      return () => clearTimeout(timer);
-    }
+
   }, []);
 
   const catalogUrl =
@@ -757,11 +728,7 @@ export function StorefrontView({ catalog, categories }: StorefrontViewProps) {
 
         <CartDrawer catalog={catalog} />
         <CartButton />
-        <AddToHomeCTA 
-          show={showInstallHint} 
-          onDismiss={() => setShowInstallHint(false)} 
-          catalogName={catalog.display_name || catalog.name}
-        />
+
 
 
 
