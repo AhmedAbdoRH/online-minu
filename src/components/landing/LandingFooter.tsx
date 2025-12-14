@@ -1,7 +1,7 @@
 
 import Link from 'next/link';
 import Image from 'next/image';
-import { Facebook, Twitter, Instagram, Mail, MessageCircle } from 'lucide-react';
+import { Facebook, Instagram, Mail, MessageCircle } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 
 export default function LandingFooter() {
@@ -26,9 +26,8 @@ export default function LandingFooter() {
                             منصتك المتكاملة لإنشاء كاتلوج رقمي احترافي وإدارة متجرك بسهولة.
                         </p>
                         <div className="flex gap-4 pt-2">
-                            <Link href="#" className="text-muted-foreground hover:text-primary transition-colors"><Twitter className="w-5 h-5" /></Link>
-                            <Link href="#" className="text-muted-foreground hover:text-primary transition-colors"><Facebook className="w-5 h-5" /></Link>
-                            <Link href="#" className="text-muted-foreground hover:text-primary transition-colors"><Instagram className="w-5 h-5" /></Link>
+                            <Link href="https://www.facebook.com/OnlineCatalog" target="_blank" rel="noopener noreferrer" className="text-muted-foreground hover:text-primary transition-colors"><Facebook className="w-5 h-5" /></Link>
+                            <Link href="https://www.instagram.com/onlinecatalog.ecommerce/" target="_blank" rel="noopener noreferrer" className="text-muted-foreground hover:text-primary transition-colors"><Instagram className="w-5 h-5" /></Link>
                         </div>
                     </div>
 
