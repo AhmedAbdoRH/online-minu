@@ -67,7 +67,7 @@ export default function Pricing() {
                         <div key={index} className={`relative rounded-3xl p-8 border flex flex-col h-full ${plan.popular ? 'border-primary shadow-2xl scale-105 z-10 bg-primary/5' : 'border-border bg-card'}`}>
 
                             <div className="mb-8">
-                                <div className="w-16 h-16 rounded-2xl bg-primary/10 flex items-center justify-center text-primary mb-4 mx-auto">
+                                <div className="w-16 h-16 rounded-2xl bg-gradient-to-br from-primary/10 to-[#ffb800]/5 flex items-center justify-center text-primary mb-4 mx-auto">
                                     <plan.icon className="w-8 h-8" />
                                 </div>
                                 <h3 className="text-xl font-bold mb-2">{plan.name}</h3>

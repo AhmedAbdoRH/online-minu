@@ -38,7 +38,7 @@ export default function HowItWorks() {
                     {steps.map((item, index) => (
                         <div key={index} className="flex flex-col items-center text-center group">
                             <div className="relative mb-8">
-                                <div className="w-20 h-20 rounded-full bg-background border-4 border-secondary shadow-xl flex items-center justify-center relative z-10 group-hover:scale-110 transition-transform duration-300">
+                                <div className="w-20 h-20 rounded-full bg-gradient-to-br from-background to-[#ffb800]/5 border-4 border-secondary shadow-xl flex items-center justify-center relative z-10 group-hover:scale-110 transition-transform duration-300">
                                     <item.icon className="w-8 h-8 text-primary" />
                                 </div>
                                 <div className="absolute -top-3 -right-3 w-8 h-8 rounded-full bg-primary text-primary-foreground flex items-center justify-center font-bold text-sm shadow-lg">
