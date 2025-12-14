@@ -1,7 +1,7 @@
 'use client';
 
-import { useState } from 'react';
-import { QRCodeSVG } from 'qrcode.react';
+import { useState, useRef } from 'react';
+import dynamic from 'next/dynamic';
 import { Button } from '@/components/ui/button';
 import {
   Dialog,
@@ -12,6 +12,12 @@ import {
 } from '@/components/ui/dialog';
 import { QrCode, Download } from 'lucide-react';
 
+// Dynamic import for QRCodeSVG to avoid SSR issues
+const QRCodeSVG = dynamic(
+  () => import('qrcode.react').then((mod) => mod.QRCodeSVG),
+  { ssr: false }
+);
+
 interface QRCodeButtonProps {
   url: string;
   storeName: string;
@@ -19,9 +25,10 @@ interface QRCodeButtonProps {
 
 export function QRCodeButton({ url, storeName }: QRCodeButtonProps) {
   const [isOpen, setIsOpen] = useState(false);
+  const qrRef = useRef<HTMLDivElement>(null);
 
   const handleDownload = () => {
-    const svg = document.getElementById('qr-code-svg');
+    const svg = qrRef.current?.querySelector('svg');
     if (!svg) return;
 
     const svgData = new XMLSerializer().serializeToString(svg);
@@ -46,9 +53,9 @@ export function QRCodeButton({ url, storeName }: QRCodeButtonProps) {
   return (
     <Dialog open={isOpen} onOpenChange={setIsOpen}>
       <DialogTrigger asChild>
-        <Button variant="outline" className="gap-2">
+        <Button variant="outline" size="sm" className="gap-2 h-8">
           <QrCode className="h-4 w-4" />
-          رمز QR
+          <span className="hidden sm:inline">رمز QR</span>
         </Button>
       </DialogTrigger>
       <DialogContent className="sm:max-w-md">
@@ -56,9 +63,8 @@ export function QRCodeButton({ url, storeName }: QRCodeButtonProps) {
           <DialogTitle className="text-center">رمز QR للمتجر</DialogTitle>
         </DialogHeader>
         <div className="flex flex-col items-center gap-4 py-4">
-          <div className="bg-white p-4 rounded-lg">
+          <div ref={qrRef} className="bg-white p-4 rounded-lg">
             <QRCodeSVG
-              id="qr-code-svg"
               value={url}
               size={200}
               level="H"
