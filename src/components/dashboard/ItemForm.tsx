@@ -14,6 +14,7 @@ import { useToast } from '@/hooks/use-toast';
 import type { Category, MenuItemWithDetails } from '@/lib/types';
 import { UpgradeAlert } from './UpgradeAlert';
 import { useState } from 'react';
+import { Plus, Image as ImageIcon } from 'lucide-react';
 
 const MAX_FILE_SIZE = 5 * 1024 * 1024; // 5MB
 const ACCEPTED_IMAGE_TYPES = ["image/jpeg", "image/jpg", "image/png", "image/webp"];
@@ -23,14 +24,16 @@ const formSchema = z.object({
   description: z.string().max(255).optional().or(z.literal('')),
   price: z.coerce.number().min(0, 'يجب أن يكون السعر إيجابياً'),
   category_id: z.string().min(1, 'التصنيف مطلوب'),
-  images: z.array(z.instanceof(File))
+  main_image: z.instanceof(File).optional(),
+  additional_images: z.array(z.instanceof(File))
     .optional()
     .or(z.literal(undefined)),
 });
 
 // For update, images are not required
 const updateFormSchema = formSchema.extend({
-  images: z.array(z.instanceof(File)).optional().or(z.literal(undefined))
+  main_image: z.instanceof(File).optional(),
+  additional_images: z.array(z.instanceof(File)).optional().or(z.literal(undefined))
 });
 
 interface ItemFormProps {
@@ -79,7 +82,8 @@ export function ItemForm({ catalogId, catalogPlan, categories, item, onSuccess, 
       description: item?.description || '',
       price: item?.price || 0,
       category_id: item?.category_id ? item.category_id.toString() : '',
-      images: undefined,
+      main_image: undefined,
+      additional_images: undefined,
     },
   });
 
@@ -107,9 +111,13 @@ export function ItemForm({ catalogId, catalogPlan, categories, item, onSuccess, 
       formData.append('price', values.price.toString());
       formData.append('category_id', values.category_id);
 
-      if (values.images && values.images.length > 0) {
-        values.images.forEach((file) => {
-          formData.append('images', file);
+      if (values.main_image) {
+        formData.append('main_image', values.main_image);
+      }
+
+      if (values.additional_images && values.additional_images.length > 0) {
+        values.additional_images.forEach((file) => {
+          formData.append('additional_images', file);
         });
       }
 
@@ -206,41 +214,89 @@ export function ItemForm({ catalogId, catalogPlan, categories, item, onSuccess, 
               )}
             />
           </div>
+          
+          {/* الصورة الرئيسية */}
           <FormField
             control={form.control}
-            name="images"
+            name="main_image"
             render={({ field: { onChange, value, ...rest } }) => (
               <FormItem>
                 <FormLabel>
-                  صور المنتج
-                  {item && ' (اختياري للتغيير)'}
-                  {!isPro && <span className="text-xs text-muted-foreground mr-2">(صورة واحدة فقط)</span>}
-                  {isPro && <span className="text-xs text-primary mr-2">(يمكنك إضافة أكثر من صورة)</span>}
+                  <div className="flex items-center gap-2">
+                    <ImageIcon className="h-4 w-4" />
+                    الصورة الرئيسية للمنتج
+                    {item && ' (اختياري للتغيير)'}
+                  </div>
                 </FormLabel>
                 <FormControl>
                   <Input
                     type="file"
                     accept="image/*"
-                    multiple={true} // Allow multiple selection for UX checking
                     onChange={(e) => {
-                      const files = Array.from(e.target.files || []);
-                      if (!isPro && files.length > 1) {
-                        setShowUpgradeAlert(true);
-                        onChange([files[0]]);
-                        // Reset input value to show only one file? Hard with uncontrolled input.
-                        // Just warn and take first.
-                        e.target.value = ''; // clear to force re-selection if they want? No that's annoying.
-                        return;
+                      const file = e.target.files?.[0];
+                      if (file) {
+                        onChange(file);
                       }
-                      onChange(files);
                     }}
                     {...rest}
                   />
                 </FormControl>
                 <FormMessage />
+                {item?.image_url && (
+                  <div className="mt-2 text-sm text-muted-foreground">
+                    الصورة الرئيسية الحالية: متوفرة
+                  </div>
+                )}
+              </FormItem>
+            )}
+          />
+
+          {/* الصور الإضافية */}
+          <FormField
+            control={form.control}
+            name="additional_images"
+            render={({ field: { onChange, value, ...rest } }) => (
+              <FormItem>
+                <FormLabel>
+                  <div className="flex items-center gap-2">
+                    <Plus className="h-4 w-4" />
+                    الصور الإضافية
+                    {!isPro && <span className="text-xs text-muted-foreground mr-2">(ميزة خاصة بالباقة الاحترافية)</span>}
+                    {isPro && <span className="text-xs text-primary mr-2">(ميزة خاصة بالباقة الاحترافية)</span>}
+                  </div>
+                </FormLabel>
+                <FormControl>
+                  {isPro ? (
+                    <div className="space-y-2">
+                      <Input
+                        type="file"
+                        accept="image/*"
+                        multiple={true}
+                        onChange={(e) => {
+                          const files = Array.from(e.target.files || []);
+                          onChange(files);
+                        }}
+                        {...rest}
+                      />
+                    </div>
+                  ) : (
+                    <div className="space-y-2">
+                      <Input
+                        type="file"
+                        accept="image/*"
+                        multiple={true}
+                        disabled={true}
+                        placeholder="ميزة خاصة بالباقة الاحترافية"
+                        className="opacity-50 cursor-not-allowed"
+                        {...rest}
+                      />
+                    </div>
+                  )}
+                </FormControl>
+                <FormMessage />
                 {item && (
                   <div className="mt-2 text-sm text-muted-foreground">
-                    الصور الحالية: {item.image_url ? 1 : 0} + {(item as any).product_images?.length || 0} إضافية
+                    الصور الإضافية الحالية: {(item as any).product_images?.length || 0} صورة
                   </div>
                 )}
               </FormItem>
