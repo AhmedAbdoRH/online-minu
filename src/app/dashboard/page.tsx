@@ -14,23 +14,23 @@ import { Badge } from "@/components/ui/badge";
 const getPlanDetails = (plan: string) => {
   switch (plan?.toLowerCase()) {
     case 'pro':
-      return { 
-        label: 'الباقة الاحترافية', 
+      return {
+        label: 'الباقة الاحترافية',
         className: 'relative overflow-hidden bg-gradient-to-r from-amber-500 via-orange-500 to-yellow-500 text-white shadow-lg shadow-orange-500/30 border-0',
         icon: Zap,
         glowColor: 'shadow-orange-400/50'
       };
     case 'business':
-      return { 
-        label: 'باقة الأعمال', 
+      return {
+        label: 'باقة الأعمال',
         className: 'relative overflow-hidden bg-gradient-to-r from-purple-600 via-violet-600 to-indigo-600 text-white shadow-lg shadow-purple-500/30 border-0',
         icon: Building,
         glowColor: 'shadow-purple-400/50'
       };
     case 'basic':
     default:
-      return { 
-        label: 'الباقة الأساسية', 
+      return {
+        label: 'الباقة الأساسية',
         className: 'relative overflow-hidden bg-gradient-to-r from-cyan-500 via-teal-500 to-emerald-500 text-white shadow-lg shadow-teal-500/30 border-0',
         icon: Package,
         glowColor: 'shadow-teal-400/50'
@@ -57,21 +57,22 @@ export default async function DashboardPage() {
 
   if (!catalog) {
     return (
-      <div className="max-w-2xl mx-auto pt-4">
+      <div className="max-w-3xl mx-auto pt-8 px-4">
         <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.5 }}
+          initial={{ opacity: 0, scale: 0.95 }}
+          animate={{ opacity: 1, scale: 1 }}
+          transition={{ duration: 0.8, ease: "easeOut" }}
+          className="relative"
         >
-          <Card className="glass-surface border-primary/20">
-            <CardHeader>
-              <CardTitle className="text-2xl text-brand-primary">خطوات بسيطة. لإطلاق متجرك.</CardTitle>
-              <CardDescription className="text-lg">
-                املأ البيانات لاستكمال المتجر.
-              </CardDescription>
-            </CardHeader>
-            <div className="px-6 pb-6">
-              <OnboardingForm userPhone={userPhone} />
+          {/* Background Decorative Element */}
+          <div className="absolute -top-24 -right-24 w-64 h-64 bg-brand-primary/10 rounded-full blur-[100px] pointer-events-none" />
+          <div className="absolute -bottom-24 -left-24 w-64 h-64 bg-brand-luxury/10 rounded-full blur-[100px] pointer-events-none" />
+
+          <Card className="glass-surface border-white/10 overflow-hidden shadow-2xl">
+            <div className="p-1"> {/* Thin border container */}
+              <div className="px-6 py-12 md:px-12">
+                <OnboardingForm userPhone={userPhone} />
+              </div>
             </div>
           </Card>
         </motion.div>

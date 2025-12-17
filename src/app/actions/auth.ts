@@ -39,21 +39,18 @@ export async function signup(formData: FormData) {
     await signInWithGoogle();
 }
 
-export async function signUpWithEmail(formData: FormData) {
-    const email = formData.get("email") as string;
-    const password = formData.get("password") as string;
-    
+export async function signUpWithEmail(email: string, password: string) {
     // Basic validation
     if (!email || !password) {
-        return redirect(`/signup?message=${encodeURIComponent("البريد الإلكتروني وكلمة المرور مطلوبان")}`);
+        return { error: "البريد الإلكتروني وكلمة المرور مطلوبان" };
     }
     
     if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
-        return redirect(`/signup?message=${encodeURIComponent("البريد الإلكتروني غير صحيح")}`);
+        return { error: "البريد الإلكتروني غير صحيح" };
     }
     
     if (password.length < 6) {
-        return redirect(`/signup?message=${encodeURIComponent("كلمة المرور يجب أن تكون 6 أحرف على الأقل")}`);
+        return { error: "كلمة المرور يجب أن تكون 6 أحرف على الأقل" };
     }
     
     const supabase = await createClient();
@@ -78,21 +75,21 @@ export async function signUpWithEmail(formData: FormData) {
             } else if (error.message.includes("Password should be")) {
                 errorMessage = "كلمة المرور ضعيفة جدًا";
             }
-            return redirect(`/signup?message=${encodeURIComponent(errorMessage)}`);
+            return { error: errorMessage };
         }
         
         console.log("Email signup successful");
         if (data.user && !data.session) {
             // User created but email confirmation required
-            return redirect(`/signup?message=${encodeURIComponent("تم إرسال رابط التأكيد إلى بريدك الإلكتروني. يرجى التحقق من بريدك وتأكيد الحساب.")}`);
+            return { success: true, message: "تم إرسال رابط التأكيد إلى بريدك الإلكتروني" };
         }
         
         // Auto sign in if no email confirmation needed
-        return redirect(`/dashboard`);
+        return { success: true };
         
     } catch (error) {
         console.error("Email signup error:", error);
-        return redirect(`/signup?message=${encodeURIComponent("حدث خطأ غير متوقع أثناء إنشاء الحساب")}`);
+        return { error: "حدث خطأ غير متوقع أثناء إنشاء الحساب" };
     }
 }
 

@@ -1,31 +1,65 @@
 'use client'
 
 import Link from "next/link"
-import { signInWithGoogle } from "@/app/actions/auth"
+import { useState } from "react"
+import { signInWithGoogle, signUpWithEmail } from "@/app/actions/auth"
 import { Button } from "@/components/ui/button"
+import { Input } from "@/components/ui/input"
+import { Label } from "@/components/ui/label"
+import { useRouter } from "next/navigation"
 
-export function SignupForm({ message }: { message: string }) {
+interface SignupFormProps {
+  message: string
+  showEmailForm?: boolean
+}
+
+export function SignupForm({ message, showEmailForm = false }: SignupFormProps) {
+  const router = useRouter()
+  const [isLoading, setIsLoading] = useState(false)
+  const [email, setEmail] = useState("")
+  const [password, setPassword] = useState("")
+  const [confirmPassword, setConfirmPassword] = useState("")
+  const [error, setError] = useState("")
+
+  const handleEmailSignup = async (e: React.FormEvent) => {
+    e.preventDefault()
+    setIsLoading(true)
+    setError("")
+
+    if (password !== confirmPassword) {
+      setError("كلمات المرور غير متطابقة")
+      setIsLoading(false)
+      return
+    }
+
+    if (password.length < 6) {
+      setError("كلمة المرور يجب أن تكون 6 أحرف على الأقل")
+      setIsLoading(false)
+      return
+    }
+
+    try {
+      const result = await signUpWithEmail(email, password)
+      if (result?.error) {
+        setError(result.error)
+      } else {
+        router.push('/login?message=تم إنشاء الحساب بنجاح، يرجى تسجيل الدخول')
+      }
+    } catch (err: any) {
+      setError(err.message || 'حدث خطأ أثناء إنشاء الحساب')
+    } finally {
+      setIsLoading(false)
+    }
+  }
+
   return (
     <div className="grid gap-6">
-      <div className="text-center">
-        <p className="text-sm text-muted-foreground flex items-center justify-center gap-2">
-          <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-            <path strokeLinecap="round" strokeLinejoin="round" d="M9 5l7 7-7 7" />
-          </svg>
-          إنشاء حساب جديد
-        </p>
-      </div>
-
       <form action={signInWithGoogle}>
         <Button 
           type="submit" 
-          className="w-full h-14 gap-3 bg-white hover:bg-gray-50 text-gray-700 border border-gray-200 shadow-md hover:shadow-lg transition-all duration-200 rounded-xl font-medium text-base flex items-center justify-center"
+          className="w-full h-14 gap-3 bg-white hover:bg-gray-50 text-gray-700 border border-gray-200 shadow-md hover:shadow-lg transition-all duration-200 rounded-xl font-medium text-base flex items-center justify-center flex-row-reverse"
         >
-          <svg className="h-5 w-5 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-            <path strokeLinecap="round" strokeLinejoin="round" d="M15 19l-7-7 7-7" />
-          </svg>
-          <span>أنشئ حسابك باستخدام جوجل</span>
-          <svg className="h-6 w-6" viewBox="0 0 24 24">
+          <svg className="h-8 w-8" viewBox="0 0 24 24">
             <path
               d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"
               fill="#4285F4"
@@ -43,8 +77,77 @@ export function SignupForm({ message }: { message: string }) {
               fill="#EA4335"
             />
           </svg>
+          <span>التسجيل باستخدام جوجل</span>
         </Button>
       </form>
+
+      {showEmailForm && (
+        <div className="space-y-4 animate-in fade-in slide-in-from-top-2 duration-300">
+          <div className="relative">
+            <div className="absolute inset-0 flex items-center">
+              <span className="w-full border-t" />
+            </div>
+            <div className="relative flex justify-center text-xs uppercase">
+              <span className="bg-background px-2 text-muted-foreground">
+                أو التسجيل بالبريد الإلكتروني
+              </span>
+            </div>
+          </div>
+
+          <form onSubmit={handleEmailSignup} className="space-y-4">
+            <div className="space-y-2">
+              <Label htmlFor="email">البريد الإلكتروني</Label>
+              <Input
+                id="email"
+                type="email"
+                placeholder="example@email.com"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                required
+                dir="ltr"
+              />
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="password">كلمة المرور</Label>
+              <Input
+                id="password"
+                type="password"
+                placeholder="••••••••"
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                required
+                minLength={6}
+                dir="ltr"
+              />
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="confirmPassword">تأكيد كلمة المرور</Label>
+              <Input
+                id="confirmPassword"
+                type="password"
+                placeholder="••••••••"
+                value={confirmPassword}
+                onChange={(e) => setConfirmPassword(e.target.value)}
+                required
+                minLength={6}
+                dir="ltr"
+              />
+            </div>
+            {error && (
+              <div className="bg-destructive/10 border border-destructive/20 p-3 text-sm text-destructive rounded-lg text-center">
+                {error}
+              </div>
+            )}
+            <Button 
+              type="submit" 
+              className="w-full"
+              disabled={isLoading}
+            >
+              {isLoading ? "جاري إنشاء الحساب..." : "إنشاء حساب بالبريد الإلكتروني"}
+            </Button>
+          </form>
+        </div>
+      )}
       
       {message && (
         <div className="bg-destructive/10 border border-destructive/20 p-4 text-sm text-destructive rounded-xl text-center">

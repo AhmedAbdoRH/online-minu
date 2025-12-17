@@ -16,7 +16,7 @@ import { UpgradeAlert } from './UpgradeAlert';
 import { useState } from 'react';
 import { Plus, Image as ImageIcon, Trash2, Tag } from 'lucide-react';
 import { useFieldArray } from 'react-hook-form';
-import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
 const MAX_FILE_SIZE = 5 * 1024 * 1024; // 5MB
 const ACCEPTED_IMAGE_TYPES = ["image/jpeg", "image/jpg", "image/png", "image/webp"];
@@ -218,116 +218,116 @@ export function ItemForm({ catalogId, catalogPlan, categories, item, onSuccess, 
             />
             <div className="col-span-2 space-y-4 rounded-lg border p-4 bg-muted/20">
               <FormLabel>نظام التسعير</FormLabel>
-              <RadioGroup
-                defaultValue={pricingType}
+              <Tabs
+                value={pricingType}
                 onValueChange={(val) => {
                   const type = val as 'unified' | 'multi';
                   setPricingType(type);
                   form.setValue('pricing_type', type);
                 }}
-                className="flex items-center gap-4"
+                className="w-full"
               >
-                <div className="flex items-center space-x-2 space-x-reverse">
-                  <RadioGroupItem value="unified" id="unified" />
-                  <FormLabel htmlFor="unified" className="font-normal cursor-pointer">سعر موحد</FormLabel>
-                </div>
-                <div className="flex items-center space-x-2 space-x-reverse">
-                  <RadioGroupItem value="multi" id="multi" />
-                  <FormLabel htmlFor="multi" className="font-normal cursor-pointer">
+                <TabsList className="grid w-full grid-cols-2">
+                  <TabsTrigger value="multi" className="text-sm">
                     <div className="flex items-center gap-2">
-                      <span>أسعار متعددة (مقاسات/أحجام)</span>
-                      <span className="text-xs bg-primary/10 text-primary px-2 py-0.5 rounded-full">جديد</span>
+                      <span>أسعار متعددة</span>
+                      <span className="text-xs bg-primary/20 text-primary px-1.5 py-0.5 rounded-full">جديد</span>
                     </div>
-                  </FormLabel>
-                </div>
-              </RadioGroup>
+                  </TabsTrigger>
+                  <TabsTrigger value="unified" className="text-sm">
+                    سعر موحد
+                  </TabsTrigger>
+                </TabsList>
 
-              {pricingType === 'unified' ? (
-                <FormField
-                  control={form.control}
-                  name="price"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>السعر (ج.م)</FormLabel>
-                      <FormControl><Input type="number" step="0.01" {...field} /></FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-              ) : (
-                <div className="space-y-4">
-                  <div className="flex items-center justify-between">
-                    <FormLabel className="text-base">خيارات المنتج</FormLabel>
-                    <Button
-                      type="button"
-                      variant="outline"
-                      size="sm"
-                      onClick={() => append({ name: '', price: 0 })}
-                      className="gap-1"
-                    >
-                      <Plus className="h-3 w-3" />
-                      إضافة خيار
-                    </Button>
-                  </div>
-
-                  <div className="space-y-3">
-                    {fields.map((field, index) => (
-                      <div key={field.id} className="flex gap-3 items-start animate-in fade-in slide-in-from-top-2">
-                        <FormField
-                          control={form.control}
-                          name={`variants.${index}.name`}
-                          render={({ field }) => (
-                            <FormItem className="flex-1">
-                              <FormControl>
-                                <Input placeholder="اسم الخيار (مثلاً: كبير، وسط)" {...field} />
-                              </FormControl>
-                              <FormMessage />
-                            </FormItem>
-                          )}
-                        />
-                        <FormField
-                          control={form.control}
-                          name={`variants.${index}.price`}
-                          render={({ field }) => (
-                            <FormItem className="w-32">
-                              <FormControl>
-                                <div className="relative">
-                                  <Input type="number" step="0.01" placeholder="السعر" {...field} className="pl-8" />
-                                  <span className="absolute left-2 top-2.5 text-xs text-muted-foreground">ج.م</span>
-                                </div>
-                              </FormControl>
-                              <FormMessage />
-                            </FormItem>
-                          )}
-                        />
-                        <Button
-                          type="button"
-                          variant="ghost"
-                          size="icon"
-                          className="text-destructive hover:text-destructive/90 hover:bg-destructive/10"
-                          onClick={() => remove(index)}
-                        >
-                          <Trash2 className="h-4 w-4" />
-                        </Button>
-                      </div>
-                    ))}
-                    {fields.length === 0 && (
-                      <div className="text-center py-8 border-2 border-dashed rounded-lg text-muted-foreground">
-                        <Tag className="h-8 w-8 mx-auto mb-2 opacity-50" />
-                        <p>لم يتم إضافة خيارات بعد</p>
-                        <Button
-                          type="button"
-                          variant="link"
-                          onClick={() => append({ name: '', price: 0 })}
-                        >
-                          إضافة الخيار الأول
-                        </Button>
-                      </div>
+                <TabsContent value="unified" className="mt-4">
+                  <FormField
+                    control={form.control}
+                    name="price"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>السعر (ج.م)</FormLabel>
+                        <FormControl><Input type="number" step="0.01" {...field} /></FormControl>
+                        <FormMessage />
+                      </FormItem>
                     )}
+                  />
+                </TabsContent>
+
+                <TabsContent value="multi" className="mt-4">
+                  <div className="space-y-4">
+                    <div className="flex items-center justify-between">
+                      <FormLabel className="text-base">خيارات المنتج</FormLabel>
+                      <Button
+                        type="button"
+                        variant="outline"
+                        size="sm"
+                        onClick={() => append({ name: '', price: 0 })}
+                        className="gap-1"
+                      >
+                        <Plus className="h-3 w-3" />
+                        إضافة خيار
+                      </Button>
+                    </div>
+
+                    <div className="space-y-3">
+                      {fields.map((field, index) => (
+                        <div key={field.id} className="flex gap-3 items-start animate-in fade-in slide-in-from-top-2">
+                          <FormField
+                            control={form.control}
+                            name={`variants.${index}.name`}
+                            render={({ field }) => (
+                              <FormItem className="flex-1">
+                                <FormControl>
+                                  <Input placeholder="اسم الخيار (مثلاً: كبير، وسط)" {...field} />
+                                </FormControl>
+                                <FormMessage />
+                              </FormItem>
+                            )}
+                          />
+                          <FormField
+                            control={form.control}
+            name={`variants.${index}.price`}
+                            render={({ field }) => (
+                              <FormItem className="w-32">
+                                <FormControl>
+                                  <div className="relative">
+                                    <Input type="number" step="0.01" placeholder="السعر" {...field} className="pl-8" />
+                                    <span className="absolute left-2 top-2.5 text-xs text-muted-foreground">ج.م</span>
+                                  </div>
+                                </FormControl>
+                                <FormMessage />
+                              </FormItem>
+                            )}
+                          />
+                          <Button
+                            type="button"
+                            variant="ghost"
+                            size="icon"
+                            className="text-destructive hover:text-destructive/90 hover:bg-destructive/10"
+                            onClick={() => remove(index)}
+                          >
+                            <Trash2 className="h-4 w-4" />
+                          </Button>
+                        </div>
+                      ))}
+                      {fields.length === 0 && (
+                        <div className="text-center py-8 border-2 border-dashed rounded-lg text-muted-foreground">
+                          <Tag className="h-8 w-8 mx-auto mb-2 opacity-50" />
+                          <p>لم يتم إضافة خيارات بعد</p>
+                          <Button
+                            type="button"
+                            variant="link"
+                            onClick={() => append({ name: '', price: 0 })}
+                          >
+                            إضافة الخيار الأول
+                          </Button>
+                        </div>
+                      )}
+                    </div>
+                    <FormMessage>{form.formState.errors.variants?.message}</FormMessage>
                   </div>
-                  <FormMessage>{form.formState.errors.variants?.message}</FormMessage>
-                </div>
-              )}
+                </TabsContent>
+              </Tabs>
             </div>
             <FormField
               control={form.control}
