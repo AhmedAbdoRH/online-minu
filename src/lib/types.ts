@@ -129,6 +129,29 @@ interface Database {
           image_url?: string;
         };
       };
+      item_variants: {
+        Row: {
+          id: number;
+          created_at: string;
+          menu_item_id: number;
+          name: string;
+          price: number;
+        };
+        Insert: {
+          id?: number;
+          created_at?: string;
+          menu_item_id: number;
+          name: string;
+          price: number;
+        };
+        Update: {
+          id?: number;
+          created_at?: string;
+          menu_item_id?: number;
+          name?: string;
+          price?: number;
+        };
+      };
     };
   };
 }
@@ -148,8 +171,13 @@ export type UpdateMenuItem = Database['public']['Tables']['menu_items']['Update'
 export type ProductImage = Database['public']['Tables']['product_images']['Row'];
 export type NewProductImage = Database['public']['Tables']['product_images']['Insert'];
 
+export type ItemVariant = Database['public']['Tables']['item_variants']['Row'];
+export type NewItemVariant = Database['public']['Tables']['item_variants']['Insert'];
+export type UpdateItemVariant = Database['public']['Tables']['item_variants']['Update'];
+
 export type MenuItemWithDetails = MenuItem & {
   product_images: ProductImage[];
+  item_variants: ItemVariant[];
   categories: { name: string } | null;
 };
 

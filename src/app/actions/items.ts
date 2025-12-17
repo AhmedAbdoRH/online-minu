@@ -21,6 +21,15 @@ const itemSchema = z.object({
       '.jpg, .jpeg, .png and .webp files are accepted.'
     )
     .optional(),
+  variants: z.string().optional().transform((str) => {
+    if (!str) return [];
+    try {
+      const parsed = JSON.parse(str);
+      return Array.isArray(parsed) ? parsed : [];
+    } catch {
+      return [];
+    }
+  }),
 });
 
 async function uploadImage(
@@ -100,6 +109,7 @@ export async function createItem(formData: FormData) {
       price: formData.get('price'),
       category_id: formData.get('category_id'),
       images: images,
+      variants: formData.get('variants'),
     });
 
     if (!validatedFields.success) {
@@ -107,7 +117,17 @@ export async function createItem(formData: FormData) {
       return { error: 'بيانات غير صالحة.' };
     }
 
-    const { catalogId, name, description, price, category_id } = validatedFields.data;
+    const { catalogId, name, description, category_id, variants } = validatedFields.data;
+    let { price } = validatedFields.data;
+
+    // Determine price from variants if valid
+    if (variants && variants.length > 0) {
+      // Find min price
+      const minPrice = Math.min(...variants.map((v: any) => parseFloat(v.price) || 0));
+      if (!isNaN(minPrice)) {
+        price = minPrice;
+      }
+    }
 
     // Check for plan limits
     const { data: catalog } = await supabase
@@ -153,7 +173,7 @@ export async function createItem(formData: FormData) {
       catalog_id: catalogId,
       name,
       description,
-      price,
+      price, // Uses min price if variants exist
       category_id,
       image_url: mainImageUrl, // Backward compatibility
     };
@@ -165,6 +185,21 @@ export async function createItem(formData: FormData) {
       .single();
 
     if (dbError) throw dbError;
+
+    // Insert variants
+    if (insertedItem && variants && variants.length > 0) {
+      const variantsToInsert = variants.map((v: any) => ({
+        menu_item_id: insertedItem.id,
+        name: v.name,
+        price: parseFloat(v.price),
+      }));
+
+      const { error: variantError } = await supabase
+        .from('item_variants')
+        .insert(variantsToInsert);
+
+      if (variantError) console.error('Error inserting variants:', variantError);
+    }
 
     // Insert all images into product_images table if we have inserted key
     if (insertedItem && uploadedUrls.length > 0) {
@@ -223,14 +258,35 @@ export async function updateItem(itemId: number, formData: FormData) {
     const rawImages = formData.getAll('images');
     const images = rawImages.filter((f): f is File => f instanceof File && f.size > 0);
 
+    // Also get variants from form data manually since we are not using the schema for full validation in update yet
+    // Or we should better parse it.
+    const variantsStr = formData.get('variants') as string;
+    let variants: any[] = [];
+    try {
+      if (variantsStr) {
+        variants = JSON.parse(variantsStr);
+      }
+    } catch (e) { console.error("Error parsing variants", e); }
+
+
     if (!isPro && images.length > 1) {
       return { error: 'LIMIT_REACHED' };
+    }
+
+    let price = parseFloat(formData.get('price') as string);
+    // Determine price from variants if valid
+    if (variants && variants.length > 0) {
+      // Find min price
+      const minPrice = Math.min(...variants.map((v: any) => parseFloat(v.price) || 0));
+      if (!isNaN(minPrice)) {
+        price = minPrice;
+      }
     }
 
     const updatePayload: UpdateMenuItem = {
       name: formData.get('name') as string,
       description: formData.get('description') as string,
-      price: parseFloat(formData.get('price') as string),
+      price: price, // Uses min price if variants exist
       category_id: parseInt(formData.get('category_id') as string),
     };
 
@@ -275,6 +331,29 @@ export async function updateItem(itemId: number, formData: FormData) {
       .eq('id', itemId);
 
     if (dbError) throw dbError;
+
+    // Handle variants update: Delete all existing and re-insert
+    if (variants) { // Only if variants field is present (even if empty array to clear)
+      // But wait, if we switch to Unified, variants should be cleared.
+      // The form should send empty array if switched to unified.
+
+      // First delete existing
+      await supabase.from('item_variants').delete().eq('menu_item_id', itemId);
+
+      if (variants.length > 0) {
+        const variantsToInsert = variants.map((v: any) => ({
+          menu_item_id: itemId,
+          name: v.name,
+          price: parseFloat(v.price),
+        }));
+
+        const { error: variantError } = await supabase
+          .from('item_variants')
+          .insert(variantsToInsert);
+
+        if (variantError) console.error('Error updating variants:', variantError);
+      }
+    }
 
     revalidatePath('/dashboard/items');
     return { error: null };

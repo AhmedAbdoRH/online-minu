@@ -6,10 +6,10 @@ import Image from "next/image";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { ShareButtons } from "@/components/menu/ShareButtons";
-import type { Catalog, MenuItem } from "@/lib/types";
+import { ProductActions } from "@/components/menu/ProductActions";
+import type { Catalog, MenuItem, ItemVariant } from "@/lib/types";
 import { cn } from "@/lib/utils";
-import { ArrowRight, Sparkles, Clock, Flame, MessageCircle } from "lucide-react";
-import ProductImage from "@/components/ProductImage";
+import { ArrowRight, Sparkles, MessageCircle } from "lucide-react";
 import RelatedProductImage from "@/components/RelatedProductImage";
 import { ProductGallery } from "@/components/menu/ProductGallery";
 
@@ -22,7 +22,7 @@ type Props = {
 
 type ProductPageData = {
   catalog: Catalog;
-  product: MenuItem;
+  product: MenuItem & { item_variants: ItemVariant[] };
   categoryName?: string;
   related: MenuItem[];
   images: string[];
@@ -51,6 +51,13 @@ async function getProductData(slug: string, itemId: string): Promise<ProductPage
   if (!product) {
     return null;
   }
+
+  // Fetch variants
+  const { data: variants } = await supabase
+    .from("item_variants")
+    .select("*")
+    .eq("menu_item_id", product.id)
+    .order('price', { ascending: true });
 
   // Fetch multiple images
   const { data: productImages } = await supabase
@@ -96,7 +103,7 @@ async function getProductData(slug: string, itemId: string): Promise<ProductPage
 
   return {
     catalog,
-    product,
+    product: { ...product, item_variants: variants || [] },
     categoryName: category?.name ?? undefined,
     related: related ?? [],
     images
@@ -237,33 +244,14 @@ export default async function ProductPage({ params }: Props) {
               {product.description ?? "وصف المنتج سيتم إضافته قريبًا لإبراز القصة والنكهة الفريدة."}
             </p>
 
-            <div className="grid gap-3 rounded-2xl border border-dashed border-white/40 bg-white/60 p-4 shadow-inner backdrop-blur dark:bg-slate-950/50">
-              <div className="flex items-center justify-between text-sm">
-                <span className="text-muted-foreground">السعر</span>
-                <span className="font-semibold text-brand-primary">{product.price} ج.م</span>
-              </div>
-            </div>
-
-            <div className="flex flex-wrap gap-3">
-              {sellerWhatsAppNumber ? (
-                <Button
-                  asChild
-                  className="flex-1 rounded-full bg-[#25D366] text-sm font-semibold shadow-[0_18px_40px_rgba(37,211,102,0.35)] hover:bg-[#1fb55b]"
-                >
-                  <a href={`https://wa.me/${sellerWhatsAppNumber.replace(/[^\d]/g, '')}?text=${whatsappText}`} target="_blank" rel="noopener noreferrer">
-                    <MessageCircle className="ml-2 h-5 w-5" />
-                    اطلب عبر واتساب
-                  </a>
-                </Button>
-              ) : (
-                <div className="flex-1 rounded-full border border-dashed border-muted-foreground/30 bg-muted/20 px-4 py-3 text-center text-sm text-muted-foreground">
-                  <MessageCircle className="ml-2 inline h-4 w-4" />
-                  رقم الواتساب غير متوفر
-                </div>
-              )}
-            </div>
-
-            <ShareButtons catalogName={catalog.display_name || ""} />
+            <ProductActions
+              basePrice={product.price}
+              variants={product.item_variants || []}
+              productName={product.name}
+              catalogName={catalog.display_name || catalog.name}
+              catalogPhone={catalog.whatsapp_number}
+              productUrl={productUrl}
+            />
           </div>
         </section>
 
