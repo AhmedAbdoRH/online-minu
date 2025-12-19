@@ -79,6 +79,59 @@ export function OnboardingForm({ userPhone }: OnboardingFormProps) {
     }
   }, [state, toast]);
 
+  // Load pending data from welcome popup and skip to appropriate step
+  useEffect(() => {
+    const pendingStoreName = localStorage.getItem('pendingStoreName');
+    const pendingStoreSlug = localStorage.getItem('pendingStoreSlug');
+    const pendingWhatsApp = localStorage.getItem('pendingWhatsApp');
+
+    if (pendingStoreName || pendingStoreSlug || pendingWhatsApp) {
+      // Extract country code and phone number from pendingWhatsApp
+      let countryCode = '+20';
+      let phoneOnly = pendingWhatsApp || '';
+
+      if (pendingWhatsApp) {
+        // Try to extract country code
+        for (const country of countries) {
+          if (pendingWhatsApp.startsWith(country.code)) {
+            countryCode = country.code;
+            phoneOnly = pendingWhatsApp.slice(country.code.length);
+            break;
+          }
+        }
+      }
+
+      setFormData(prev => ({
+        ...prev,
+        ...(pendingStoreName && { display_name: pendingStoreName }),
+        ...(pendingStoreSlug && { name: pendingStoreSlug }),
+        ...(phoneOnly && { whatsapp_number: phoneOnly }),
+      }));
+
+      if (countryCode) {
+        const country = countries.find(c => c.code === countryCode);
+        if (country) {
+          setSelectedCountry({ code: country.code, name: country.name });
+        }
+      }
+
+      // Data was already validated in popup, just mark as available
+      if (pendingStoreSlug) {
+        setIsNameAvailable(true);
+      }
+
+      // If all required data is provided, skip directly to logo step (step 3)
+      if (pendingStoreName && pendingStoreSlug && pendingWhatsApp) {
+        setCurrentStep(3);
+      }
+
+      // Clean up localStorage
+      localStorage.removeItem('pendingStoreName');
+      localStorage.removeItem('pendingStoreSlug');
+      localStorage.removeItem('pendingWhatsApp');
+    }
+  }, []);
+
   const handleInputChange = (field: string, value: string | File | null) => {
     setFormData(prev => {
       const newData = { ...prev, [field]: value };

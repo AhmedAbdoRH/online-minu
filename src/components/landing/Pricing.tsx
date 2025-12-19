@@ -22,7 +22,7 @@ const plans = [
     },
     {
         name: "Pro",
-        price: "2000 ج.م",
+        price: "2500 ج.م",
         period: "/ سنوياً",
         description: "للمتاجر المتنامية التي تحتاج المزيد",
         icon: Zap,
@@ -33,12 +33,14 @@ const plans = [
             { text: "دعم فني أولوية", included: true },
         ],
         cta: "اشترك الآن",
-        ctaLink: "https://wa.me/201008116452?text=أرغب%20في%20الاشتراك%20في%20باقة%20البرو%20المهنية%20(2000%20ج.م%20سنوياً)",
+        ctaLink: "https://wa.me/201008116452?text=أرغب%20في%20الاشتراك%20في%20باقة%20البرو%20المهنية%20(2500%20ج.م%20سنوياً)",
         popular: false
     },
     {
         name: "Business",
-        price: "ابتداء من 5000 ج.م",
+        prefix: "ابتداءً من",
+        price: "5000 ج.م",
+        period: "/ سنوياً",
         description: "للشركات التي تحتاج حلولاً مخصصة",
         icon: Building,
         features: [
@@ -72,9 +74,12 @@ export default function Pricing() {
                                 </div>
                                 <h3 className="text-xl font-bold mb-2">{plan.name}</h3>
                                 <div className="text-muted-foreground mb-4 h-10">{plan.description}</div>
-                                <div className="flex items-baseline gap-1">
-                                    <span className="text-4xl font-black">{plan.price}</span>
-                                    {plan.period && <span className="text-muted-foreground">{plan.period}</span>}
+                                <div className="flex flex-col gap-1">
+                                    {plan.prefix && <span className="text-sm text-muted-foreground">{plan.prefix}</span>}
+                                    <div className="flex items-baseline gap-1">
+                                        <span className="text-4xl font-black">{plan.price}</span>
+                                        {plan.period && <span className="text-muted-foreground">{plan.period}</span>}
+                                    </div>
                                 </div>
                             </div>
 
