@@ -28,7 +28,7 @@ import { useToast } from '@/hooks/use-toast';
 import { useRouter } from 'next/navigation';
 import type { Catalog } from '@/lib/types';
 import NextImage from 'next/image';
-import { Loader2, Lock, Check, Crown, Palette, Sparkles, MessageCircle, EyeOff } from 'lucide-react';
+import { Loader2, Lock, Check, Crown, Palette, Sparkles, MessageCircle, EyeOff, Camera, Upload } from 'lucide-react';
 import { Switch } from '../ui/switch';
 
 const THEME_OPTIONS = [
@@ -48,7 +48,7 @@ const formSchema = z.object({
   name: z.string()
     .min(3, 'يجب أن يكون اسم الكتالوج 3 أحرف على الأقل')
     .max(50, 'يجب أن يكون اسم الكتالوج 50 حرفًا على الأكثر')
-    .regex(/^[a-zA-Z0-9-]+$/, 'يجب أن يحتوي اسم الكتالوج على أحرف إنجليزية وأرقام وشرطات فقط'),
+    .regex(/^[a-zA-Z0-9-]+$/, 'يجب أن يكون الرابط باللغة الإنجليزية فقط (أحرف، أرقام، وشرطات)'),
   display_name: z.string()
     .min(3, 'يجب أن يكون اسم العرض 3 أحرف على الأقل')
     .max(50, 'يجب أن يكون اسم العرض 50 حرفًا على الأكثر'),
@@ -136,8 +136,81 @@ export function SettingsForm({ catalog }: { catalog: Catalog }) {
 
   return (
     <Form {...form}>
-      <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+      <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8">
+        {/* Visual Header Preview/Upload Section */}
+        <div className="relative mb-14 pt-4">
+          <div className="flex flex-col gap-2 mb-4">
+            <FormLabel className="text-lg font-bold">هوية المتجر البصرية</FormLabel>
+            <FormDescription>اضبط الغلاف والشعار لتمييز علامتك التجارية.</FormDescription>
+          </div>
+
+          {/* Cover Upload Area */}
+          <div className="relative h-44 sm:h-56 w-full rounded-2xl overflow-hidden bg-muted group cursor-pointer border-2 border-dashed border-brand-primary/20 hover:border-brand-primary/40 transition-all shadow-inner">
+            {catalog.cover_url ? (
+              <NextImage
+                src={catalog.cover_url}
+                alt="Store Cover"
+                fill
+                className="object-cover transition-transform group-hover:scale-105"
+              />
+            ) : (
+              <div className="absolute inset-0 flex flex-col items-center justify-center text-muted-foreground bg-muted/50">
+                <Upload className="h-10 w-10 mb-2 opacity-20" />
+                <span className="text-sm font-medium">اضغط لرفع غلاف المتجر</span>
+                <span className="text-[10px] mt-1">(مقاس مستطيل)</span>
+              </div>
+            )}
+
+            <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center backdrop-blur-[2px]">
+              <div className="flex flex-col items-center gap-2 text-white">
+                <Camera className="h-8 w-8" />
+                <span className="text-xs font-bold">تغيير صورة الغلاف</span>
+              </div>
+            </div>
+
+            <Input
+              type="file"
+              name="cover"
+              accept="image/*"
+              className="absolute inset-0 opacity-0 cursor-pointer z-10"
+              onChange={(e) => {
+                // Visual feedback can be added here if needed
+              }}
+            />
+          </div>
+
+          {/* Logo Upload Area */}
+          <div className="absolute -bottom-10 left-1/2 -translate-x-1/2">
+            <div className="relative h-28 w-28 sm:h-36 sm:w-36 rounded-full border-4 border-background bg-card shadow-2xl overflow-hidden group cursor-pointer border-dashed border-brand-primary/30 hover:border-brand-primary/50 transition-all ring-4 ring-black/5">
+              {catalog.logo_url ? (
+                <NextImage
+                  src={catalog.logo_url}
+                  alt="Store Logo"
+                  fill
+                  className="object-cover transition-transform group-hover:scale-110"
+                />
+              ) : (
+                <div className="absolute inset-0 flex flex-col items-center justify-center text-muted-foreground p-4 text-center bg-muted/30">
+                  <Camera className="h-8 w-8 mb-1 opacity-20" />
+                  <span className="text-[10px] font-bold">شعار المتجر</span>
+                </div>
+              )}
+
+              <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center backdrop-blur-[2px]">
+                <Camera className="h-6 w-6 sm:h-8 sm:w-8 text-white" />
+              </div>
+
+              <Input
+                type="file"
+                name="logo"
+                accept="image/*"
+                className="absolute inset-0 opacity-0 cursor-pointer z-10"
+              />
+            </div>
+          </div>
+        </div>
+
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 pt-6">
           <FormField
             control={form.control}
             name="display_name"
@@ -161,7 +234,7 @@ export function SettingsForm({ catalog }: { catalog: Catalog }) {
             render={({ field }) => (
               <FormItem>
                 <div className="flex items-center justify-between">
-                  <FormLabel>رابط المتجر (بالإنجليزية)</FormLabel>
+                  <FormLabel>تخصيص رابط المتجر</FormLabel>
                   {!isPro && (
                     <Dialog>
                       <DialogTrigger asChild>
@@ -261,89 +334,6 @@ export function SettingsForm({ catalog }: { catalog: Catalog }) {
           />
         </div>
 
-        <FormField
-          control={form.control}
-          name="whatsapp_number"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>رقم الواتساب</FormLabel>
-              <FormControl>
-                <Input {...field} disabled={isSubmitting} placeholder="+201234567890" className="bg-white text-[#1e3a5f] text-lg" />
-              </FormControl>
-              <FormDescription>
-                رقم الواتساب الخاص بمتجرك (اختياري).
-              </FormDescription>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
-
-        <div className="space-y-4">
-          <div>
-            <FormLabel>الشعار الحالي</FormLabel>
-            {catalog.logo_url && catalog.logo_url !== '' && (
-              <div className="mt-2">
-                <NextImage
-                  src={catalog.logo_url}
-                  alt="شعار حالي"
-                  width={80}
-                  height={80}
-                  className="rounded-md border"
-                />
-              </div>
-            )}
-          </div>
-
-          <FormItem>
-            <FormLabel>رفع شعار جديد</FormLabel>
-            <FormControl>
-              <Input
-                type="file"
-                name="logo"
-                accept="image/jpeg,image/jpg,image/png,image/webp"
-                disabled={isSubmitting}
-                className="bg-muted/50 border-2 border-dashed border-brand-primary/30 hover:border-brand-primary/50 text-foreground file:bg-brand-primary file:text-white file:border-0 file:rounded-md file:px-3 file:py-1 file:mr-3 file:cursor-pointer cursor-pointer"
-              />
-            </FormControl>
-            <FormDescription>
-              اختر ملفًا جديدًا فقط إذا كنت تريد تغيير الشعار الحالي. الحد الأقصى: 5 ميغابايت. الصيغ المقبولة: .jpg, .jpeg, .png, .webp
-            </FormDescription>
-          </FormItem>
-        </div>
-
-        <div className="space-y-4">
-          <div>
-            <FormLabel>صورة الغلاف الحالية</FormLabel>
-            {catalog.cover_url && catalog.cover_url !== '' && (
-              <div className="mt-2">
-                <NextImage
-                  src={catalog.cover_url}
-                  alt="صورة غلاف حالية"
-                  width={200}
-                  height={100}
-                  className="rounded-md border"
-                />
-              </div>
-            )}
-          </div>
-
-          <FormItem>
-            <FormLabel>رفع صورة غلاف جديدة</FormLabel>
-            <FormControl>
-              <Input
-                type="file"
-                name="cover"
-                accept="image/jpeg,image/jpg,image/png,image/webp"
-                disabled={isSubmitting}
-                className="bg-muted/50 border-2 border-dashed border-brand-primary/30 hover:border-brand-primary/50 text-foreground file:bg-brand-primary file:text-white file:border-0 file:rounded-md file:px-3 file:py-1 file:mr-3 file:cursor-pointer cursor-pointer"
-              />
-            </FormControl>
-            <FormDescription>
-              اختر ملفًا جديدًا فقط إذا كنت تريد تغيير صورة الغلاف الحالية. الحد الأقصى: 5 ميغابايت. الصيغ المقبولة: .jpg, .jpeg, .png, .webp
-            </FormDescription>
-          </FormItem>
-        </div>
-
         {/* قسم تخصيص مظهر المتجر */}
         <div className="space-y-4 pt-4 border-t">
           <div className="flex items-center justify-between">
@@ -421,8 +411,8 @@ export function SettingsForm({ catalog }: { catalog: Catalog }) {
                     disabled={isLocked || isSubmitting}
                     onClick={() => !isLocked && setSelectedTheme(theme.id)}
                     className={`relative h-16 w-full rounded-lg ${theme.gradient} border-2 transition-all ${selectedTheme === theme.id
-                        ? 'border-brand-primary ring-2 ring-brand-primary/50'
-                        : 'border-transparent hover:border-white/30'
+                      ? 'border-brand-primary ring-2 ring-brand-primary/50'
+                      : 'border-transparent hover:border-white/30'
                       } ${isLocked ? 'cursor-not-allowed' : 'cursor-pointer'}`}
                     title={theme.name}
                   >
