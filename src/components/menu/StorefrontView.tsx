@@ -320,11 +320,77 @@ export function StorefrontView({ catalog, categories }: StorefrontViewProps) {
 
   if (!mounted) {
     return (
-      <div className="relative h-40 bg-gradient-to-r from-[#ffb347] to-[#61ffd0] flex-shrink-0">
-        <div className="mx-auto flex max-w-4xl flex-col gap-4">
-          <div className="glass-surface h-48 animate-pulse rounded-[2rem]" />
-          <div className="glass-surface h-32 animate-pulse rounded-[2rem]" />
-          <div className="glass-surface h-72 animate-pulse rounded-[2rem]" />
+      <div className={cn("fixed inset-0 z-[100] flex flex-col items-center justify-center overflow-hidden bg-gradient-default")}>
+        {/* Decorative background elements */}
+        <div className="absolute top-[-10%] left-[-10%] w-[40%] h-[40%] bg-brand-primary/10 rounded-full blur-[120px] animate-pulse-slow" />
+        <div className="absolute bottom-[-10%] right-[-10%] w-[40%] h-[40%] bg-brand-luxury/10 rounded-full blur-[120px] animate-pulse-slow" />
+
+        <div className="relative flex flex-col items-center gap-8 px-6 text-center">
+          {/* Logo Container with Animation */}
+          <motion.div
+            initial={{ opacity: 0, scale: 0.8 }}
+            animate={{
+              opacity: 1,
+              scale: 1,
+              transition: { duration: 0.8, ease: "easeOut" }
+            }}
+            className="relative"
+          >
+            <div className="absolute inset-0 rounded-full bg-brand-primary/20 blur-2xl animate-pulse" />
+            <div className="relative h-28 w-28 overflow-hidden rounded-full border-2 border-white/20 bg-background/50 p-1.5 backdrop-blur-md shadow-2xl">
+              {catalog.logo_url ? (
+                <Image
+                  src={catalog.logo_url}
+                  alt={catalog.name}
+                  width={112}
+                  height={112}
+                  className="h-full w-full rounded-full object-cover"
+                  priority
+                />
+              ) : (
+                <div className="flex h-full w-full items-center justify-center rounded-full bg-gradient-to-br from-white/10 to-white/5">
+                  <Sparkles className="h-10 w-10 text-brand-primary opacity-50" />
+                </div>
+              )}
+            </div>
+          </motion.div>
+
+          {/* Store Name & Loading Text */}
+          <div className="space-y-3">
+            <motion.h2
+              initial={{ opacity: 0, y: 10 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.3, duration: 0.6 }}
+              className="text-2xl font-bold text-foreground md:text-3xl"
+            >
+              {catalog.display_name || catalog.name}
+            </motion.h2>
+            <motion.p
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              transition={{ delay: 0.5, duration: 0.6 }}
+              className="text-sm font-medium tracking-widest text-muted-foreground uppercase"
+            >
+              جاري تحميل المتجر...
+            </motion.p>
+          </div>
+
+          {/* Elegant Loading Bar */}
+          <div className="relative mt-4 h-1.5 w-48 overflow-hidden rounded-full bg-white/10">
+            <div className="absolute inset-y-0 bg-gradient-to-r from-brand-primary via-brand-luxury to-brand-primary animate-loading-bar shadow-[0_0_15px_rgba(0,209,201,0.5)]" />
+          </div>
+
+          {/* Slogan if available */}
+          {catalog.slogan && (
+            <motion.p
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              transition={{ delay: 0.7, duration: 0.8 }}
+              className="mt-4 max-w-xs text-xs italic text-muted-foreground/60"
+            >
+              "{catalog.slogan}"
+            </motion.p>
+          )}
         </div>
       </div>
     );
@@ -348,7 +414,12 @@ export function StorefrontView({ catalog, categories }: StorefrontViewProps) {
 
   return (
     <CartProvider storageKey={`oc_cart_${catalog.name}`}>
-      <div className={cn("relative flex flex-col min-h-screen pb-3", getThemeClass())}>
+      <motion.div
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        transition={{ duration: 0.8, ease: "easeOut" }}
+        className={cn("relative flex flex-col min-h-screen pb-3", getThemeClass())}
+      >
         <div className="relative mx-auto w-[min(92vw,1200px)] pt-2">
           {/* Hero Image Section */}
           {/* Hero Image Section */}
@@ -777,8 +848,8 @@ export function StorefrontView({ catalog, categories }: StorefrontViewProps) {
         {/* Bottom spacing */}
         <div className="h-16"></div>
 
-      </div>
-      <Footer hideFooter={catalog.hide_footer || false} />
+        <Footer hideFooter={catalog.hide_footer || false} />
+      </motion.div>
     </CartProvider>
   );
 }
