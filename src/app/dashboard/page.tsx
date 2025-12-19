@@ -1,6 +1,5 @@
 import { createClient } from "@/lib/supabase/server";
 import { redirect } from "next/navigation";
-import { OnboardingForm } from "@/components/dashboard/OnboardingForm";
 import { AutoCatalogCreator } from "@/components/dashboard/AutoCatalogCreator";
 import { CopyLinkButton } from "@/components/dashboard/CopyLinkButton";
 import { QRCodeButton } from "@/components/dashboard/QRCodeButton";
@@ -73,8 +72,11 @@ export default async function DashboardPage() {
           <Card className="glass-surface border-white/10 overflow-hidden shadow-2xl">
             <div className="p-1"> {/* Thin border container */}
               <div className="px-6 py-12 md:px-12">
-                <AutoCatalogCreator userPhone={userPhone} />
-                <OnboardingForm userPhone={userPhone} />
+                <AutoCatalogCreator
+                  userPhone={userPhone}
+                  userEmail={user.email || undefined}
+                  userName={user.user_metadata?.full_name || user.user_metadata?.name}
+                />
               </div>
             </div>
           </Card>

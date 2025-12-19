@@ -176,6 +176,7 @@ export async function updateCatalog(prevState: any, formData: FormData) {
   const logoFile = formData.get('logo') as File | null;
   const coverFile = formData.get('cover') as File | null;
   const rawWhatsappUpdate = formData.get('whatsapp_number');
+
   const whatsappUpdateCandidate = typeof rawWhatsappUpdate === 'string' && rawWhatsappUpdate.trim()
     ? rawWhatsappUpdate.trim()
     : (currentCatalog.whatsapp_number ?? '');

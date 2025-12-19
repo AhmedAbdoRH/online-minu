@@ -71,6 +71,12 @@ export function SettingsForm({ catalog }: { catalog: Catalog }) {
   const [hideFooter, setHideFooter] = useState(catalog.hide_footer || false);
   const isPro = catalog.plan === 'pro' || catalog.plan === 'business';
 
+  // File states for previews and actual files
+  const [logoFile, setLogoFile] = useState<File | null>(null);
+  const [coverFile, setCoverFile] = useState<File | null>(null);
+  const [logoPreview, setLogoPreview] = useState<string | null>(catalog.logo_url || null);
+  const [coverPreview, setCoverPreview] = useState<string | null>(catalog.cover_url || null);
+
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: {
@@ -81,6 +87,32 @@ export function SettingsForm({ catalog }: { catalog: Catalog }) {
       theme: catalog.theme || 'default',
     },
   });
+
+  const handleLogoChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    console.log('SettingsForm: handleLogoChange called', e?.target?.files);
+    const file = e.target.files?.[0];
+    if (file) {
+      setLogoFile(file);
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        setLogoPreview(reader.result as string);
+      };
+      reader.readAsDataURL(file);
+    }
+  };
+
+  const handleCoverChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    console.log('SettingsForm: handleCoverChange called', e?.target?.files);
+    const file = e.target.files?.[0];
+    if (file) {
+      setCoverFile(file);
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        setCoverPreview(reader.result as string);
+      };
+      reader.readAsDataURL(file);
+    }
+  };
 
   const onSubmit = async (values: z.infer<typeof formSchema>) => {
     setIsSubmitting(true);
@@ -96,16 +128,14 @@ export function SettingsForm({ catalog }: { catalog: Catalog }) {
       formData.append('theme', selectedTheme);
       formData.append('hide_footer', hideFooter.toString());
 
-      // Handle logo file
-      const logoInput = document.querySelector('input[name="logo"]') as HTMLInputElement;
-      if (logoInput?.files?.[0]) {
-        formData.append('logo', logoInput.files[0]);
+      // Handle logo file from state
+      if (logoFile) {
+        formData.append('logo', logoFile);
       }
 
-      // Handle cover file
-      const coverInput = document.querySelector('input[name="cover"]') as HTMLInputElement;
-      if (coverInput?.files?.[0]) {
-        formData.append('cover', coverInput.files[0]);
+      // Handle cover file from state
+      if (coverFile) {
+        formData.append('cover', coverFile);
       }
 
       const result = await updateCatalog(null, formData);
@@ -146,9 +176,9 @@ export function SettingsForm({ catalog }: { catalog: Catalog }) {
 
           {/* Cover Upload Area */}
           <div className="relative h-44 sm:h-56 w-full rounded-2xl overflow-hidden bg-muted group cursor-pointer border-2 border-dashed border-brand-primary/20 hover:border-brand-primary/40 transition-all shadow-inner">
-            {catalog.cover_url ? (
+            {coverPreview ? (
               <NextImage
-                src={catalog.cover_url}
+                src={coverPreview}
                 alt="Store Cover"
                 fill
                 className="object-cover transition-transform group-hover:scale-105"
@@ -161,7 +191,7 @@ export function SettingsForm({ catalog }: { catalog: Catalog }) {
               </div>
             )}
 
-            <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center backdrop-blur-[2px]">
+            <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center backdrop-blur-[2px] pointer-events-none group-hover:pointer-events-auto z-20">
               <div className="flex flex-col items-center gap-2 text-white">
                 <Camera className="h-8 w-8" />
                 <span className="text-xs font-bold">تغيير صورة الغلاف</span>
@@ -172,19 +202,18 @@ export function SettingsForm({ catalog }: { catalog: Catalog }) {
               type="file"
               name="cover"
               accept="image/*"
-              className="absolute inset-0 opacity-0 cursor-pointer z-10"
-              onChange={(e) => {
-                // Visual feedback can be added here if needed
-              }}
+                className="absolute inset-0 h-full w-full opacity-0 cursor-pointer z-50 pointer-events-auto p-0 border-0 rounded-none"
+                onClick={() => console.log('SettingsForm: cover input clicked')}
+                onChange={handleCoverChange}
             />
           </div>
 
           {/* Logo Upload Area */}
           <div className="absolute -bottom-10 left-1/2 -translate-x-1/2">
             <div className="relative h-28 w-28 sm:h-36 sm:w-36 rounded-full border-4 border-background bg-card shadow-2xl overflow-hidden group cursor-pointer border-dashed border-brand-primary/30 hover:border-brand-primary/50 transition-all ring-4 ring-black/5">
-              {catalog.logo_url ? (
+              {logoPreview ? (
                 <NextImage
-                  src={catalog.logo_url}
+                  src={logoPreview}
                   alt="Store Logo"
                   fill
                   className="object-cover transition-transform group-hover:scale-110"
@@ -196,7 +225,7 @@ export function SettingsForm({ catalog }: { catalog: Catalog }) {
                 </div>
               )}
 
-              <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center backdrop-blur-[2px]">
+              <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center backdrop-blur-[2px] pointer-events-none group-hover:pointer-events-auto z-20">
                 <Camera className="h-6 w-6 sm:h-8 sm:w-8 text-white" />
               </div>
 
@@ -204,7 +233,9 @@ export function SettingsForm({ catalog }: { catalog: Catalog }) {
                 type="file"
                 name="logo"
                 accept="image/*"
-                className="absolute inset-0 opacity-0 cursor-pointer z-10"
+                className="absolute inset-0 h-full w-full opacity-0 cursor-pointer z-50 pointer-events-auto p-0 border-0 rounded-full"
+                onClick={() => console.log('SettingsForm: logo input clicked')}
+                onChange={handleLogoChange}
               />
             </div>
           </div>
