@@ -99,7 +99,7 @@ export function DashboardNav({ user, catalog }: { user: User; catalog: Catalog |
           >
             <div className="relative h-9 w-9">
               <Image
-                src="/mainlogo.png"
+                src="/logo.png"
                 alt={APP_NAME}
                 fill
                 className="object-contain transition-all group-hover:scale-110"
@@ -171,7 +171,7 @@ export function DashboardNav({ user, catalog }: { user: User; catalog: Catalog |
           </form>
         </nav>
       </aside>
-      <header className="sticky top-0 z-30 flex h-14 items-center gap-4 border-b bg-background px-4 sm:static sm:h-auto sm:border-0 sm:bg-transparent sm:px-6 sm:pr-20">
+      <header className="sticky top-0 z-30 flex h-auto min-h-14 items-center gap-4 border-b bg-background px-4 pt-10 pb-2 sm:pt-0 sm:static sm:h-auto sm:border-0 sm:bg-transparent sm:px-6 sm:pr-20">
         <Sheet open={isSheetOpen} onOpenChange={setIsSheetOpen}>
           <SheetTrigger asChild>
             <Button size="icon" variant="outline" className="sm:hidden">
@@ -179,7 +179,7 @@ export function DashboardNav({ user, catalog }: { user: User; catalog: Catalog |
               <span className="sr-only">فتح القائمة</span>
             </Button>
           </SheetTrigger>
-          <SheetContent side="right" className="sm:max-w-xs">
+          <SheetContent side="right" className="sm:max-w-xs pt-10">
             <div className="flex items-center justify-between mb-6">
               <Link
                 href="https://online-catalog.net"
@@ -188,12 +188,13 @@ export function DashboardNav({ user, catalog }: { user: User; catalog: Catalog |
                 onClick={closeSheet}
                 className="group flex h-12 w-12 shrink-0 items-center justify-center"
               >
-                <div className="relative h-12 w-12">
+                <div className="relative h-12 w-12 overflow-hidden rounded-2xl bg-white/10 p-2 ring-1 ring-white/20">
                   <Image
-                    src="/mainlogo.png"
-                    alt={APP_NAME}
-                    fill
-                    className="object-contain transition-all group-hover:scale-110"
+                    src="/logo.png"
+                    alt="Logo"
+                    width={40}
+                    height={40}
+                    className="object-contain"
                   />
                 </div>
                 <span className="sr-only">{APP_NAME}</span>

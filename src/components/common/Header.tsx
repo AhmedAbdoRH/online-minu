@@ -1,3 +1,5 @@
+'use client';
+
 import Link from 'next/link';
 import { Button } from '@/components/ui/button';
 import { UtensilsCrossed } from 'lucide-react';
@@ -12,7 +14,8 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
 import { Avatar, AvatarFallback, AvatarImage } from '../ui/avatar';
-import { logout } from '@/app/actions/auth';
+import { createClient } from '@/lib/supabase/client';
+import { useRouter } from 'next/navigation';
 import type { Catalog } from '@/lib/types';
 
 function getInitials(name: string | undefined, email: string | undefined, phone: string | undefined) {
@@ -36,6 +39,15 @@ interface HeaderProps {
 }
 
 export default function Header({ user, catalog }: HeaderProps) {
+  const router = useRouter();
+
+  const handleLogout = async () => {
+    const supabase = createClient();
+    await supabase.auth.signOut();
+    router.push('/login');
+    router.refresh();
+  };
+
   return (
     <header className="sticky top-0 z-50 w-full border-b border-border/40 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
       <div className="container flex h-14 max-w-screen-2xl items-center">
@@ -71,15 +83,14 @@ export default function Header({ user, catalog }: HeaderProps) {
                 <DropdownMenuItem asChild>
                   <Link href="/dashboard">لوحة التحكم</Link>
                 </DropdownMenuItem>
-                <DropdownMenuItem asChild>
-                  <Link href="/dashboard/settings">الإعدادات</Link>
-                </DropdownMenuItem>
                 <DropdownMenuSeparator />
-                <form action={logout} className="w-full">
-                  <Button type="submit" variant="ghost" className="w-full justify-start px-2 py-1.5 text-sm">
-                    تسجيل الخروج
-                  </Button>
-                </form>
+                <Button
+                  variant="ghost"
+                  className="w-full justify-start px-2 py-1.5 text-sm"
+                  onClick={handleLogout}
+                >
+                  تسجيل الخروج
+                </Button>
               </DropdownMenuContent>
             </DropdownMenu>
           ) : (

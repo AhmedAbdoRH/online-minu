@@ -33,14 +33,9 @@ export default async function ItemsPage() {
                 </div>
             </CardHeader>
             <CardContent className="px-2 sm:px-6">
-                {categories.length === 0 ? (
-                    <div className="text-center text-muted-foreground py-8">
-                        يجب عليك <a href="/dashboard/categories" className="text-primary underline">إضافة تصنيف</a> أولاً قبل إضافة المنتجات.
-                    </div>
-                ) : (
-                    <ItemsTable items={items as any} catalogId={catalog.id} catalogPlan={catalog.plan} categories={categories} />
-                )}
+                <ItemsTable items={items as any} catalogId={catalog.id} catalogPlan={catalog.plan} categories={categories} />
             </CardContent>
+            <div className="h-24" /> {/* مسافة إضافية في نهاية الصفحة لتجنب التداخل مع شريط التنقل السفلي */}
         </Card>
     );
 }

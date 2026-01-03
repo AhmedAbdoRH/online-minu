@@ -1,0 +1,29 @@
+
+> nextn@0.1.0 build
+> cross-env NODE_ENV=production next build
+
+   ▲ Next.js 15.5.7
+   - Experiments (use with caution):
+     · serverActions
+
+   Creating an optimized production build ...
+Failed to compile.
+
+./src/components/dashboard/ItemsTable.tsx
+Module not found: Can't resolve '@/app/actions/items'
+
+https://nextjs.org/docs/messages/module-not-found
+
+Import trace for requested module:
+./src/app/dashboard/items/page.tsx
+
+./src/components/dashboard/SettingsForm.tsx
+Module not found: Can't resolve '@/app/actions/catalog'
+
+https://nextjs.org/docs/messages/module-not-found
+
+Import trace for requested module:
+./src/app/dashboard/settings/page.tsx
+
+
+> Build failed because of webpack errors

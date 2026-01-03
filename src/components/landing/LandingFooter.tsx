@@ -16,7 +16,7 @@ export default function LandingFooter() {
                     <div className="col-span-1 md:col-span-1 space-y-4">
                         <div className="relative h-10 w-32">
                             <Image
-                                src="/mainlogo.png"
+                                src="/logo.png"
                                 alt="منصة اونلاين كاتلوج"
                                 fill
                                 className="object-contain object-left grayscale opacity-80"

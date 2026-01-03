@@ -1,9 +1,10 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import * as z from 'zod';
+import { motion, AnimatePresence } from 'framer-motion';
 import {
   Form,
   FormControl,
@@ -28,7 +29,7 @@ import { useToast } from '@/hooks/use-toast';
 import { useRouter } from 'next/navigation';
 import type { Catalog } from '@/lib/types';
 import NextImage from 'next/image';
-import { Loader2, Lock, Check, Crown, Palette, Sparkles, MessageCircle, EyeOff, Camera, Upload } from 'lucide-react';
+import { Loader2, Lock, Check, Crown, Palette, Sparkles, MessageCircle, EyeOff, Camera, Upload, X } from 'lucide-react';
 import { Switch } from '../ui/switch';
 
 const THEME_OPTIONS = [
@@ -66,6 +67,27 @@ export function SettingsForm({ catalog }: { catalog: Catalog }) {
   const { toast } = useToast();
   const router = useRouter();
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [showTooltips, setShowTooltips] = useState(false);
+
+  useEffect(() => {
+    // Show tooltips if logo or cover are missing
+    // We check both but the user emphasized the logo
+    const isMissingLogo = !catalog.logo_url;
+    const isMissingCover = !catalog.cover_url;
+    
+    if (isMissingLogo || isMissingCover) {
+      const timer = setTimeout(() => {
+        setShowTooltips(true);
+      }, 1500);
+      return () => clearTimeout(timer);
+    } else {
+      setShowTooltips(false);
+    }
+  }, [catalog.logo_url, catalog.cover_url]);
+
+  const dismissTooltips = () => {
+    setShowTooltips(false);
+  };
 
   const [selectedTheme, setSelectedTheme] = useState(catalog.theme || 'default');
   const [hideFooter, setHideFooter] = useState(catalog.hide_footer || false);
@@ -176,6 +198,30 @@ export function SettingsForm({ catalog }: { catalog: Catalog }) {
 
           {/* Cover Upload Area */}
           <div className="relative h-44 sm:h-56 w-full rounded-2xl overflow-hidden bg-muted group cursor-pointer border-2 border-dashed border-brand-primary/20 hover:border-brand-primary/40 transition-all shadow-inner">
+            <AnimatePresence>
+              {showTooltips && (
+                <motion.div
+                  initial={{ opacity: 0, scale: 0.8, y: -10 }}
+                  animate={{ opacity: 1, scale: 1, y: 0 }}
+                  exit={{ opacity: 0, scale: 0.8, y: -10 }}
+                  className="absolute inset-x-4 bottom-[-80px] z-[60] pointer-events-none"
+                >
+                  <div className="bg-brand-primary text-white p-3 rounded-xl shadow-2xl flex items-center justify-between gap-3 border border-white/20 pointer-events-auto max-w-xs mx-auto">
+                    <div className="flex items-center gap-2">
+                      <div className="w-8 h-8 rounded-full bg-white/20 flex items-center justify-center shrink-0">
+                        <Camera className="h-4 w-4" />
+                      </div>
+                      <p className="text-xs font-bold leading-tight">أضف شعار المتجر وصورة الغلاف من هنا لتمييز علامتك التجارية.</p>
+                    </div>
+                    <button onClick={(e) => { e.stopPropagation(); dismissTooltips(); }} className="p-1 hover:bg-white/10 rounded-full transition-colors">
+                      <X className="h-4 w-4" />
+                    </button>
+                    {/* Arrow */}
+                    <div className="absolute -top-2 left-1/2 -translate-x-1/2 w-4 h-4 bg-brand-primary rotate-45 border-l border-t border-white/20" />
+                  </div>
+                </motion.div>
+              )}
+            </AnimatePresence>
             {coverPreview ? (
               <NextImage
                 src={coverPreview}

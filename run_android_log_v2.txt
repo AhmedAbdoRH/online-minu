@@ -1,0 +1,8 @@
+√ Copying web assets from out to android\app\src\main\assets\public in 75.83ms
+√ Creating capacitor.config.json in android\app\src\main\assets in 1.15ms
+[info] Inlining sourcemaps
+√ copy android in 150.12ms
+√ Updating Android plugins in 16.02ms
+√ update android in 95.68ms
+√ Running Gradle build in 2.32s
+√ Deploying app-debug.apk to emulator-5554 in 4.21s

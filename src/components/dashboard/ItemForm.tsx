@@ -6,7 +6,7 @@ import * as z from 'zod';
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue, SelectGroup, SelectLabel, SelectSeparator } from '@/components/ui/select';
 import { SubmitButton } from '@/components/common/SubmitButton';
 import { Button } from '@/components/ui/button';
 import { createItem, updateItem } from '@/app/actions/items';
@@ -14,9 +14,11 @@ import { useToast } from '@/hooks/use-toast';
 import type { Category, MenuItemWithDetails } from '@/lib/types';
 import { UpgradeAlert } from './UpgradeAlert';
 import { useState } from 'react';
-import { Plus, Image as ImageIcon, Trash2, Tag } from 'lucide-react';
+import { Plus, Image as ImageIcon, Trash2, Tag, PlusCircle, Upload } from 'lucide-react';
 import { useFieldArray } from 'react-hook-form';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { useRouter } from 'next/navigation';
+import { cn } from "@/lib/utils";
 
 const MAX_FILE_SIZE = 5 * 1024 * 1024; // 5MB
 const ACCEPTED_IMAGE_TYPES = ["image/jpeg", "image/jpg", "image/png", "image/webp"];
@@ -59,8 +61,10 @@ interface ItemFormProps {
 
 export function ItemForm({ catalogId, catalogPlan, categories, item, onSuccess, onCancel }: ItemFormProps) {
   const { toast } = useToast();
+  const router = useRouter();
   const [showUpgradeAlert, setShowUpgradeAlert] = useState(false);
   const [submissionId, setSubmissionId] = useState<string>('');
+  const [mainImagePreview, setMainImagePreview] = useState<string | null>(item?.image_url || null);
   const isPro = catalogPlan === 'pro';
 
   // Determine initial pricing type
@@ -84,8 +88,21 @@ export function ItemForm({ catalogId, catalogPlan, categories, item, onSuccess, 
   // عرض فئات متداخلة مع مسافات
   const renderCategoryItems = (categories: (Category & { depth: number; children: any[] })[]): JSX.Element[] => {
     return categories.flatMap(cat => [
-      <SelectItem key={cat.id} value={cat.id.toString()}>
-        {Array(cat.depth).fill('— ').join('')}{cat.name}
+      <SelectItem 
+        key={cat.id} 
+        value={cat.id.toString()}
+        className="my-1.5 cursor-pointer focus:bg-transparent p-0 w-full"
+      >
+        <div className={cn(
+          "w-full px-4 py-3 rounded-lg transition-all flex items-center gap-2",
+          cat.depth === 0 
+            ? "bg-[#4ade80]/10 text-[#4ade80] font-black text-sm border border-[#4ade80]/20" 
+            : "bg-muted/50 text-foreground font-bold text-[13px]"
+        )}
+        >
+          {cat.depth > 0 && <span className="opacity-60 shrink-0 text-[#4ade80]" style={{ marginRight: `${cat.depth * 10}px` }}>└─</span>}
+          <span className="truncate">{cat.name}</span>
+        </div>
       </SelectItem>,
       ...renderCategoryItems(cat.children)
     ]);
@@ -96,7 +113,7 @@ export function ItemForm({ catalogId, catalogPlan, categories, item, onSuccess, 
     defaultValues: {
       name: item?.name || '',
       description: item?.description || '',
-      price: item?.price || 0,
+      price: item?.price || undefined,
       category_id: item?.category_id ? item.category_id.toString() : '',
       main_image: undefined,
       additional_images: undefined,
@@ -196,6 +213,50 @@ export function ItemForm({ catalogId, catalogPlan, categories, item, onSuccess, 
           <div className="grid grid-cols-2 gap-4">
             <FormField
               control={form.control}
+              name="category_id"
+              render={({ field }) => (
+                <FormItem className="col-span-2">
+                  <FormLabel>الفئة</FormLabel>
+                  <Select onValueChange={(val) => {
+                    console.log('Category selected:', val);
+                    if (val === 'new_category') {
+                      if (onCancel) onCancel();
+                      router.push('/dashboard/categories');
+                      return;
+                    }
+                    field.onChange(val);
+                  }} value={field.value || ''}>
+                    <FormControl>
+                    <SelectTrigger className="h-14 text-base text-foreground font-bold border-2 focus:ring-brand-primary/20">
+                      <SelectValue placeholder="اختر فئة" className="placeholder:text-muted-foreground/60" />
+                    </SelectTrigger>
+                  </FormControl>
+                    <SelectContent>
+                        <SelectGroup>
+                           <SelectLabel className="text-[#4ade80] font-black py-3.5 px-4 text-[15px] bg-[#4ade80]/5 mb-1">الإجراءات</SelectLabel>
+                           <SelectItem 
+                         value="new_category" 
+                         className="flex items-center gap-2 text-[#4ade80] font-black text-[15px] cursor-pointer py-4 focus:bg-muted focus:text-[#22c55e] border-b border-muted/50"
+                       >
+                         <div className="flex items-center gap-2 justify-center w-full">
+                           <PlusCircle className="h-5 w-5 stroke-[3px]" />
+                           <span>إضافة تصنيف جديد</span>
+                         </div>
+                       </SelectItem>
+                         </SelectGroup>
+                         <SelectSeparator className="bg-[#4ade80]/10" />
+                         <SelectGroup>
+                           <SelectLabel className="text-[#4ade80] font-black py-3.5 px-4 text-[15px] bg-[#4ade80]/5 mt-1 mb-1">التصنيفات المتاحة</SelectLabel>
+                           {renderCategoryItems(buildHierarchicalCategories())}
+                         </SelectGroup>
+                      </SelectContent>
+                  </Select>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+            <FormField
+              control={form.control}
               name="name"
               render={({ field }) => (
                 <FormItem className="col-span-2">
@@ -246,7 +307,7 @@ export function ItemForm({ catalogId, catalogPlan, categories, item, onSuccess, 
                     render={({ field }) => (
                       <FormItem>
                         <FormLabel>السعر (ج.م)</FormLabel>
-                        <FormControl><Input type="number" step="0.01" {...field} /></FormControl>
+                        <FormControl><Input type="number" step="0.01" placeholder="0" {...field} /></FormControl>
                         <FormMessage />
                       </FormItem>
                     )}
@@ -261,7 +322,7 @@ export function ItemForm({ catalogId, catalogPlan, categories, item, onSuccess, 
                         type="button"
                         variant="outline"
                         size="sm"
-                        onClick={() => append({ name: '', price: 0 })}
+                        onClick={() => append({ name: '', price: undefined as any })}
                         className="gap-1"
                       >
                         <Plus className="h-3 w-3" />
@@ -329,29 +390,6 @@ export function ItemForm({ catalogId, catalogPlan, categories, item, onSuccess, 
                 </TabsContent>
               </Tabs>
             </div>
-            <FormField
-              control={form.control}
-              name="category_id"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>الفئة</FormLabel>
-                  <Select onValueChange={(val) => {
-                    console.log('Category selected:', val);
-                    field.onChange(val);
-                  }} value={field.value || ''}>
-                    <FormControl>
-                      <SelectTrigger>
-                        <SelectValue placeholder="اختر فئة" />
-                      </SelectTrigger>
-                    </FormControl>
-                    <SelectContent>
-                      {renderCategoryItems(buildHierarchicalCategories())}
-                    </SelectContent>
-                  </Select>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
           </div>
 
           {/* الصورة الرئيسية */}
@@ -360,32 +398,67 @@ export function ItemForm({ catalogId, catalogPlan, categories, item, onSuccess, 
             name="main_image"
             render={({ field: { onChange, value, ...rest } }) => (
               <FormItem>
-                <FormLabel>
-                  <div className="flex items-center gap-2">
-                    <ImageIcon className="h-4 w-4" />
-                    الصورة الرئيسية للمنتج
-                    {item && ' (اختياري للتغيير)'}
-                  </div>
+                <FormLabel className="flex items-center gap-2 mb-2">
+                  <ImageIcon className="h-4 w-4 text-brand-accent" />
+                  الصورة الرئيسية للمنتج
+                  {item && <span className="text-xs text-muted-foreground">(اختياري للتغيير)</span>}
                 </FormLabel>
                 <FormControl>
-                  <Input
-                    type="file"
-                    accept="image/*"
-                    onChange={(e) => {
-                      const file = e.target.files?.[0];
-                      if (file) {
-                        onChange(file);
-                      }
-                    }}
-                    {...rest}
-                  />
+                  <div className="relative">
+                    <input
+                      type="file"
+                      id="main-image-upload"
+                      className="hidden"
+                      accept="image/*"
+                      onChange={(e) => {
+                        const file = e.target.files?.[0];
+                        if (file) {
+                          onChange(file);
+                          const reader = new FileReader();
+                          reader.onloadend = () => {
+                            setMainImagePreview(reader.result as string);
+                          };
+                          reader.readAsDataURL(file);
+                        }
+                      }}
+                      {...rest}
+                    />
+                    <label
+                      htmlFor="main-image-upload"
+                      className={cn(
+                        "flex flex-col items-center justify-center w-full h-40 border-2 border-dashed rounded-xl cursor-pointer transition-all duration-300",
+                        mainImagePreview 
+                          ? "border-brand-accent/50 bg-brand-accent/5" 
+                          : "border-muted-foreground/20 hover:border-brand-accent/50 hover:bg-brand-accent/5 bg-muted/10"
+                      )}
+                    >
+                      {mainImagePreview ? (
+                        <div className="relative w-full h-full p-2">
+                          <img 
+                            src={mainImagePreview} 
+                            alt="Preview" 
+                            className="w-full h-full object-contain rounded-lg"
+                          />
+                          <div className="absolute inset-0 flex items-center justify-center bg-black/40 opacity-0 hover:opacity-100 transition-opacity rounded-lg">
+                            <div className="flex flex-col items-center text-white">
+                              <Upload className="h-8 w-8 mb-1" />
+                              <span className="text-xs font-bold">تغيير الصورة</span>
+                            </div>
+                          </div>
+                        </div>
+                      ) : (
+                        <div className="flex flex-col items-center justify-center py-6">
+                          <div className="bg-brand-accent/10 p-4 rounded-full mb-3">
+                            <Upload className="h-8 w-8 text-brand-accent" />
+                          </div>
+                          <span className="text-sm font-bold text-foreground">أضف صورة للمنتج</span>
+                          <span className="text-xs text-muted-foreground mt-1">اضغط هنا لاختيار صورة</span>
+                        </div>
+                      )}
+                    </label>
+                  </div>
                 </FormControl>
                 <FormMessage />
-                {item?.image_url && (
-                  <div className="mt-2 text-sm text-muted-foreground">
-                    الصورة الرئيسية الحالية: متوفرة
-                  </div>
-                )}
               </FormItem>
             )}
           />
@@ -441,19 +514,20 @@ export function ItemForm({ catalogId, catalogPlan, categories, item, onSuccess, 
               </FormItem>
             )}
           />
-          <div className="flex gap-2">
+          <div className="flex gap-2 pt-2">
             <Button
               type="button"
               variant="destructive"
               onClick={onCancel}
-              className="w-full"
+              className="w-full h-11"
             >
               إلغاء
             </Button>
-            <SubmitButton pendingText="جاري الحفظ..." className="w-full">
+            <SubmitButton pendingText="جاري الحفظ..." className="w-full h-11">
               {item ? 'حفظ التغييرات' : 'حفظ المنتج'}
             </SubmitButton>
           </div>
+          <div className="h-24" /> {/* مسافة إضافية أسفل الزر لتجنب التداخل مع شريط التنقل */}
         </form>
       </Form>
     </>

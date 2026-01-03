@@ -1,5 +1,6 @@
+'use client';
+
 import Link from "next/link"
-import { resetPassword } from "@/app/actions/auth"
 import { SubmitButton } from "@/components/common/SubmitButton"
 import {
   Card,
@@ -10,12 +11,29 @@ import {
 } from "@/components/ui/card"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
+import { createClient } from "@/lib/supabase/client"
+import { useState } from "react"
 
-export default async function ForgotPasswordPage(props: {
-  searchParams: Promise<{ message: string }>
-}) {
-  const searchParams = await props.searchParams;
-  const message = searchParams.message;
+export default function ForgotPasswordPage() {
+  const [message, setMessage] = useState<string | null>(null);
+
+  const handleSubmit = async (formData: FormData) => {
+    const email = formData.get('email') as string;
+    const supabase = createClient();
+
+    // For mobile app, we might need a deep link scheme if strictly native, 
+    // but typically we use the website URL or a custom scheme.
+    // For now assuming the standard generic auth callback URL logic.
+    const { error } = await supabase.auth.resetPasswordForEmail(email, {
+      redirectTo: `${window.location.origin}/auth/callback?next=/reset-password`,
+    });
+
+    if (error) {
+      setMessage(`خطأ: ${error.message}`);
+    } else {
+      setMessage("تم إرسال رابط إعادة تعيين كلمة المرور إلى بريدك الإلكتروني.");
+    }
+  };
 
   return (
     <Card className="mx-auto max-w-sm">
@@ -26,7 +44,7 @@ export default async function ForgotPasswordPage(props: {
         </CardDescription>
       </CardHeader>
       <CardContent>
-        <form action={resetPassword} className="grid gap-4">
+        <form action={handleSubmit} className="grid gap-4">
           <div className="grid gap-2">
             <Label htmlFor="email">البريد الإلكتروني</Label>
             <Input
@@ -37,17 +55,16 @@ export default async function ForgotPasswordPage(props: {
               required
             />
           </div>
-          
+
           <SubmitButton pendingText="جاري إرسال الرابط..." className="w-full">
             إرسال رابط إعادة تعيين كلمة المرور
           </SubmitButton>
-          
+
           {message && (
-            <div className={`p-3 text-sm rounded-md text-center ${
-              message.includes("خطأ") 
-                ? "bg-destructive/15 text-destructive" 
+            <div className={`p-3 text-sm rounded-md text-center ${message.includes("خطأ")
+                ? "bg-destructive/15 text-destructive"
                 : "bg-emerald-500/15 text-emerald-600"
-            }`}>
+              }`}>
               {message}
             </div>
           )}

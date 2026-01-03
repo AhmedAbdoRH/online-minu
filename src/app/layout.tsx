@@ -27,9 +27,9 @@ export const metadata: Metadata = {
     siteName: 'منصة اونلاين كاتلوج',
     images: [
       {
-        url: '/wphoto.png',
-        width: 1200,
-        height: 630,
+        url: '/mainlogo.png',
+        width: 512,
+        height: 512,
         alt: 'منصة اونلاين كاتلوج - واجهة المعاينة',
       },
     ],
@@ -38,7 +38,7 @@ export const metadata: Metadata = {
     card: 'summary_large_image',
     title: 'أونلاين كاتلوج | Online Catalog',
     description: 'أنشئ متجرك الرقمي والكاتلوج الخاص بك في دقائق.',
-    images: ['/wphoto.png'],
+    images: ['/mainlogo.png'],
   },
 };
 

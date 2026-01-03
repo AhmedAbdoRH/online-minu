@@ -25,7 +25,7 @@ export function Footer({ hideFooter = false }: FooterProps) {
             className="group relative inline-flex items-center gap-0.5 text-primary"
           >
             <Image 
-              src="/mainlogo.png" 
+              src="/logo.png" 
               alt="أونلاين كتلوج" 
               width={10} 
               height={10} 

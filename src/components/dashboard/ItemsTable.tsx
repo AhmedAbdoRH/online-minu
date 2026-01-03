@@ -50,8 +50,8 @@ function ItemRow({ item, catalogId, catalogPlan, categories }: { item: ItemWithC
 
   return (
     <TableRow className="hover:bg-muted/50 transition-colors">
-      <TableCell className="p-1 sm:p-4">
-        <div className="relative h-10 w-10 sm:h-16 sm:w-16 shrink-0 overflow-hidden rounded-lg border border-border/50">
+      <TableCell className="p-2 sm:p-5">
+        <div className="relative h-14 w-14 sm:h-20 sm:w-20 shrink-0 overflow-hidden rounded-xl border border-border/50 shadow-sm">
           <Image
             alt={item.name}
             className="object-cover"
@@ -60,21 +60,21 @@ function ItemRow({ item, catalogId, catalogPlan, categories }: { item: ItemWithC
           />
         </div>
       </TableCell>
-      <TableCell className="font-medium text-[11px] sm:text-sm p-1 sm:p-4 overflow-hidden">
-        <div className="flex flex-col gap-0.5 min-w-0">
-          <span className="truncate block font-bold" title={item.name}>{item.name}</span>
+      <TableCell className="font-medium text-[14px] sm:text-lg p-2 sm:p-5 overflow-hidden">
+        <div className="flex flex-col gap-1 min-w-0">
+          <span className="truncate block font-bold text-foreground" title={item.name}>{item.name}</span>
           <div className="sm:hidden">
-            <Badge variant="outline" className="text-[9px] px-1 py-0 h-3.5 bg-muted/50 whitespace-nowrap">
+            <Badge variant="outline" className="text-[11px] px-2 py-0.5 h-5 bg-muted/50 whitespace-nowrap">
               {item.categories?.name || 'غير مصنف'}
             </Badge>
           </div>
         </div>
       </TableCell>
-      <TableCell className="hidden sm:table-cell p-4">
-        <Badge variant="outline" className="bg-muted/50">{item.categories?.name || 'غير مصنف'}</Badge>
+      <TableCell className="hidden sm:table-cell p-5">
+        <Badge variant="outline" className="bg-muted/50 text-sm px-3 py-1">{item.categories?.name || 'غير مصنف'}</Badge>
       </TableCell>
-      <TableCell className="font-mono text-[10px] sm:text-sm p-1 sm:p-4 whitespace-nowrap text-left sm:text-right">{item.price} ج.م</TableCell>
-      <TableCell className="p-1 sm:p-4 text-left">
+      <TableCell className="font-mono text-[13px] sm:text-lg font-bold p-2 sm:p-5 whitespace-nowrap text-left sm:text-right text-brand-primary">{item.price} ج.م</TableCell>
+      <TableCell className="p-2 sm:p-5 text-left">
         <Dialog open={isEditDialogOpen} onOpenChange={setIsEditDialogOpen}>
           <AlertDialog>
             <DropdownMenu>
@@ -149,16 +149,16 @@ export function ItemsTable({ items, catalogId, catalogPlan, categories }: ItemsT
 
   return (
     <div className="rounded-xl border bg-card text-card-foreground shadow-sm overflow-x-auto">
-      <Table className="w-full table-fixed min-w-[300px]">
+      <Table className="w-full table-fixed min-w-[350px]">
         <TableHeader className="bg-muted/50">
           <TableRow>
-            <TableHead className="w-[50px] sm:w-[100px] p-2 sm:p-4 text-right">
+            <TableHead className="w-[70px] sm:w-[120px] p-2 sm:p-5 text-right font-bold text-foreground">
               الصورة
             </TableHead>
-            <TableHead className="sm:w-auto p-2 sm:p-4 text-right">الاسم</TableHead>
-            <TableHead className="hidden sm:table-cell p-4 text-right">التصنيف</TableHead>
-            <TableHead className="w-[70px] sm:w-[120px] p-2 sm:p-4 text-right">السعر</TableHead>
-            <TableHead className="w-[35px] sm:w-[50px] p-2 sm:p-4 text-left">
+            <TableHead className="sm:w-auto p-2 sm:p-5 text-right font-bold text-foreground">الاسم</TableHead>
+            <TableHead className="hidden sm:table-cell p-5 text-right font-bold text-foreground">التصنيف</TableHead>
+            <TableHead className="w-[90px] sm:w-[150px] p-2 sm:p-5 text-right font-bold text-foreground">السعر</TableHead>
+            <TableHead className="w-[45px] sm:w-[60px] p-2 sm:p-5 text-left">
               <span className="sr-only">الإجراءات</span>
             </TableHead>
           </TableRow>

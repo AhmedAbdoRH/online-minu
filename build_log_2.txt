@@ -1,0 +1,12 @@
+
+> nextn@0.1.0 build
+> cross-env NODE_ENV=production next build
+
+   ▲ Next.js 15.5.7
+   - Experiments (use with caution):
+     · serverActions
+
+   Creating an optimized production build ...
+
+> Build error occurred
+[Error: Page "/[slug]/page" cannot use both "use client" and export function "generateStaticParams()".]

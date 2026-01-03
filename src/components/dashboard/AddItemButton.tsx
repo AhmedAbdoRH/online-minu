@@ -19,7 +19,7 @@ export function AddItemButton({ catalogId, catalogPlan, categories }: AddItemBut
     return (
         <Dialog open={open} onOpenChange={setOpen}>
             <DialogTrigger asChild>
-                <Button size="sm" className="gap-1" disabled={categories.length === 0}>
+                <Button size="sm" className="gap-1">
                     <PlusCircle className="h-3.5 w-3.5" />
                     <span className="whitespace-nowrap">
                         إضافة منتج

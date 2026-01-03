@@ -1,43 +1,37 @@
-import type {NextConfig} from 'next';
+import type { NextConfig } from 'next';
+import type { RemotePattern } from 'next/dist/shared/lib/image-config';
 
 const nextConfig: NextConfig = {
   /* config options here */
-  output: 'standalone',
+  /* output: 'export', */
+  experimental: {
+    serverActions: {
+      bodySizeLimit: '10mb',
+    },
+  },
   typescript: {
     ignoreBuildErrors: true,
   },
   eslint: {
     ignoreDuringBuilds: true,
   },
-  webpack: (config, { isServer }) => {
-    // Fixes npm packages that depend on `qrcode.react` module
-    if (!isServer) {
-      config.resolve.alias = {
-        ...config.resolve.alias,
-        'qrcode.react': false,
-      };
-    }
-    return config;
-  },
   images: {
+    unoptimized: true,
     remotePatterns: (() => {
-      const patterns: Array<Record<string, string>> = [
+      const patterns: RemotePattern[] = [
         {
           protocol: 'https',
           hostname: 'placehold.co',
-          port: '',
           pathname: '/**',
         },
         {
           protocol: 'https',
           hostname: 'images.unsplash.com',
-          port: '',
           pathname: '/**',
         },
         {
           protocol: 'https',
           hostname: 'picsum.photos',
-          port: '',
           pathname: '/**',
         },
       ];
@@ -47,7 +41,8 @@ const nextConfig: NextConfig = {
         const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
         if (supabaseUrl) {
           const u = new URL(supabaseUrl);
-          patterns.push({ protocol: u.protocol.replace(':', ''), hostname: u.hostname, port: '', pathname: '/**' });
+          const protocol = u.protocol.replace(':', '') as 'http' | 'https';
+          patterns.push({ protocol, hostname: u.hostname, pathname: '/**' });
         }
       } catch (e) {
         // ignore malformed env

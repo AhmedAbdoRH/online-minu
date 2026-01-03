@@ -67,8 +67,8 @@ export default function CategoriesPage() {
                 </div>
                 <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
                     <DialogTrigger asChild>
-                        <Button className="gap-2 shadow-sm">
-                            <PlusCircle className="h-4 w-4" />
+                        <Button className="gap-2 shadow-lg bg-[#FFB300] hover:bg-[#FF9500] text-white border-none font-black text-lg h-14 px-8 rounded-xl transition-all hover:scale-105 active:scale-95">
+                            <PlusCircle className="h-6 w-6 stroke-[3px]" />
                             <span>إضافة تصنيف جديد</span>
                         </Button>
                     </DialogTrigger>
@@ -117,6 +117,7 @@ export default function CategoriesPage() {
                     {catalog && <CategoriesTable categories={categories} catalogId={catalog.id} />}
                 </CardContent>
             </Card>
+            <div className="h-24" /> {/* مسافة إضافية في نهاية الصفحة لتجنب التداخل مع شريط التنقل السفلي */}
         </div>
     );
 }

@@ -1,25 +1,36 @@
-import { createClient } from '@/lib/supabase/server';
-import { redirect } from 'next/navigation';
+'use client';
+
+import { createClient } from '@/lib/supabase/client';
+import { useRouter, useSearchParams } from 'next/navigation';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { Label } from '@/components/ui/label';
+import { useState, Suspense } from 'react';
 
-export default async function VerifyOtpPage({ searchParams }: { searchParams: Promise<{ message: string; phone: string; type: string }> }) {
-    const params = await searchParams;
-    const phone = params.phone;
-    const type = params.type || 'sms'; // 'login' or 'signup'
+function VerifyOtpContent() {
+    const router = useRouter();
+    const searchParams = useSearchParams();
+    const phone = searchParams.get('phone') || '';
+    const type = searchParams.get('type') || 'sms';
+    const initialMessage = searchParams.get('message');
 
-    const verifyOtp = async (formData: FormData) => {
-        'use server';
-        const otp = formData.get('otp') as string;
-        const phone = formData.get('phone') as string;
-        const verificationType = formData.get('type') as string;
+    const [otp, setOtp] = useState('');
+    const [loading, setLoading] = useState(false);
+    const [message, setMessage] = useState(initialMessage || '');
 
-        const supabase = await createClient();
+    const handleVerify = async (e: React.FormEvent) => {
+        e.preventDefault();
+        setLoading(true);
+        setMessage('');
 
-        // Determine OTP type based on verification type
-        const otpType = verificationType === 'signup' ? 'phone_change' : 'sms';
+        const supabase = createClient();
+        const verificationType = type === 'signup' ? 'phone_change' : 'sms';
+        // Note: verifyOtp with 'sms' usually works for both signup/login if using phone auth.
+        // If type was signup, it implies we are verifying the phone number.
+
+        // Supabase verifyOtp type: 'sms', 'phone_change', 'recovery', 'signup', 'invite', 'magiclink', 'email_change'
+        // For phone login/signup, 'sms' is typical.
 
         const { data, error } = await supabase.auth.verifyOtp({
             phone,
@@ -29,10 +40,12 @@ export default async function VerifyOtpPage({ searchParams }: { searchParams: Pr
 
         if (error) {
             console.error('OTP verification error:', error.message);
-            return redirect(`/verify-otp?message=${encodeURIComponent('خطأ: رمز التحقق غير صحيح أو منتهي الصلاحية')}&phone=${encodeURIComponent(phone)}&type=${verificationType}`);
+            setMessage('خطأ: رمز التحقق غير صحيح أو منتهي الصلاحية');
+            setLoading(false);
+        } else {
+            // Success
+            router.push('/dashboard');
         }
-
-        return redirect('/dashboard');
     };
 
     const isSignup = type === 'signup';
@@ -49,32 +62,40 @@ export default async function VerifyOtpPage({ searchParams }: { searchParams: Pr
                     </CardDescription>
                 </CardHeader>
                 <CardContent>
-                    <form className="grid gap-4" action={verifyOtp}>
+                    <form className="grid gap-4" onSubmit={handleVerify}>
                         <div className="grid gap-2">
                             <Label htmlFor="otp">رمز التحقق (OTP)</Label>
-                            <Input 
-                                id="otp" 
-                                name="otp" 
-                                type="text" 
-                                required 
+                            <Input
+                                id="otp"
+                                name="otp"
+                                type="text"
+                                required
                                 className="text-center text-lg tracking-widest"
                                 maxLength={6}
                                 placeholder="000000"
+                                value={otp}
+                                onChange={(e) => setOtp(e.target.value)}
                             />
-                            <input type="hidden" name="phone" value={phone} />
-                            <input type="hidden" name="type" value={type} />
                         </div>
-                        <Button type="submit" className="w-full">
-                            {isSignup ? 'تأكيد وإنشاء الحساب' : 'تحقق وتسجيل الدخول'}
+                        <Button type="submit" className="w-full" disabled={loading}>
+                            {loading ? 'جاري التحقق...' : (isSignup ? 'تأكيد وإنشاء الحساب' : 'تحقق وتسجيل الدخول')}
                         </Button>
-                        {params?.message && (
+                        {message && (
                             <p className="mt-4 p-4 bg-destructive/15 text-destructive text-center rounded-md text-sm">
-                                {params.message}
+                                {message}
                             </p>
                         )}
                     </form>
                 </CardContent>
             </Card>
         </div>
+    );
+}
+
+export default function VerifyOtpPage() {
+    return (
+        <Suspense fallback={<div>جاري التحميل...</div>}>
+            <VerifyOtpContent />
+        </Suspense>
     );
 }

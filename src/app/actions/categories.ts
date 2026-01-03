@@ -142,6 +142,7 @@ export async function createCategory(prevState: any, formData: FormData) {
   }
 
   revalidatePath('/dashboard/categories');
+  revalidatePath('/dashboard/items');
   return { message: 'تم إنشاء التصنيف بنجاح.' };
 }
 
@@ -187,6 +188,7 @@ export async function updateCategory(prevState: any, formData: FormData) {
   }
 
   revalidatePath('/dashboard/categories');
+  revalidatePath('/dashboard/items');
   return { message: 'تم تحديث التصنيف بنجاح.' };
 }
 
@@ -206,6 +208,7 @@ export async function deleteCategory(id: number) {
   }
 
   revalidatePath('/dashboard/categories');
+  revalidatePath('/dashboard/items');
   return { error: null };
 }
 

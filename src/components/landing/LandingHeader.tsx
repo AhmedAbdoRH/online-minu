@@ -23,14 +23,14 @@ export default function LandingHeader() {
                 {/* Logo */}
                 <div className="flex items-center gap-2 sm:gap-3">
                     <div className="relative h-8 w-8 sm:h-10 sm:w-10 md:h-10 md:w-10">
-                        <Image
-                            src="/mainlogo.png"
-                            alt="منصة اونلاين كاتلوج"
-                            fill
-                            className="object-contain"
-                            priority
-                        />
-                    </div>
+                            <Image
+                                src="/logo.png"
+                                alt="منصة اونلاين كاتلوج"
+                                fill
+                                className="object-contain"
+                                priority
+                            />
+                        </div>
                     <span className="text-lg sm:text-xl font-bold text-foreground">منصة اونلاين كاتلوج</span>
                 </div>
 
@@ -67,14 +67,14 @@ export default function LandingHeader() {
                     <SheetContent side="right" className="w-80 sm:w-96">
                         <div className="flex flex-col gap-6 mt-8">
                             <div className="flex items-center gap-3 mx-auto">
-                                <div className="relative h-8 w-8">
-                                    <Image
-                                        src="/mainlogo.png"
-                                        alt="منصة اونلاين كاتلوج"
-                                        fill
-                                        className="object-contain"
-                                    />
-                                </div>
+                                <div className="relative h-12 w-12">
+                                        <Image
+                                            src="/logo.png"
+                                            alt="منصة اونلاين كاتلوج"
+                                            fill
+                                            className="object-contain"
+                                        />
+                                    </div>
                                 <span className="text-xl font-bold text-foreground">منصة اونلاين كاتلوج</span>
                             </div>
                             {navLinks.map((link) => (

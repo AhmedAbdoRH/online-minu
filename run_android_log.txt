@@ -1,0 +1,12 @@
+√ Copying web assets from out to android\app\src\main\assets\public in 79.60ms
+√ Creating capacitor.config.json in android\app\src\main\assets in 1.54ms
+[info] Inlining sourcemaps
+√ copy android in 151.53ms
+√ Updating Android plugins in 14.19ms
+√ update android in 101.84ms
+[?25l[36m?[39m [1mPlease choose a target device:[22m [90m»[39m [90m- Use arrow-keys. Return to submit.[39m
+[36m>[39m   [36m[4mGoogle sdk_gphone64_x86_64 (emulator-5554)[39m[24m[90m[39m
+    Medium Phone API 36.0 (emulator) (Medium_Phone_API_36.0)[90m[39m
+    Pixel 7 (emulator) (Pixel_7)[90m[39m
+[2K[1G[31m×[39m [1mPlease choose a target device:[22m [90m»[39m Google sdk_gphone64_x86_64 (emulator-5554)
+[?25h

@@ -1,0 +1,54 @@
+
+> nextn@0.1.0 build
+> cross-env NODE_ENV=production next build
+
+   ▲ Next.js 15.5.7
+   - Experiments (use with caution):
+     · serverActions
+
+   Creating an optimized production build ...
+Failed to compile.
+
+./src/components/dashboard/AutoCatalogCreator.tsx
+Module not found: Can't resolve '@/app/actions/catalog'
+
+https://nextjs.org/docs/messages/module-not-found
+
+Import trace for requested module:
+./src/app/dashboard/page.tsx
+
+./src/components/dashboard/CategoriesTable.tsx
+Module not found: Can't resolve '@/app/actions/categories'
+
+https://nextjs.org/docs/messages/module-not-found
+
+Import trace for requested module:
+./src/app/dashboard/categories/page.tsx
+
+./src/components/dashboard/CategoryForm.tsx
+Module not found: Can't resolve '@/app/actions/categories'
+
+https://nextjs.org/docs/messages/module-not-found
+
+Import trace for requested module:
+./src/app/dashboard/categories/page.tsx
+
+./src/components/dashboard/DashboardNav.tsx
+Module not found: Can't resolve '@/app/actions/auth'
+
+https://nextjs.org/docs/messages/module-not-found
+
+Import trace for requested module:
+./src/app/dashboard/layout.tsx
+
+./src/components/dashboard/ItemForm.tsx
+Module not found: Can't resolve '@/app/actions/items'
+
+https://nextjs.org/docs/messages/module-not-found
+
+Import trace for requested module:
+./src/components/dashboard/AddItemButton.tsx
+./src/app/dashboard/items/page.tsx
+
+
+> Build failed because of webpack errors

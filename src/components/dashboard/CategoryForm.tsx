@@ -229,6 +229,7 @@ export function CategoryForm({ catalogId, category, categories, defaultParentId,
                             {category ? 'حفظ التغييرات' : 'حفظ التصنيف'}
                         </SubmitButton>
                     </div>
+                    <div className="h-24" /> {/* مسافة إضافية أسفل الزر لتجنب التداخل مع شريط التنقل */}
                 </form>
             </Form>
         </>

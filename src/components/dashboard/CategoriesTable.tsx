@@ -57,82 +57,83 @@ function CategoryRow({ category, catalogId, categories, level = 0, isLast = fals
         <>
           <div
             className="absolute -top-3 bottom-1/2 w-px bg-border/60"
-            style={{ right: -24 }}
+            style={{ right: -18 }}
           />
           <div
-            className="absolute top-1/2 h-px w-6 bg-border/60"
-            style={{ right: -24 }}
+            className="absolute top-1/2 h-px w-4 bg-border/60"
+            style={{ right: -18 }}
           />
         </>
       )}
 
       <div
         className={cn(
-          "group relative flex items-center justify-between rounded-xl border p-3 sm:p-4 transition-all duration-200",
+          "group relative flex items-center justify-between rounded-xl border p-3 sm:p-5 transition-all duration-200",
           isSubcategory
             ? "border-border/40 bg-muted/20 hover:bg-muted/40 hover:border-border/60"
             : "glass-surface border-border/50 hover:border-primary/20 mb-3"
         )}
       >
-        <div className="flex items-center gap-2 sm:gap-4 min-w-0">
+        <div className="flex items-center gap-2 sm:gap-5 min-w-0">
           <Button
             variant="ghost"
             size="icon"
             className={cn(
-              "h-7 w-7 sm:h-8 sm:w-8 shrink-0 text-muted-foreground/70 transition-transform hover:bg-muted hover:text-foreground",
+              "h-8 w-8 sm:h-10 sm:w-10 shrink-0 text-muted-foreground/70 transition-transform hover:bg-muted hover:text-foreground",
               !hasSubcategories && "opacity-0 pointer-events-none"
             )}
             onClick={() => setIsExpanded(!isExpanded)}
           >
-            {isExpanded ? <ChevronDown className="h-4 w-4 sm:h-5 sm:w-5" /> : <ChevronRight className="h-4 w-4 sm:h-5 sm:w-5" />}
+            {isExpanded ? <ChevronDown className="h-5 w-5 sm:h-6 sm:w-6" /> : <ChevronRight className="h-5 w-5 sm:h-6 sm:w-6" />}
           </Button>
 
           <div className={cn(
-            "flex h-10 w-10 sm:h-12 sm:w-12 shrink-0 items-center justify-center rounded-xl sm:rounded-2xl shadow-sm transition-colors",
+            "flex h-12 w-12 sm:h-16 sm:w-16 shrink-0 items-center justify-center rounded-xl sm:rounded-3xl shadow-sm transition-colors",
             isSubcategory
               ? "bg-background border border-border/50 text-muted-foreground"
               : "bg-primary/10 text-primary border border-primary/10"
           )}>
             {hasSubcategories ? (
-              isExpanded ? <FolderOpen className="h-5 w-5 sm:h-6 sm:w-6" /> : <Folder className="h-5 w-5 sm:h-6 sm:w-6" />
+              isExpanded ? <FolderOpen className="h-5 w-5 sm:h-8 sm:w-8" /> : <Folder className="h-5 w-5 sm:h-8 sm:w-8" />
             ) : (
-              <Folder className="h-5 w-5 sm:h-6 sm:w-6" />
+              <Folder className="h-5 w-5 sm:h-8 sm:w-8" />
             )}
           </div>
 
-          <div className="flex flex-col gap-0.5 sm:gap-1 min-w-0">
-            <div className="flex items-center gap-1.5 sm:gap-3 min-w-0">
+          <div className="flex flex-col gap-0.5 sm:gap-1.5 min-w-0">
+            <div className="flex items-center gap-1.5 sm:gap-4 min-w-0">
               <span className={cn(
                 "font-bold text-foreground tracking-tight truncate",
-                !isSubcategory ? "text-base sm:text-lg" : "text-sm sm:text-base"
+                !isSubcategory ? "text-base sm:text-2xl" : "text-sm sm:text-xl"
               )}>
                 {category.name}
               </span>
               {hasSubcategories && (
-                <Badge variant="secondary" className="h-5 sm:h-6 px-1.5 sm:px-2 text-[10px] sm:text-xs font-medium bg-muted/50 text-muted-foreground border-transparent whitespace-nowrap">
-                  {category.subcategories.length} <span className="hidden xs:inline">فئات فرعية</span>
+                <Badge variant="secondary" className="h-5 sm:h-8 px-1.5 sm:px-3 text-[10px] sm:text-sm font-bold bg-muted/50 text-muted-foreground border-transparent whitespace-nowrap">
+                  {category.subcategories.length} <span className="hidden xs:inline">فئات</span>
                 </Badge>
               )}
             </div>
-            <span className="text-[10px] sm:text-xs font-medium text-muted-foreground/80">
+            <span className="text-[10px] sm:text-sm font-bold text-muted-foreground/80">
               {isSubcategory ? 'تصنيف فرعي' : 'تصنيف رئيسي'}
             </span>
           </div>
         </div>
 
         <div className={cn(
-          "flex items-center gap-1.5 sm:gap-3 transition-opacity duration-200 shrink-0",
+          "flex items-center gap-1 sm:gap-4 transition-opacity duration-200 shrink-0",
           isSubcategory ? "opacity-100 sm:opacity-0 sm:group-hover:opacity-100" : "opacity-100"
         )}>
           {!isSubcategory && (
             <Button
               variant="default"
               size="sm"
-              className="h-7 sm:h-9 w-auto px-1 sm:px-4 gap-0 text-[9px] sm:text-xs font-medium bg-brand-primary hover:bg-brand-primary/90 text-primary-foreground shadow-sm transition-all"
+              className="h-8 sm:h-11 w-auto px-2 sm:px-6 gap-1 text-[10px] sm:text-sm font-bold bg-brand-primary hover:bg-brand-primary/90 text-primary-foreground shadow-sm transition-all rounded-full"
               onClick={() => setIsAddSubOpen(true)}
             >
-              <Plus className="h-3 w-3 sm:h-3.5 sm:w-3.5" />
-              <span>تصنيف فرعي</span>
+              <Plus className="h-3.5 w-3.5 sm:h-5 sm:w-5" />
+              <span className="hidden xs:inline">تصنيف فرعي</span>
+              <span className="xs:hidden">فرعي</span>
             </Button>
           )}
           <CategoryActionsMenu category={category} catalogId={catalogId} categories={categories} size="icon" />
@@ -164,11 +165,11 @@ function CategoryRow({ category, catalogId, categories, level = 0, isLast = fals
             animate={{ opacity: 1, height: 'auto' }}
             exit={{ opacity: 0, height: 0 }}
             transition={{ duration: 0.2, ease: "easeInOut" }}
-            className="relative mr-6 sm:mr-10 flex flex-col gap-3 pt-3"
+            className="relative mr-4 sm:mr-10 flex flex-col gap-2 sm:gap-3 pt-2 sm:pt-3"
           >
             <div
               className="absolute bottom-4 top-0 w-px bg-border/60"
-              style={{ right: -24 }}
+              style={{ right: -18 }}
             />
 
             {category.subcategories.map((subCategory, index) => (
@@ -213,9 +214,9 @@ function CategoryActionsMenu({ category, catalogId, categories, size = 'default'
             aria-haspopup="true"
             size={size === 'icon' ? 'icon' : 'sm'}
             variant="ghost"
-            className="h-8 w-8 text-muted-foreground hover:text-foreground"
+            className="h-9 w-9 sm:h-10 sm:w-10 text-muted-foreground hover:text-foreground"
           >
-            <MoreHorizontal className="h-4 w-4" />
+            <MoreHorizontal className="h-5 w-5 sm:h-6 sm:w-6" />
             <span className="sr-only">القائمة</span>
           </Button>
         </DropdownMenuTrigger>

@@ -3,6 +3,7 @@ import { redirect } from "next/navigation";
 import { AutoCatalogCreator } from "@/components/dashboard/AutoCatalogCreator";
 import { CopyLinkButton } from "@/components/dashboard/CopyLinkButton";
 import { QRCodeButton } from "@/components/dashboard/QRCodeButton";
+import { SettingsForm } from "@/components/dashboard/SettingsForm";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import Link from "next/link";
@@ -58,20 +59,20 @@ export default async function DashboardPage() {
 
   if (!catalog) {
     return (
-      <div className="max-w-3xl mx-auto pt-8 px-4">
+      <div className="w-full max-w-4xl mx-auto pt-0 md:pt-8 px-0 md:px-4 min-h-[100dvh] flex flex-col">
         <motion.div
-          initial={{ opacity: 0, scale: 0.95 }}
-          animate={{ opacity: 1, scale: 1 }}
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.8, ease: "easeOut" }}
-          className="relative"
+          className="relative flex-1 flex flex-col"
         >
           {/* Background Decorative Element */}
-          <div className="absolute -top-24 -right-24 w-64 h-64 bg-brand-primary/10 rounded-full blur-[100px] pointer-events-none" />
-          <div className="absolute -bottom-24 -left-24 w-64 h-64 bg-brand-luxury/10 rounded-full blur-[100px] pointer-events-none" />
+          <div className="absolute -top-24 -right-24 w-64 h-64 bg-brand-primary/10 rounded-full blur-[100px] pointer-events-none hidden md:block" />
+          <div className="absolute -bottom-24 -left-24 w-64 h-64 bg-brand-luxury/10 rounded-full blur-[100px] pointer-events-none hidden md:block" />
 
-          <Card className="glass-surface border-white/10 overflow-hidden shadow-2xl">
-            <div className="p-1"> {/* Thin border container */}
-              <div className="px-6 py-12 md:px-12">
+          <Card className="glass-surface border-0 md:border border-white/10 overflow-hidden shadow-none md:shadow-2xl flex-1 flex flex-col bg-transparent md:bg-white/5">
+            <div className="p-0 flex-1 flex flex-col"> 
+              <div className="px-4 py-6 md:px-12 md:py-12 flex-1 flex flex-col">
                 <AutoCatalogCreator
                   userPhone={userPhone}
                   userEmail={user.email || undefined}
@@ -103,8 +104,6 @@ export default async function DashboardPage() {
 
   // Always use production URL for QR code
   const qrCodeUrl = `https://online-catalog.net/${catalog.name}`;
-
-  const needsCustomization = !catalog.logo_url || !catalog.cover_url;
 
   return (
     <div className="space-y-8">
@@ -141,60 +140,7 @@ export default async function DashboardPage() {
         </Card>
       </motion.div>
 
-      <div className="grid grid-cols-2 lg:grid-cols-3 gap-3 md:gap-6">
-        {/* Settings Card - First */}
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{
-            opacity: 1,
-            y: 0,
-            scale: needsCustomization ? [1, 1.01, 1] : 1
-          }}
-          transition={{
-            delay: 0.2,
-            scale: needsCustomization ? {
-              duration: 2,
-              repeat: Infinity,
-              ease: "easeInOut"
-            } : {}
-          }}
-          className="col-span-2 lg:col-span-1"
-        >
-          <Link href="/dashboard/settings" className="block h-full relative group">
-            {needsCustomization && (
-              <div className="absolute -top-3 -right-2 z-20 bg-brand-primary text-white text-[10px] sm:text-xs px-3 py-1.5 rounded-full font-bold shadow-lg animate-bounce flex items-center gap-1.5 border-2 border-background">
-                <Palette className="h-3 w-3" />
-                أكمل إضافة اللوجو والغلاف والشعار النصي لمتجرك
-              </div>
-            )}
-            <Card className={cn(
-              "h-full flex flex-col cursor-pointer transition-all hover:scale-[1.02] group relative overflow-hidden",
-              needsCustomization ? "border-brand-primary shadow-[0_0_20px_rgba(8,145,178,0.2)] ring-2 ring-brand-primary/20" : "glass-surface-hover"
-            )}>
-              {needsCustomization && (
-                <div className="absolute inset-0 bg-gradient-to-br from-brand-primary/5 via-transparent to-transparent pointer-events-none" />
-              )}
-              <CardHeader className="p-4 sm:p-6">
-                <CardTitle className="flex items-center gap-2 text-base sm:text-xl">
-                  <div className="p-1.5 rounded-lg bg-brand-primary/20">
-                    <Palette className="h-4 w-4 sm:h-5 sm:w-5 text-brand-primary" />
-                  </div>
-                  عدّل شكل متجرك
-                </CardTitle>
-                <CardDescription className="text-[10px] sm:text-sm line-clamp-2 mt-2">
-                  أضف اللوجو، والغلاف، والشعار النصي، وغيره..
-                </CardDescription>
-              </CardHeader>
-              <CardContent className="mt-auto p-4 pt-0 sm:p-6 sm:pt-0">
-                <div className="w-full bg-[#0891b2] hover:bg-[#0e7490] text-white rounded-lg px-4 py-2 sm:py-2.5 flex items-center justify-center gap-2 text-xs sm:text-sm font-medium transition-all group-hover:shadow-lg group-hover:shadow-brand-primary/30">
-                  <Settings className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
-                  <span>تخصيص شكل المتجر</span>
-                </div>
-              </CardContent>
-            </Card>
-          </Link>
-        </motion.div>
-
+      <div className="hidden sm:grid grid-cols-2 lg:grid-cols-3 gap-3 md:gap-6">
         {/* Categories Section */}
         <motion.div
           initial={{ opacity: 0, y: 20 }}
@@ -277,6 +223,18 @@ export default async function DashboardPage() {
           </Link>
         </motion.div>
       </div>
+
+      <motion.div
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ delay: 0.5 }}
+      >
+        <Card className="glass-surface border-white/10 overflow-hidden">
+          <CardContent className="p-4 sm:p-6">
+            <SettingsForm catalog={catalog} />
+          </CardContent>
+        </Card>
+      </motion.div>
     </div>
   );
 }

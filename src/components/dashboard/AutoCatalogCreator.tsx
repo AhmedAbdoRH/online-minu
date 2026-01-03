@@ -1,11 +1,12 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useCallback } from 'react';
 import { useRouter } from 'next/navigation';
 import { createCatalog, checkCatalogName } from '@/app/actions/catalog';
 import { Loader2, Sparkles } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { slugify } from '@/lib/utils';
+import { OnboardingFormSimple } from './OnboardingFormSimple';
 
 export function AutoCatalogCreator({
     userPhone,
@@ -19,77 +20,63 @@ export function AutoCatalogCreator({
     const router = useRouter();
     const { toast } = useToast();
     const [isCreating, setIsCreating] = useState(false);
+    const [showForm, setShowForm] = useState(false);
+
+    const handleCreateCatalog = useCallback(async (displayName: string, slug: string, whatsapp: string) => {
+        setIsCreating(true);
+        const formData = new FormData();
+        formData.append('display_name', displayName);
+        formData.append('name', slug);
+        formData.append('whatsapp_number', whatsapp);
+
+        // Use +20 as default if not in whatsapp
+        if (!whatsapp.startsWith('+')) {
+            formData.set('whatsapp_number', '+20' + whatsapp);
+        }
+
+        try {
+            const result = await createCatalog(null, formData);
+
+            if (result && result.message === undefined) {
+                // Success: createCatalog redirects or we reload
+                localStorage.removeItem('pendingStoreName');
+                localStorage.removeItem('pendingStoreSlug');
+                localStorage.removeItem('pendingWhatsApp');
+                router.refresh();
+            } else if (result && result.message) {
+                toast({
+                    title: 'تنبيه',
+                    description: result.message,
+                    variant: 'destructive',
+                });
+                setIsCreating(false);
+            }
+        } catch (error) {
+            console.error('Auto creation failed:', error);
+            setIsCreating(false);
+        }
+    }, [router, toast]);
 
     useEffect(() => {
-        const autoCreate = async () => {
-            const pendingStoreName = localStorage.getItem('pendingStoreName');
-            const pendingStoreSlug = localStorage.getItem('pendingStoreSlug');
-            const pendingWhatsApp = localStorage.getItem('pendingWhatsApp');
+        const pendingStoreName = localStorage.getItem('pendingStoreName');
+        const pendingStoreSlug = localStorage.getItem('pendingStoreSlug');
+        const pendingWhatsApp = localStorage.getItem('pendingWhatsApp');
 
-            let displayName = pendingStoreName;
-            let slug = pendingStoreSlug;
-            let whatsapp = pendingWhatsApp;
+        if (pendingStoreName && pendingStoreSlug && pendingWhatsApp) {
+            handleCreateCatalog(pendingStoreName, pendingStoreSlug, pendingWhatsApp);
+        } else {
+            setShowForm(true);
+        }
+    }, [handleCreateCatalog]);
 
-            // Fallback to user metadata if no pending data (e.g. direct Google sign up without popup)
-            if (!displayName && userName) {
-                displayName = `متجر ${userName}`;
-            } else if (!displayName && userEmail) {
-                displayName = `متجر ${userEmail.split('@')[0]}`;
-            }
-
-            if (!slug && displayName) {
-                const baseSlug = slugify(displayName);
-                // Check if slug is available, if not, append random suffix or timestamp
-                const isAvailable = await checkCatalogName(baseSlug);
-                slug = isAvailable ? baseSlug : `${baseSlug}-${Math.floor(Math.random() * 1000)}`;
-            } else if (!slug && userEmail) {
-                slug = userEmail.split('@')[0].replace(/[^a-z0-9]/g, '');
-            }
-
-            if (!whatsapp) {
-                whatsapp = '+20' + (userPhone || '0000000000');
-            }
-
-            if (displayName && slug) {
-                setIsCreating(true);
-                const formData = new FormData();
-                formData.append('display_name', displayName);
-                formData.append('name', slug);
-                formData.append('whatsapp_number', whatsapp);
-
-                // Use +20 as default if not in whatsapp
-                if (!whatsapp.startsWith('+')) {
-                    formData.set('whatsapp_number', '+20' + whatsapp);
-                }
-
-                try {
-                    const result = await createCatalog(null, formData);
-
-                    if (result && result.message === undefined) {
-                        // Success: createCatalog redirects or we reload
-                        localStorage.removeItem('pendingStoreName');
-                        localStorage.removeItem('pendingStoreSlug');
-                        localStorage.removeItem('pendingWhatsApp');
-                        router.refresh();
-                    } else if (result && result.message) {
-                        // If it's a name duplication error, we might want to try again with a different slug
-                        // but for now let's just show the toast
-                        toast({
-                            title: 'تنبيه',
-                            description: result.message,
-                            variant: 'destructive',
-                        });
-                        setIsCreating(false);
-                    }
-                } catch (error) {
-                    console.error('Auto creation failed:', error);
-                    setIsCreating(false);
-                }
-            }
-        };
-
-        autoCreate();
-    }, [router, toast, userPhone, userEmail, userName]);
+    if (showForm && !isCreating) {
+        return (
+            <OnboardingFormSimple 
+                onSubmit={(data) => handleCreateCatalog(data.displayName, data.slug, data.whatsapp)}
+                isSubmitting={isCreating}
+            />
+        );
+    }
 
     if (!isCreating) {
         return null;
