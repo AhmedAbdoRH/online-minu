@@ -6,7 +6,7 @@ import { redirect } from "next/navigation";
 
 export async function signInWithGoogle() {
     const supabase = await createClient();
-    const origin = (await headers()).get("origin") || "http://localhost:9003";
+    const origin = (await headers()).get("origin") || "http://localhost:9004";
 
     const { data, error } = await supabase.auth.signInWithOAuth({
         provider: 'google',
@@ -61,7 +61,7 @@ export async function signUpWithEmail(email: string, password: string) {
             email,
             password,
             options: {
-                emailRedirectTo: `${(await headers()).get("origin") || "http://localhost:9003"}/auth/callback`
+                emailRedirectTo: `${(await headers()).get("origin") || "http://localhost:9004"}/auth/callback`
             }
         });
 
