@@ -198,30 +198,6 @@ export function SettingsForm({ catalog }: { catalog: Catalog }) {
 
           {/* Cover Upload Area */}
           <div className="relative h-44 sm:h-56 w-full rounded-2xl overflow-hidden bg-muted group cursor-pointer border-2 border-dashed border-brand-primary/20 hover:border-brand-primary/40 transition-all shadow-inner">
-            <AnimatePresence>
-              {showTooltips && (
-                <motion.div
-                  initial={{ opacity: 0, scale: 0.8, y: -10 }}
-                  animate={{ opacity: 1, scale: 1, y: 0 }}
-                  exit={{ opacity: 0, scale: 0.8, y: -10 }}
-                  className="absolute inset-x-4 bottom-[-80px] z-[60] pointer-events-none"
-                >
-                  <div className="bg-brand-primary text-white p-3 rounded-xl shadow-2xl flex items-center justify-between gap-3 border border-white/20 pointer-events-auto max-w-xs mx-auto">
-                    <div className="flex items-center gap-2">
-                      <div className="w-8 h-8 rounded-full bg-white/20 flex items-center justify-center shrink-0">
-                        <Camera className="h-4 w-4" />
-                      </div>
-                      <p className="text-xs font-bold leading-tight">أضف شعار المتجر وصورة الغلاف من هنا لتمييز علامتك التجارية.</p>
-                    </div>
-                    <button onClick={(e) => { e.stopPropagation(); dismissTooltips(); }} className="p-1 hover:bg-white/10 rounded-full transition-colors">
-                      <X className="h-4 w-4" />
-                    </button>
-                    {/* Arrow */}
-                    <div className="absolute -top-2 left-1/2 -translate-x-1/2 w-4 h-4 bg-brand-primary rotate-45 border-l border-t border-white/20" />
-                  </div>
-                </motion.div>
-              )}
-            </AnimatePresence>
             {coverPreview ? (
               <NextImage
                 src={coverPreview}
@@ -256,6 +232,43 @@ export function SettingsForm({ catalog }: { catalog: Catalog }) {
 
           {/* Logo Upload Area */}
           <div className="absolute -bottom-10 left-1/2 -translate-x-1/2">
+            <AnimatePresence>
+              {showTooltips && (
+                <motion.div
+                  initial={{ opacity: 0, scale: 0.8, y: 10 }}
+                  animate={{ 
+                    opacity: [1, 0.7, 1],
+                    scale: [1, 1.02, 1],
+                    y: 0 
+                  }}
+                  exit={{ opacity: 0, scale: 0.8, y: 10 }}
+                  transition={{
+                    opacity: { repeat: Infinity, duration: 2, ease: "easeInOut" },
+                    scale: { repeat: Infinity, duration: 2, ease: "easeInOut" },
+                    duration: 0.3
+                  }}
+                  className="absolute left-[-40%] -translate-x-full bottom-full mb-6 z-[60] pointer-events-none w-[240px] sm:w-[280px]"
+                >
+                  <div className="bg-brand-primary text-white p-4 rounded-2xl shadow-2xl flex flex-col items-center gap-2 border border-white/20 pointer-events-auto text-center relative">
+                    <div className="flex items-center gap-2 justify-center">
+                      <Camera className="h-5 w-5 shrink-0" />
+                      <p className="text-sm font-black leading-tight">أضف شعار / غلاف لمتجرك</p>
+                    </div>
+                    
+                    <button 
+                      onClick={(e) => { e.stopPropagation(); dismissTooltips(); }} 
+                      className="absolute -top-2 -right-2 bg-red-500 border border-white/40 p-1.5 hover:bg-red-600 rounded-full transition-colors shadow-lg pointer-events-auto"
+                    >
+                      <X className="h-3.5 w-3.5 text-white" />
+                    </button>
+                    
+                    {/* Arrow */}
+                    <div className="absolute -bottom-1.5 left-1/2 -translate-x-1/2 w-3 h-3 bg-brand-primary rotate-45 border-r border-b border-white/20" />
+                  </div>
+                </motion.div>
+              )}
+            </AnimatePresence>
+
             <div className="relative h-28 w-28 sm:h-36 sm:w-36 rounded-full border-4 border-background bg-card shadow-2xl overflow-hidden group cursor-pointer border-dashed border-brand-primary/30 hover:border-brand-primary/50 transition-all ring-4 ring-black/5">
               {logoPreview ? (
                 <NextImage

@@ -9,14 +9,14 @@ import NextTopLoader from 'nextjs-toploader';
 
 export const metadata: Metadata = {
   title: {
-    default: 'منصة اونلاين كاتلوج',
-    template: '%s | منصة اونلاين كاتلوج'
+    default: 'أونلاين كاتلوج | Online Catalog',
+    template: '%s | أونلاين كاتلوج'
   },
     description: 'منصة اونلاين كاتلوج: منصة إنشاء المتجر الرقمي للمحال والمتاجر. سجل مجاناً وأنشئ متجرك خلال دقائق.',
   icons: {
-    icon: '/mainlogo.png',
-    shortcut: '/mainlogo.png',
-    apple: '/mainlogo.png',
+    icon: '/logo.png',
+    shortcut: '/logo.png',
+    apple: '/logo.png',
   },
   openGraph: {
     type: 'website',
@@ -24,13 +24,13 @@ export const metadata: Metadata = {
     url: 'https://online-catalog.net',
     title: 'أونلاين كاتلوج | Online Catalog',
     description: 'أنشئ متجرك الرقمي والكاتلوج الخاص بك في دقائق. منصة متكاملة تدعم واتساب، بدون الحاجة لمبرمج.',
-    siteName: 'منصة اونلاين كاتلوج',
+    siteName: 'اونلاين كاتلوج',
     images: [
       {
-        url: '/mainlogo.png',
+        url: '/logo.png',
         width: 512,
         height: 512,
-        alt: 'منصة اونلاين كاتلوج - واجهة المعاينة',
+        alt: 'اونلاين كاتلوج - واجهة المعاينة',
       },
     ],
   },
@@ -38,7 +38,7 @@ export const metadata: Metadata = {
     card: 'summary_large_image',
     title: 'أونلاين كاتلوج | Online Catalog',
     description: 'أنشئ متجرك الرقمي والكاتلوج الخاص بك في دقائق.',
-    images: ['/mainlogo.png'],
+    images: ['/logo.png'],
   },
 };
 

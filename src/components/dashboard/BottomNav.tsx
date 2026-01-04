@@ -12,12 +12,15 @@ import { ItemForm } from "./ItemForm";
 import { createClient } from "@/lib/supabase/client";
 import type { Category, Catalog } from "@/lib/types";
 
-const navItems = [
+const leftNavItems = [
   {
     label: "التصنيفات",
     href: "/dashboard/categories",
     icon: Tags,
   },
+];
+
+const rightNavItems = [
   {
     label: "المنتجات",
     href: "/dashboard/items",
@@ -31,6 +34,7 @@ export function BottomNav() {
   const [isAddItemOpen, setIsAddItemOpen] = useState(false);
   const [catalog, setCatalog] = useState<Catalog | null>(null);
   const [categories, setCategories] = useState<Category[]>([]);
+  const [itemsCount, setItemsCount] = useState<number | null>(null);
 
   const fetchData = async () => {
     const supabase = createClient();
@@ -45,6 +49,15 @@ export function BottomNav() {
 
     if (catalogData) {
       setCatalog(catalogData);
+
+      // Fetch items count
+      const { count } = await supabase
+        .from("items")
+        .select("*", { count: 'exact', head: true })
+        .eq("catalog_id", catalogData.id);
+      
+      setItemsCount(count || 0);
+
       const { data: categoriesData } = await supabase
         .from("categories")
         .select("*")
@@ -62,22 +75,20 @@ export function BottomNav() {
 
   useEffect(() => {
     fetchData();
-
-    // Show tooltip after 3 seconds
-    const showTimer = setTimeout(() => {
-      setShowTooltip(true);
-    }, 3000);
-
-    // Hide tooltip after another 4 seconds (total 7 seconds)
-    const hideTimer = setTimeout(() => {
-      setShowTooltip(false);
-    }, 7000);
-
-    return () => {
-      clearTimeout(showTimer);
-      clearTimeout(hideTimer);
-    };
   }, []);
+
+  useEffect(() => {
+    // Show product tooltip after 2 seconds only if there are no items
+    if (itemsCount === 0) {
+      const showTimer = setTimeout(() => {
+        setShowTooltip(true);
+      }, 2000);
+
+      return () => clearTimeout(showTimer);
+    } else {
+      setShowTooltip(false);
+    }
+  }, [itemsCount]);
 
   return (
     <motion.div
@@ -91,7 +102,7 @@ export function BottomNav() {
         <div className="absolute top-0 left-0 right-0 h-[1px] bg-gradient-to-r from-transparent via-brand-accent/40 to-transparent" />
         
         {/* Floating Home Button - Above the bar, centered, circular, neutral */}
-        <div className="absolute -top-12 left-1/2 -translate-x-1/2 flex flex-col items-center">
+        <div className="absolute -top-10 left-1/2 -translate-x-1/2 flex flex-col items-center translate-y-1">
           <Link href="/dashboard">
             <motion.div
               whileHover={{ scale: 1.1 }}
@@ -107,63 +118,96 @@ export function BottomNav() {
           <span className="mt-1.5 text-[10px] font-bold text-white/40 tracking-widest uppercase">الرئيسية</span>
         </div>
 
-        {navItems.map((item, index) => {
-          const isActive = pathname === item.href;
-          const Icon = item.icon;
+        {/* Nav Items Container */}
+        <div className="flex w-full items-center justify-between px-2 translate-y-1.5">
+          {/* Left Side Items */}
+          <div className="flex flex-1 items-center justify-start gap-1">
+            {leftNavItems.map((item) => {
+              const isActive = pathname === item.href;
+              const Icon = item.icon;
 
-          return (
-            <div key={item.href} className="flex items-center flex-1 h-full">
-              <Link
-                href={item.href}
-                className="relative flex h-full w-full flex-col items-center justify-center pt-2 transition-all"
-              >
-                <div
+              return (
+                <Link
+                  key={item.href}
+                  href={item.href}
                   className={cn(
-                    "relative flex flex-col items-center justify-center transition-all duration-300 px-12 py-4 min-w-[140px]",
-                    isActive
-                      ? "scale-110"
-                      : "opacity-70 hover:opacity-100"
+                    "flex flex-col items-center justify-center py-2 transition-all duration-300 min-w-[100px]",
+                    isActive ? "scale-120 opacity-100" : "opacity-80 hover:opacity-100"
                   )}
                 >
-                  <Icon
-                    className={cn(
-                      "h-8 w-8 mb-2",
-                      isActive ? "text-brand-accent" : "text-white"
-                    )}
-                  />
-                  <span
-                    className={cn(
-                      "text-[14px] font-extrabold tracking-wide transition-all duration-300",
-                      isActive ? "text-brand-accent" : "text-white/90"
-                    )}
-                  >
+                  <Icon className={cn("h-9 w-9 mb-2", isActive ? "text-brand-accent" : "text-white")} />
+                  <span className={cn("text-[16px] font-black tracking-tight", isActive ? "text-brand-accent" : "text-white/95")}>
                     {item.label}
                   </span>
                   {isActive && (
                     <motion.div
                       layoutId="active-indicator"
-                      className="absolute -bottom-1 h-[3px] w-24 rounded-full bg-brand-accent"
+                      className="absolute -bottom-1 h-[2px] w-12 rounded-full bg-brand-accent"
                       transition={{ type: "spring", stiffness: 380, damping: 28 }}
                     />
                   )}
-                </div>
-              </Link>
-              
-              {/* Vertical Separator - More prominent */}
-              {index < navItems.length - 1 && (
-                <div className="h-10 w-[1.5px] bg-gradient-to-b from-transparent via-brand-accent/30 to-transparent mx-4" />
-              )}
-            </div>
-          );
-        })}
+                </Link>
+              );
+            })}
+          </div>
+
+          {/* Vertical Separator under Home Button */}
+          <div className="relative flex h-12 w-16 items-center justify-center">
+            <div className="h-8 w-[1px] bg-gradient-to-b from-transparent via-white/20 to-transparent" />
+          </div>
+
+          {/* Right Side Items */}
+          <div className="flex flex-1 items-center justify-end gap-1">
+            {rightNavItems.map((item) => {
+              const isActive = pathname === item.href;
+              const Icon = item.icon;
+
+              return (
+                <Link
+                  key={item.href}
+                  href={item.href}
+                  className={cn(
+                    "flex flex-col items-center justify-center py-2 transition-all duration-300 min-w-[100px]",
+                    isActive ? "scale-120 opacity-100" : "opacity-80 hover:opacity-100"
+                  )}
+                >
+                  <Icon className={cn("h-9 w-9 mb-2", isActive ? "text-brand-accent" : "text-white")} />
+                  <span className={cn("text-[16px] font-black tracking-tight", isActive ? "text-brand-accent" : "text-white/95")}>
+                    {item.label}
+                  </span>
+                  {isActive && (
+                    <motion.div
+                      layoutId="active-indicator"
+                      className="absolute -bottom-1 h-[2px] w-12 rounded-full bg-brand-accent"
+                      transition={{ type: "spring", stiffness: 380, damping: 28 }}
+                    />
+                  )}
+                </Link>
+              );
+            })}
+          </div>
+        </div>
       </div>
       <div className="fixed bottom-28 left-4 z-[60] block sm:hidden">
         <AnimatePresence>
           {showTooltip && (
             <motion.div
-              initial={{ opacity: 0, scale: 0.5, y: 20, x: -10 }}
-              animate={{ opacity: 1, scale: 1, y: 0, x: 0 }}
-              exit={{ opacity: 0, scale: 0.5, y: 10, x: -5 }}
+              initial={{ opacity: 0, scale: 0.9, y: 10 }}
+              animate={{ 
+                opacity: 1,
+                scale: 1,
+                y: [0, -6, 0],
+              }}
+              exit={{ opacity: 0, scale: 0.9, y: 10 }}
+              transition={{
+                y: {
+                  repeat: Infinity,
+                  duration: 2,
+                  ease: "easeInOut"
+                },
+                opacity: { duration: 0.3 },
+                scale: { duration: 0.3 }
+              }}
               className="absolute bottom-20 left-0 whitespace-nowrap"
             >
               <div className="relative rounded-2xl bg-brand-primary px-4 py-2 text-[13px] font-bold text-white shadow-[0_8px_20px_rgba(0,209,201,0.3)] ring-1 ring-white/20">
@@ -201,13 +245,13 @@ export function BottomNav() {
             whileTap={{ scale: 0.9 }}
             className="relative"
           >
-            <div className="absolute -inset-5 rounded-full bg-[conic-gradient(from_0deg,rgba(255,152,0,0.3)_0%,transparent_25%,rgba(255,152,0,0.2)_60%,transparent_100%)] blur-2xl opacity-70" />
+            <div className="absolute -inset-5 rounded-full bg-[conic-gradient(from_0deg,rgba(251,191,36,0.2)_0%,transparent_25%,rgba(251,191,36,0.1)_60%,transparent_100%)] blur-2xl opacity-60" />
             <motion.div 
-              animate={{ opacity: [0.3, 0.6, 0.3] }}
+              animate={{ opacity: [0.2, 0.4, 0.2] }}
               transition={{ repeat: Infinity, duration: 2 }}
-              className="absolute -inset-1 rounded-full bg-orange-400/20 blur-md" 
+              className="absolute -inset-1 rounded-full bg-amber-400/10 blur-md" 
             />
-            <div className="relative flex h-16 w-16 items-center justify-center rounded-full bg-gradient-to-br from-[#FFC107] via-[#FF9800] to-[#F57C00] text-white shadow-[0_15px_35px_rgba(255,152,0,0.4)] ring-1 ring-white/40">
+            <div className="relative flex h-16 w-16 items-center justify-center rounded-full bg-gradient-to-br from-[#FCD34D] via-[#F59E0B] to-[#D97706] text-white shadow-[0_15px_35px_rgba(245,158,11,0.25)] ring-1 ring-white/40">
               <div className="absolute inset-0 rounded-full bg-[radial-gradient(circle_at_top_left,_rgba(255,255,255,0.4),_transparent_70%)] opacity-50" />
               <div className="absolute inset-0.5 rounded-full ring-1 ring-white/20" />
               <Plus className="relative h-10 w-10 stroke-[1.5px]" />

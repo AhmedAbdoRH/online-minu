@@ -13,7 +13,7 @@ import {
   MessageCircle,
   Zap,
   Package as PackageIcon,
-  Building
+  Building,
 } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
 import type { Catalog } from '@/lib/types';
@@ -126,8 +126,28 @@ export function DashboardNav({ user, catalog }: { user: User; catalog: Catalog |
             </Tooltip>
           ))}
         </nav>
-        <nav className="mt-auto flex flex-col items-center gap-4 px-2 sm:py-5">
+        <nav className="mt-auto flex flex-col items-center gap-4 px-2 sm:py-5 relative">
           <ThemeToggle />
+          
+          <Tooltip>
+            <TooltipTrigger asChild>
+              <div className="relative">
+                <Link
+                  href="/dashboard/settings"
+                  onClick={() => handleNavClick('/dashboard/settings')}
+                  className={cn(
+                    "flex h-9 w-9 items-center justify-center rounded-lg text-muted-foreground transition-colors hover:text-foreground md:h-8 md:w-8",
+                    pathname === '/dashboard/settings' ? 'bg-accent text-accent-foreground' : ''
+                  )}
+                >
+                  <Settings className="h-5 w-5" />
+                  <span className="sr-only">الإعدادات</span>
+                </Link>
+              </div>
+            </TooltipTrigger>
+            <TooltipContent side="left">الإعدادات</TooltipContent>
+          </Tooltip>
+
           <Tooltip>
             <TooltipTrigger asChild>
               <Link
@@ -141,22 +161,6 @@ export function DashboardNav({ user, catalog }: { user: User; catalog: Catalog |
               </Link>
             </TooltipTrigger>
             <TooltipContent side="left">تواصل مع الدعم الفني</TooltipContent>
-          </Tooltip>
-          <Tooltip>
-            <TooltipTrigger asChild>
-              <Link
-                href="/dashboard/settings"
-                onClick={() => handleNavClick('/dashboard/settings')}
-                className={cn(
-                  "flex h-9 w-9 items-center justify-center rounded-lg text-muted-foreground transition-colors hover:text-foreground md:h-8 md:w-8",
-                  pathname === '/dashboard/settings' ? 'bg-accent text-accent-foreground' : ''
-                )}
-              >
-                <Settings className="h-5 w-5" />
-                <span className="sr-only">الإعدادات</span>
-              </Link>
-            </TooltipTrigger>
-            <TooltipContent side="left">الإعدادات</TooltipContent>
           </Tooltip>
           <form action={logout}>
             <Tooltip>

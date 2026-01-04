@@ -2,7 +2,7 @@ import type { CapacitorConfig } from '@capacitor/cli';
 
 const config: CapacitorConfig = {
   appId: 'com.nextcatalog.app',
-  appName: 'NextCatalogApp',
+  appName: 'اونلاين كاتلوج',
   webDir: 'out',
   server: {
     url: 'https://online-catalog.net',

@@ -24,54 +24,62 @@ function LoginContent() {
   };
 
   return (
-    <div className="flex min-h-screen items-center justify-center p-4 bg-gradient-to-br from-background to-muted/50">
-      <Card className="relative mx-auto max-w-md w-full border border-border bg-card/85 text-card-foreground shadow-lg backdrop-blur-md overflow-hidden">
-        {/* Subtle warm glass tint (keeps brand colors as primary) */}
-        <div className="pointer-events-none absolute inset-0 bg-gradient-to-br from-orange-200/14 via-amber-100/10 to-transparent dark:from-orange-500/8 dark:via-amber-500/6 dark:to-transparent" />
-        {/* Very soft highlights */}
-        <div className="pointer-events-none absolute -top-24 -right-24 h-56 w-56 rounded-full bg-orange-200/14 blur-3xl dark:bg-orange-500/7" />
-        <div className="pointer-events-none absolute -bottom-24 -left-24 h-56 w-56 rounded-full bg-amber-200/12 blur-3xl dark:bg-amber-500/6" />
+    <div className="flex min-h-screen flex-col items-center justify-center p-6 bg-gradient-to-br from-background to-muted/50 text-white relative overflow-hidden">
+      {/* Subtle warm glass tint (keeps brand colors as primary) */}
+      <div className="pointer-events-none absolute inset-0 bg-gradient-to-br from-orange-200/14 via-amber-100/10 to-transparent dark:from-orange-500/8 dark:via-amber-500/6 dark:to-transparent" />
+      {/* Very soft highlights */}
+      <div className="pointer-events-none absolute -top-24 -right-24 h-56 w-56 rounded-full bg-orange-200/14 blur-3xl dark:bg-orange-500/7" />
+      <div className="pointer-events-none absolute -bottom-24 -left-24 h-56 w-56 rounded-full bg-amber-200/12 blur-3xl dark:bg-amber-500/6" />
 
-        <CardHeader className="relative text-center space-y-4 pb-2">
-          <div className="flex justify-center">
-            <div
-              className="relative h-16 w-16 cursor-pointer select-none"
-              onDoubleClick={handleLogoDoubleClick}
-            >
-              <Image
-                src="/logo.png"
-                alt="Online Catalog"
-                fill
-                className="object-contain"
-                priority
-              />
-            </div>
+      <div className="relative w-full max-w-sm space-y-8 animate-in fade-in zoom-in duration-500">
+        {/* Logo Section */}
+        <div className="flex flex-col items-center space-y-6">
+          <div 
+            className="relative h-24 w-24 cursor-pointer select-none"
+            onDoubleClick={handleLogoDoubleClick}
+          >
+            <Image
+              src="/logo.png"
+              alt="اونلاين كاتلوج"
+              fill
+              className="object-contain"
+              priority
+            />
           </div>
-          <div>
-            <CardTitle className="text-2xl font-bold">مرحباً بعودتك</CardTitle>
-            <CardDescription className="mt-2">
+          
+          <div className="text-center space-y-2">
+            <h1 className="text-3xl font-bold tracking-tight text-[#2eb872]">
+              مرحباً بعودتك.
+            </h1>
+            <p className="text-lg text-gray-400">
               سجل دخولك للوصول إلى لوحة التحكم
-            </CardDescription>
+            </p>
           </div>
-        </CardHeader>
-        <CardContent className="relative pt-4">
+        </div>
+
+        <div className="space-y-6">
           <LoginForm
             message={message}
             showEmailForm={showEmailForm}
             onToggleEmailForm={() => setShowEmailForm(!showEmailForm)}
           />
 
-          <div className="mt-6 text-center text-sm text-muted-foreground">
-            ليس لديك حساب؟{" "}
+          <div className="pt-8 border-t border-gray-800 text-center">
+            <p className="text-white font-bold text-lg mb-4">ليس لديك حساب؟</p>
             <Link
               href="/"
-              className="text-primary font-medium hover:underline"
+              className="inline-flex h-14 w-full items-center justify-center bg-[#2eb872] hover:bg-[#25965d] text-[#05110d] font-bold text-xl rounded-xl shadow-[0_0_20px_rgba(46,184,114,0.3)] transition-all active:scale-95"
             >
-              إنشاء حساب جديد
+              إنشاء متجرك الآن ✨
             </Link>
           </div>
-        </CardContent>
-      </Card>
+        </div>
+
+        {/* Footer */}
+        <p className="text-center text-xs text-gray-600 pt-8">
+          بالمتابعة، أنت توافق على شروط الخدمة وسياسة الخصوصية الخاصة بنا.
+        </p>
+      </div>
     </div>
   );
 }
