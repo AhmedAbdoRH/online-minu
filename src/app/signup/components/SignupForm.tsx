@@ -32,7 +32,7 @@ export function SignupForm({
   useEffect(() => {
     if (Capacitor.isNativePlatform()) {
       GoogleAuth.initialize({
-        clientId: '471992011728-o37eenopdmpm81s6npksqjv6j0ug9uhu.apps.googleusercontent.com',
+        clientId: '471992011728-n051jite6n017emj40qm5nht9a999jn6.apps.googleusercontent.com',
         scopes: ['profile', 'email'],
         grantOfflineAccess: true,
       });
