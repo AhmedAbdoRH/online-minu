@@ -300,7 +300,7 @@ export function SettingsForm({ catalog }: { catalog: Catalog }) {
           </div>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 pt-6">
+        <div className="flex flex-col gap-6 pt-6">
           <FormField
             control={form.control}
             name="display_name"
@@ -312,6 +312,23 @@ export function SettingsForm({ catalog }: { catalog: Catalog }) {
                 </FormControl>
                 <FormDescription>
                   سيظهر هذا الاسم في واجهة المتجر الخاصة بك.
+                </FormDescription>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+
+          <FormField
+            control={form.control}
+            name="slogan"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>شعار نصي (سلوغان)</FormLabel>
+                <FormControl>
+                  <Input {...field} disabled={isSubmitting} placeholder="شعار متجرك أو جملة ترويجية" className="bg-white text-[#1e3a5f] text-lg" />
+                </FormControl>
+                <FormDescription>
+                  سيظهر هذا النص بخط صغير تحت اسم المتجر.
                 </FormDescription>
                 <FormMessage />
               </FormItem>
@@ -401,22 +418,6 @@ export function SettingsForm({ catalog }: { catalog: Catalog }) {
                     ? 'يمكنك تغيير رابط المتجر الخاص بك.'
                     : 'ترقية إلى باقة البرو لتتمكن من تعديل رابط متجرك.'
                   }
-                </FormDescription>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-          <FormField
-            control={form.control}
-            name="slogan"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>شعار نصي (سلوغان)</FormLabel>
-                <FormControl>
-                  <Input {...field} disabled={isSubmitting} placeholder="شعار متجرك أو جملة ترويجية" className="bg-white text-[#1e3a5f] text-lg" />
-                </FormControl>
-                <FormDescription>
-                  سيظهر هذا النص بخط صغير تحت اسم المتجر.
                 </FormDescription>
                 <FormMessage />
               </FormItem>
