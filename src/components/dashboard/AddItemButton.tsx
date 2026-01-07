@@ -26,11 +26,11 @@ export function AddItemButton({ catalogId, catalogPlan, categories }: AddItemBut
                     </span>
                 </Button>
             </DialogTrigger>
-            <DialogContent>
+            <DialogContent className="max-w-full sm:max-w-[90vw] md:max-w-[80vw] lg:max-w-[1000px] max-h-[95vh] overflow-y-auto">
                 <DialogHeader>
-                    <DialogTitle>إضافة منتج جديد</DialogTitle>
+                    <DialogTitle className="text-2xl font-bold">إضافة منتج جديد</DialogTitle>
                     <DialogDescription>
-                        املأ تفاصيل المنتج الجديد.
+                        املأ تفاصيل المنتج الجديد بدقة ليظهر بشكل جذاب في متجرك.
                     </DialogDescription>
                 </DialogHeader>
                 <ItemForm

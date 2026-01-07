@@ -214,332 +214,343 @@ export function ItemForm({ catalogId, catalogPlan, categories, item, onSuccess, 
         resourceType="product"
       />
       <Form {...form}>
-        <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
-          <div className="grid grid-cols-2 gap-4">
-            <FormField
-              control={form.control}
-              name="category_id"
-              render={({ field }) => (
-                <FormItem className="col-span-2">
-                  <FormLabel>الفئة</FormLabel>
-                  <Select onValueChange={(val) => {
-                    console.log('Category selected:', val);
-                    if (val === 'new_category') {
-                      if (onCancel) onCancel();
-                      router.push('/dashboard/categories');
-                      return;
-                    }
-                    field.onChange(val);
-                  }} value={field.value || ''}>
-                    <FormControl>
-                    <SelectTrigger className="h-14 text-base text-foreground font-bold border-2 focus:ring-brand-primary/20">
-                      <SelectValue placeholder="اختر فئة" className="placeholder:text-muted-foreground/60" />
-                    </SelectTrigger>
-                  </FormControl>
-                    <SelectContent>
-                        <SelectGroup>
-                           <SelectLabel className="text-[#4ade80] font-black py-3.5 px-4 text-[15px] bg-[#4ade80]/5 mb-1">الإجراءات</SelectLabel>
-                           <SelectItem 
-                         value="new_category" 
-                         className="flex items-center gap-2 text-[#4ade80] font-black text-[15px] cursor-pointer py-4 focus:bg-muted focus:text-[#22c55e] border-b border-muted/50"
-                       >
-                         <div className="flex items-center gap-2 justify-center w-full">
-                           <PlusCircle className="h-5 w-5 stroke-[3px]" />
-                           <span>إضافة تصنيف جديد</span>
-                         </div>
-                       </SelectItem>
-                         </SelectGroup>
-                         <SelectSeparator className="bg-[#4ade80]/10" />
-                         <SelectGroup>
-                           <SelectLabel className="text-[#4ade80] font-black py-3.5 px-4 text-[15px] bg-[#4ade80]/5 mt-1 mb-1">التصنيفات المتاحة</SelectLabel>
-                           {renderCategoryItems(buildHierarchicalCategories())}
-                         </SelectGroup>
-                      </SelectContent>
-                  </Select>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-            <FormField
-              control={form.control}
-              name="name"
-              render={({ field }) => (
-                <FormItem className="col-span-2">
-                  <FormLabel>اسم المنتج</FormLabel>
-                  <FormControl><Input {...field} /></FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-            <FormField
-              control={form.control}
-              name="description"
-              render={({ field }) => (
-                <FormItem className="col-span-2">
-                  <FormLabel>الوصف (اختياري)</FormLabel>
-                  <FormControl><Textarea {...field} /></FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-            <div className="col-span-2 space-y-4 rounded-lg border p-4 bg-muted/20">
-              <FormLabel>نظام التسعير</FormLabel>
-              <Tabs
-                value={pricingType}
-                onValueChange={(val) => {
-                  const type = val as 'unified' | 'multi';
-                  setPricingType(type);
-                  form.setValue('pricing_type', type);
-                }}
-                className="w-full"
-              >
-                <TabsList className="grid w-full grid-cols-2">
-                  <TabsTrigger value="multi" className="text-sm">
-                    <div className="flex items-center gap-2">
-                      <span>أسعار متعددة</span>
-                      <span className="text-xs bg-primary/20 text-primary px-1.5 py-0.5 rounded-full">جديد</span>
+        <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
+          <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
+            {/* الجهة اليمنى: البيانات الأساسية */}
+            <div className="lg:col-span-7 space-y-6">
+              <div className="space-y-4">
+                <FormField
+                  control={form.control}
+                  name="category_id"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel className="text-base font-bold">الفئة</FormLabel>
+                      <Select onValueChange={(val) => {
+                        console.log('Category selected:', val);
+                        if (val === 'new_category') {
+                          if (onCancel) onCancel();
+                          router.push('/dashboard/categories');
+                          return;
+                        }
+                        field.onChange(val);
+                      }} value={field.value || ''}>
+                        <FormControl>
+                        <SelectTrigger className="h-12 text-base border-2 focus:ring-brand-primary/20">
+                          <SelectValue placeholder="اختر فئة للمنتج" />
+                        </SelectTrigger>
+                      </FormControl>
+                        <SelectContent>
+                            <SelectGroup>
+                               <SelectLabel className="text-[#4ade80] font-black py-3.5 px-4 text-[15px] bg-[#4ade80]/5 mb-1">الإجراءات</SelectLabel>
+                               <SelectItem 
+                             value="new_category" 
+                             className="flex items-center gap-2 text-[#4ade80] font-black text-[15px] cursor-pointer py-4 focus:bg-muted focus:text-[#22c55e] border-b border-muted/50"
+                           >
+                             <div className="flex items-center gap-2 justify-center w-full">
+                               <PlusCircle className="h-5 w-5 stroke-[3px]" />
+                               <span>إضافة تصنيف جديد</span>
+                             </div>
+                           </SelectItem>
+                             </SelectGroup>
+                             <SelectSeparator className="bg-[#4ade80]/10" />
+                             <SelectGroup>
+                               <SelectLabel className="text-[#4ade80] font-black py-3.5 px-4 text-[15px] bg-[#4ade80]/5 mt-1 mb-1">التصنيفات المتاحة</SelectLabel>
+                               {renderCategoryItems(buildHierarchicalCategories())}
+                             </SelectGroup>
+                          </SelectContent>
+                      </Select>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+                <FormField
+                  control={form.control}
+                  name="name"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel className="text-base font-bold">اسم المنتج</FormLabel>
+                      <FormControl>
+                        <Input placeholder="مثال: بيتزا مارجريتا" className="h-12 text-lg" {...field} />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+                <FormField
+                  control={form.control}
+                  name="description"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel className="text-base font-bold">وصف المنتج</FormLabel>
+                      <FormControl>
+                        <Textarea 
+                          placeholder="اكتب وصفاً جذاباً لمنتجك..." 
+                          className="min-h-[120px] text-base resize-none" 
+                          {...field} 
+                        />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+              </div>
+              <div className="space-y-4 rounded-xl border-2 border-brand-primary/10 p-6 bg-brand-primary/5">
+                <FormLabel className="text-lg font-black text-brand-primary flex items-center gap-2">
+                  <span className="bg-brand-primary text-white p-1 rounded-md"><Plus className="h-4 w-4" /></span>
+                  نظام التسعير
+                </FormLabel>
+                <Tabs
+                  value={pricingType}
+                  onValueChange={(val) => {
+                    const type = val as 'unified' | 'multi';
+                    setPricingType(type);
+                    form.setValue('pricing_type', type);
+                  }}
+                  className="w-full"
+                >
+                  <TabsList className="grid w-full grid-cols-2 p-1 bg-muted/50 h-12">
+                    <TabsTrigger value="multi" className="text-base font-bold data-[state=active]:bg-white data-[state=active]:text-brand-primary shadow-sm">
+                      أسعار متعددة (أحجام)
+                    </TabsTrigger>
+                    <TabsTrigger value="unified" className="text-base font-bold data-[state=active]:bg-white data-[state=active]:text-brand-primary shadow-sm">
+                      سعر موحد
+                    </TabsTrigger>
+                  </TabsList>
+
+                  <TabsContent value="unified" className="mt-6">
+                    <FormField
+                      control={form.control}
+                      name="price"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel className="font-bold">السعر النهائي (ج.م)</FormLabel>
+                          <FormControl>
+                            <div className="relative">
+                              <Input type="number" step="0.01" placeholder="0.00" className="h-12 pl-12 text-xl font-bold" {...field} />
+                              <span className="absolute left-4 top-1/2 -translate-y-1/2 text-muted-foreground font-bold">ج.م</span>
+                            </div>
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                  </TabsContent>
+
+                  <TabsContent value="multi" className="mt-6">
+                    <div className="space-y-4">
+                      <div className="flex items-center justify-between">
+                        <span className="text-sm text-muted-foreground font-medium">أضف الأحجام المختلفة (مثلاً: صغير، كبير)</span>
+                        <Button
+                          type="button"
+                          variant="outline"
+                          size="sm"
+                          onClick={() => append({ name: '', price: undefined as any })}
+                          className="gap-2 border-brand-primary text-brand-primary hover:bg-brand-primary/10 font-bold"
+                        >
+                          <Plus className="h-4 w-4" />
+                          إضافة خيار
+                        </Button>
+                      </div>
+
+                      <div className="space-y-3 max-h-[300px] overflow-y-auto pr-2">
+                        {fields.map((field, index) => (
+                          <div key={field.id} className="flex gap-3 items-start p-3 rounded-lg bg-white border-2 border-transparent hover:border-brand-primary/20 transition-all shadow-sm">
+                            <FormField
+                              control={form.control}
+                              name={`variants.${index}.name`}
+                              render={({ field }) => (
+                                <FormItem className="flex-1">
+                                  <FormControl>
+                                    <Input placeholder="مثلاً: حجم كبير" className="h-11 border-none bg-muted/30 focus-visible:ring-0 font-bold" {...field} />
+                                  </FormControl>
+                                  <FormMessage />
+                                </FormItem>
+                              )}
+                            />
+                            <FormField
+                              control={form.control}
+                              name={`variants.${index}.price`}
+                              render={({ field }) => (
+                                <FormItem className="w-32">
+                                  <FormControl>
+                                    <div className="relative">
+                                      <Input type="number" step="0.01" placeholder="0.00" className="h-11 pl-10 border-none bg-muted/30 focus-visible:ring-0 font-bold" {...field} />
+                                      <span className="absolute left-2 top-1/2 -translate-y-1/2 text-[10px] text-muted-foreground font-bold">ج.م</span>
+                                    </div>
+                                  </FormControl>
+                                  <FormMessage />
+                                </FormItem>
+                              )}
+                            />
+                            <Button
+                              type="button"
+                              variant="ghost"
+                              size="icon"
+                              onClick={() => remove(index)}
+                              className="text-destructive hover:bg-destructive/10 h-11 w-11"
+                            >
+                              <Trash2 className="h-5 w-5" />
+                            </Button>
+                          </div>
+                        ))}
+                      </div>
                     </div>
-                  </TabsTrigger>
-                  <TabsTrigger value="unified" className="text-sm">
-                    سعر موحد
-                  </TabsTrigger>
-                </TabsList>
+                  </TabsContent>
+                </Tabs>
+              </div>
+            </div>
 
-                <TabsContent value="unified" className="mt-4">
-                  <FormField
-                    control={form.control}
-                    name="price"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>السعر (ج.م)</FormLabel>
-                        <FormControl><Input type="number" step="0.01" placeholder="0" {...field} /></FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-                </TabsContent>
-
-                <TabsContent value="multi" className="mt-4">
-                  <div className="space-y-4">
-                    <div className="flex items-center justify-between">
-                      <FormLabel className="text-base">خيارات المنتج</FormLabel>
-                      <Button
-                        type="button"
-                        variant="outline"
-                        size="sm"
-                        onClick={() => append({ name: '', price: undefined as any })}
-                        className="gap-1"
-                      >
-                        <Plus className="h-3 w-3" />
-                        إضافة خيار
-                      </Button>
-                    </div>
-
-                    <div className="space-y-3">
-                      {fields.map((field, index) => (
-                        <div key={field.id} className="flex gap-3 items-start animate-in fade-in slide-in-from-top-2">
-                          <FormField
-                            control={form.control}
-                            name={`variants.${index}.name`}
-                            render={({ field }) => (
-                              <FormItem className="flex-1">
-                                <FormControl>
-                                  <Input placeholder="اسم الخيار (مثلاً: كبير، وسط)" {...field} />
-                                </FormControl>
-                                <FormMessage />
-                              </FormItem>
-                            )}
+            {/* الجهة اليسرى: الصور */}
+            <div className="lg:col-span-5 space-y-6">
+              <div className="space-y-4 rounded-xl border-2 border-dashed border-muted-foreground/20 p-6 bg-muted/5">
+                <FormField
+                  control={form.control}
+                  name="main_image"
+                  render={({ field: { onChange, value, ...rest } }) => (
+                    <FormItem>
+                      <FormLabel className="flex items-center gap-2 mb-4 text-base font-bold">
+                        <ImageIcon className="h-5 w-5 text-brand-primary" />
+                        الصورة الرئيسية للمنتج
+                      </FormLabel>
+                      <FormControl>
+                        <div className="relative group">
+                          <input
+                            type="file"
+                            id="main-image-upload"
+                            className="hidden"
+                            accept="image/*"
+                            onChange={async (e) => {
+                              const file = e.target.files?.[0];
+                              if (file) {
+                                const compressed = await compressImage(file);
+                                onChange(compressed);
+                                const reader = new FileReader();
+                                reader.onloadend = () => {
+                                  setMainImagePreview(reader.result as string);
+                                };
+                                reader.readAsDataURL(compressed);
+                              }
+                            }}
+                            {...rest}
                           />
-                          <FormField
-                            control={form.control}
-            name={`variants.${index}.price`}
-                            render={({ field }) => (
-                              <FormItem className="w-32">
-                                <FormControl>
-                                  <div className="relative">
-                                    <Input type="number" step="0.01" placeholder="السعر" {...field} className="pl-8" />
-                                    <span className="absolute left-2 top-2.5 text-xs text-muted-foreground">ج.م</span>
+                          <label
+                            htmlFor="main-image-upload"
+                            className={cn(
+                              "relative flex flex-col items-center justify-center w-full aspect-square rounded-2xl border-4 border-dashed cursor-pointer transition-all overflow-hidden",
+                              mainImagePreview 
+                                ? "border-brand-primary/40 bg-white shadow-inner" 
+                                : "border-muted-foreground/20 hover:border-brand-primary/50 hover:bg-brand-primary/5 bg-white"
+                            )}
+                          >
+                            {mainImagePreview ? (
+                              <>
+                                <img 
+                                  src={mainImagePreview} 
+                                  alt="Preview" 
+                                  className="w-full h-full object-cover"
+                                />
+                                <div className="absolute inset-0 bg-black/40 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
+                                  <div className="flex flex-col items-center text-white">
+                                    <Upload className="h-10 w-10 mb-2" />
+                                    <span className="font-bold">تغيير الصورة</span>
                                   </div>
-                                </FormControl>
-                                <FormMessage />
-                              </FormItem>
+                                </div>
+                              </>
+                            ) : (
+                              <div className="flex flex-col items-center text-center p-6">
+                                <div className="bg-brand-primary/10 p-5 rounded-full mb-4">
+                                  <Upload className="h-10 w-10 text-brand-primary" />
+                                </div>
+                                <span className="text-lg font-black text-foreground">أضف صورة جذابة</span>
+                                <span className="text-sm text-muted-foreground mt-2">يفضل أن تكون مربعة وبإضاءة جيدة</span>
+                              </div>
                             )}
-                          />
-                          <Button
-                            type="button"
-                            variant="ghost"
-                            size="icon"
-                            className="text-destructive hover:text-destructive/90 hover:bg-destructive/10"
-                            onClick={() => remove(index)}
-                          >
-                            <Trash2 className="h-4 w-4" />
-                          </Button>
+                          </label>
                         </div>
-                      ))}
-                      {fields.length === 0 && (
-                        <div className="text-center py-8 border-2 border-dashed rounded-lg text-muted-foreground">
-                          <Tag className="h-8 w-8 mx-auto mb-2 opacity-50" />
-                          <p>لم يتم إضافة خيارات بعد</p>
-                          <Button
-                            type="button"
-                            variant="link"
-                            onClick={() => append({ name: '', price: 0 })}
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+
+                <FormField
+                  control={form.control}
+                  name="additional_images"
+                  render={({ field: { onChange, value, ...rest } }) => (
+                    <FormItem className="mt-8">
+                      <FormLabel className="flex items-center justify-between mb-4">
+                        <div className="flex items-center gap-2 text-base font-bold">
+                          <Plus className="h-5 w-5 text-brand-primary" />
+                          صور إضافية للمنتج
+                        </div>
+                        {!isPro && <span className="text-[10px] bg-amber-100 text-amber-700 px-2 py-1 rounded-full font-bold">باقة PRO فقط</span>}
+                      </FormLabel>
+                      <FormControl>
+                        <div className={cn(!isPro && "opacity-50 pointer-events-none")}>
+                          <input
+                            type="file"
+                            id="additional-images-upload"
+                            className="hidden"
+                            accept="image/*"
+                            multiple={true}
+                            onChange={async (e) => {
+                              const files = Array.from(e.target.files || []);
+                              if (files.length > 0) {
+                                const compressedFiles = await Promise.all(
+                                  files.map(file => compressImage(file))
+                                );
+                                onChange(compressedFiles);
+                              }
+                            }}
+                            {...rest}
+                          />
+                          <label
+                            htmlFor="additional-images-upload"
+                            className="flex flex-col items-center justify-center w-full py-8 rounded-xl border-2 border-dashed border-muted-foreground/20 hover:border-brand-primary/40 bg-white transition-all cursor-pointer"
                           >
-                            إضافة الخيار الأول
-                          </Button>
+                            <Plus className="h-8 w-8 text-muted-foreground mb-2" />
+                            <span className="text-sm font-bold">اضغط هنا لإضافة المزيد من الصور</span>
+                          </label>
+                        </div>
+                      </FormControl>
+                      {item && (item as any).product_images && (
+                        <div className="mt-4 p-3 bg-blue-50 rounded-lg text-blue-700 text-xs font-bold flex items-center gap-2">
+                          <ImageIcon className="h-4 w-4" />
+                          الصور المرفوعة حالياً: {(item as any).product_images.length}
                         </div>
                       )}
-                    </div>
-                    <FormMessage>{form.formState.errors.variants?.message}</FormMessage>
-                  </div>
-                </TabsContent>
-              </Tabs>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+              </div>
             </div>
           </div>
 
-          {/* الصورة الرئيسية */}
-          <FormField
-            control={form.control}
-            name="main_image"
-            render={({ field: { onChange, value, ...rest } }) => (
-              <FormItem>
-                <FormLabel className="flex items-center gap-2 mb-2">
-                  <ImageIcon className="h-4 w-4 text-brand-accent" />
-                  الصورة الرئيسية للمنتج
-                  {item && <span className="text-xs text-muted-foreground">(اختياري للتغيير)</span>}
-                </FormLabel>
-                <FormControl>
-                  <div className="relative">
-                    <input
-                      type="file"
-                      id="main-image-upload"
-                      className="hidden"
-                      accept="image/*"
-                      onChange={async (e) => {
-                        const file = e.target.files?.[0];
-                        if (file) {
-                          // Compress immediately for preview and state
-                          const compressed = await compressImage(file);
-                          onChange(compressed);
-                          const reader = new FileReader();
-                          reader.onloadend = () => {
-                            setMainImagePreview(reader.result as string);
-                          };
-                          reader.readAsDataURL(compressed);
-                        }
-                      }}
-                      {...rest}
-                    />
-                    <label
-                      htmlFor="main-image-upload"
-                      className={cn(
-                        "flex flex-col items-center justify-center w-full h-40 border-2 border-dashed rounded-xl cursor-pointer transition-all duration-300",
-                        mainImagePreview 
-                          ? "border-brand-accent/50 bg-brand-accent/5" 
-                          : "border-muted-foreground/20 hover:border-brand-accent/50 hover:bg-brand-accent/5 bg-muted/10"
-                      )}
-                    >
-                      {mainImagePreview ? (
-                        <div className="relative w-full h-full p-2">
-                          <img 
-                            src={mainImagePreview} 
-                            alt="Preview" 
-                            className="w-full h-full object-contain rounded-lg"
-                          />
-                          <div className="absolute inset-0 flex items-center justify-center bg-black/40 opacity-0 hover:opacity-100 transition-opacity rounded-lg">
-                            <div className="flex flex-col items-center text-white">
-                              <Upload className="h-8 w-8 mb-1" />
-                              <span className="text-xs font-bold">تغيير الصورة</span>
-                            </div>
-                          </div>
-                        </div>
-                      ) : (
-                        <div className="flex flex-col items-center justify-center py-6">
-                          <div className="bg-brand-accent/10 p-4 rounded-full mb-3">
-                            <Upload className="h-8 w-8 text-brand-accent" />
-                          </div>
-                          <span className="text-sm font-bold text-foreground">أضف صورة للمنتج</span>
-                          <span className="text-xs text-muted-foreground mt-1">اضغط هنا لاختيار صورة</span>
-                        </div>
-                      )}
-                    </label>
-                  </div>
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-
-          {/* الصور الإضافية */}
-          <FormField
-            control={form.control}
-            name="additional_images"
-            render={({ field: { onChange, value, ...rest } }) => (
-              <FormItem>
-                <FormLabel>
-                  <div className="flex items-center gap-2">
-                    <Plus className="h-4 w-4" />
-                    الصور الإضافية
-                    {!isPro && <span className="text-xs text-muted-foreground mr-2">(ميزة خاصة بالباقة الاحترافية)</span>}
-                    {isPro && <span className="text-xs text-primary mr-2">(ميزة خاصة بالباقة الاحترافية)</span>}
-                  </div>
-                </FormLabel>
-                <FormControl>
-                  {isPro ? (
-                    <div className="space-y-2">
-                      <Input
-                        type="file"
-                        accept="image/*"
-                        multiple={true}
-                        onChange={async (e) => {
-                          const files = Array.from(e.target.files || []);
-                          if (files.length > 0) {
-                            const compressedFiles = await Promise.all(
-                              files.map(file => compressImage(file))
-                            );
-                            onChange(compressedFiles);
-                          }
-                        }}
-                        {...rest}
-                      />
-                    </div>
-                  ) : (
-                    <div className="space-y-2">
-                      <Input
-                        type="file"
-                        accept="image/*"
-                        multiple={true}
-                        disabled={true}
-                        placeholder="ميزة خاصة بالباقة الاحترافية"
-                        className="opacity-50 cursor-not-allowed"
-                        {...rest}
-                      />
-                    </div>
-                  )}
-                </FormControl>
-                <FormMessage />
-                {item && (
-                  <div className="mt-2 text-sm text-muted-foreground">
-                    الصور الإضافية الحالية: {(item as any).product_images?.length || 0} صورة
-                  </div>
-                )}
-              </FormItem>
-            )}
-          />
-          <div className="flex gap-2 pt-2">
+          <div className="flex gap-4 pt-6 border-t mt-8 sticky bottom-0 bg-white pb-2">
             <Button
               type="button"
-              variant="destructive"
+              variant="outline"
               onClick={onCancel}
-              className="w-full h-11"
+              className="flex-1 h-14 text-lg font-bold border-2"
             >
               إلغاء
             </Button>
-            <SubmitButton pendingText="جاري الحفظ..." className="w-full h-11">
-              {item ? 'حفظ التغييرات' : 'حفظ المنتج'}
-            </SubmitButton>
+            <Button
+              type="submit"
+              disabled={form.formState.isSubmitting}
+              className="flex-[2] h-14 text-lg font-black bg-brand-primary hover:bg-brand-primary/90 text-white shadow-lg shadow-brand-primary/20"
+            >
+              {form.formState.isSubmitting ? (
+                <div className="flex items-center gap-3">
+                  <div className="h-5 w-5 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+                  <span>جاري الحفظ...</span>
+                </div>
+              ) : (
+                item ? 'تحديث المنتج' : 'إضافة المنتج للمنيو'
+              )}
+            </Button>
           </div>
-          <div className="h-24" /> {/* مسافة إضافية أسفل الزر لتجنب التداخل مع شريط التنقل */}
         </form>
       </Form>
     </>
