@@ -19,6 +19,7 @@ import { useFieldArray } from 'react-hook-form';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useRouter } from 'next/navigation';
 import { cn } from "@/lib/utils";
+import { compressImage } from '@/lib/image-utils';
 
 const MAX_FILE_SIZE = 5 * 1024 * 1024; // 5MB
 const ACCEPTED_IMAGE_TYPES = ["image/jpeg", "image/jpg", "image/png", "image/webp"];
@@ -166,13 +167,17 @@ export function ItemForm({ catalogId, catalogPlan, categories, item, onSuccess, 
       formData.append('category_id', values.category_id);
 
       if (values.main_image) {
-        formData.append('main_image', values.main_image);
+        console.log('Compressing main image...');
+        const compressedMain = await compressImage(values.main_image);
+        formData.append('main_image', compressedMain);
       }
 
       if (values.additional_images && values.additional_images.length > 0) {
-        values.additional_images.forEach((file) => {
-          formData.append('additional_images', file);
-        });
+        console.log(`Compressing ${values.additional_images.length} additional images...`);
+        for (const img of values.additional_images) {
+          const compressedImg = await compressImage(img);
+          formData.append('additional_images', compressedImg);
+        }
       }
 
       console.log('Sending form data...');
@@ -410,15 +415,17 @@ export function ItemForm({ catalogId, catalogPlan, categories, item, onSuccess, 
                       id="main-image-upload"
                       className="hidden"
                       accept="image/*"
-                      onChange={(e) => {
+                      onChange={async (e) => {
                         const file = e.target.files?.[0];
                         if (file) {
-                          onChange(file);
+                          // Compress immediately for preview and state
+                          const compressed = await compressImage(file);
+                          onChange(compressed);
                           const reader = new FileReader();
                           reader.onloadend = () => {
                             setMainImagePreview(reader.result as string);
                           };
-                          reader.readAsDataURL(file);
+                          reader.readAsDataURL(compressed);
                         }
                       }}
                       {...rest}
@@ -484,9 +491,14 @@ export function ItemForm({ catalogId, catalogPlan, categories, item, onSuccess, 
                         type="file"
                         accept="image/*"
                         multiple={true}
-                        onChange={(e) => {
+                        onChange={async (e) => {
                           const files = Array.from(e.target.files || []);
-                          onChange(files);
+                          if (files.length > 0) {
+                            const compressedFiles = await Promise.all(
+                              files.map(file => compressImage(file))
+                            );
+                            onChange(compressedFiles);
+                          }
                         }}
                         {...rest}
                       />

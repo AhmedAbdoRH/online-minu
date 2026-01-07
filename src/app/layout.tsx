@@ -1,3 +1,4 @@
+import { Tajawal } from 'next/font/google';
 import type { Metadata, Viewport } from 'next';
 import Script from 'next/script';
 import './globals.css';
@@ -6,6 +7,12 @@ import { cn } from '@/lib/utils';
 import ClientProviders from '@/components/common/ClientProviders';
 import { ThemeProvider } from "@/components/theme-provider";
 import NextTopLoader from 'nextjs-toploader';
+
+const tajawal = Tajawal({
+  subsets: ['arabic'],
+  weight: ['400', '500', '700', '800'],
+  variable: '--font-tajawal',
+});
 
 export const metadata: Metadata = {
   title: {
@@ -52,14 +59,8 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="ar" dir="rtl" suppressHydrationWarning>
+    <html lang="ar" dir="rtl" suppressHydrationWarning className={tajawal.variable}>
       <head>
-        <link rel="preconnect" href="https://fonts.googleapis.com" />
-        <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
-        <link
-          href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;700;800&display=swap"
-          rel="stylesheet"
-        />
         <link
           href="https://fonts.cdnfonts.com/css/satoshi"
           rel="stylesheet"
@@ -89,7 +90,7 @@ export default function RootLayout({
       </head>
       <body
         className={cn(
-          "font-body antialiased min-h-screen bg-background text-foreground",
+          "font-tajawal antialiased min-h-screen bg-background text-foreground",
           "selection:bg-brand-primary/10 selection:text-brand-primary"
         )}
       >

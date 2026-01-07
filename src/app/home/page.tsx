@@ -91,6 +91,12 @@ function UnifiedHomeContent() {
         friendlyMessage = 'تم إلغاء تسجيل الدخول.';
       }
       
+      // Skip showing the technical PKCE error message to the user
+      if (errorMessage.includes('both auth code and code verifier should be non-empty')) {
+        setIsLoading(false);
+        return;
+      }
+
       toast({
         variant: "destructive",
         title: "خطأ في تسجيل الدخول",
@@ -101,32 +107,30 @@ function UnifiedHomeContent() {
   };
 
   return (
-    <div className="flex min-h-screen flex-col items-center justify-center p-6 bg-gradient-to-br from-background to-muted/50 text-white relative overflow-hidden">
-      {/* Subtle warm glass tint (keeps brand colors as primary) */}
-      <div className="pointer-events-none absolute inset-0 bg-gradient-to-br from-orange-200/14 via-amber-100/10 to-transparent dark:from-orange-500/8 dark:via-amber-500/6 dark:to-transparent" />
-      {/* Very soft highlights */}
-      <div className="pointer-events-none absolute -top-24 -right-24 h-56 w-56 rounded-full bg-orange-200/14 blur-3xl dark:bg-orange-500/7" />
-      <div className="pointer-events-none absolute -bottom-24 -left-24 h-56 w-56 rounded-full bg-amber-200/12 blur-3xl dark:bg-amber-500/6" />
+    <div className="flex min-h-screen flex-col items-center justify-center p-6 bg-background text-white relative">
+      {/* Simpler background for better performance */}
+      <div className="pointer-events-none absolute inset-0 bg-gradient-to-b from-orange-500/5 to-transparent dark:from-orange-500/10" />
 
-      <div className="relative w-full max-w-sm space-y-8 animate-in fade-in zoom-in duration-500">
+      <div className="relative w-full max-w-sm space-y-8">
         
         {/* Logo Section */}
-        <div className="flex flex-col items-center space-y-6">
-          <div className="relative h-24 w-24">
+        <div className="flex flex-col items-center space-y-4">
+          <div className="relative h-20 w-20">
             <Image
               src="/logo.png"
               alt="اونلاين كاتلوج"
-              fill
+              width={80}
+              height={80}
               className="object-contain"
               priority
             />
           </div>
           
           <div className="text-center space-y-2">
-            <h1 className="text-3xl font-bold tracking-tight">
+            <h1 className="text-2xl font-bold tracking-tight">
               متجرك جاهز للانطلاق.
             </h1>
-            <p className="text-lg text-gray-400">
+            <p className="text-base text-gray-400">
               امتلك متجر احترافي في 3 دقائق. <span className="text-[#2eb872] font-bold">مجاناً!</span>
             </p>
           </div>
@@ -135,30 +139,25 @@ function UnifiedHomeContent() {
         {/* Dynamic Content Based on Step */}
         <div className="space-y-6">
           {isLoading && (
-            <div className="fixed inset-x-0 bottom-0 z-50 animate-in slide-in-from-bottom-full duration-300">
-              <div className="bg-[#1a1a1a]/95 backdrop-blur-md border-t border-white/10 p-4 shadow-[0_-10px_40px_rgba(0,0,0,0.5)]">
-                <div className="max-w-sm mx-auto space-y-3">
-                  <div className="flex items-center justify-between text-sm font-medium">
-                    <span className="text-[#2eb872] animate-pulse">جاري تسجيل الدخول...</span>
-                    <span className="text-gray-400">يرجى الانتظار قليلاً</span>
-                  </div>
-                  <div className="h-1.5 w-full bg-white/5 rounded-full overflow-hidden">
-                    <div className="h-full bg-gradient-to-r from-[#2eb872]/50 via-[#2eb872] to-[#2eb872]/50 w-full animate-progress-indeterminate" />
-                  </div>
+            <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm">
+              <div className="bg-[#1a1a1a] p-6 rounded-2xl border border-white/10 w-full max-w-[280px] space-y-4 text-center">
+                <div className="flex flex-col items-center gap-3">
+                  <div className="w-10 h-10 border-4 border-[#2eb872]/20 border-t-[#2eb872] rounded-full animate-spin" />
+                  <span className="text-[#2eb872] font-medium">جاري تسجيل الدخول...</span>
                 </div>
               </div>
             </div>
           )}
 
           {step === 'onboarding' ? (
-            <div className="space-y-4 animate-in slide-in-from-bottom-4 duration-500">
+            <div className="space-y-4">
               <div className="space-y-4">
                 <div className="relative group">
                   <Input
                     placeholder="اسم متجرك"
-                    className={`bg-black/20 border-2 h-14 pr-12 text-lg rounded-xl transition-all duration-300 focus-visible:ring-1 focus-visible:ring-[#2eb872] text-right ${
+                    className={`bg-black/40 border-2 h-14 pr-12 text-lg rounded-xl transition-all duration-300 focus-visible:ring-1 focus-visible:ring-[#2eb872] text-right ${
                       !storeName 
-                        ? "border-gray-700/30 bg-black/40 shadow-inner" 
+                        ? "border-gray-800" 
                         : "border-[#2eb872]/30 bg-[#121f1a]"
                     }`}
                     value={storeName}
@@ -167,17 +166,14 @@ function UnifiedHomeContent() {
                   <Store className={`absolute right-4 top-1/2 -translate-y-1/2 transition-colors duration-300 h-5 w-5 ${
                     !storeName ? "text-gray-600" : "text-[#2eb872]"
                   }`} />
-                  {!storeName && (
-                    <div className="absolute left-4 top-1/2 -translate-y-1/2 w-1.5 h-1.5 rounded-full bg-orange-500 animate-pulse" />
-                  )}
                 </div>
                 
                 <div className="relative flex items-center group">
                   <Input
                     placeholder="رقم الواتساب"
-                    className={`bg-black/20 border-2 h-14 pr-12 pl-24 text-lg rounded-xl transition-all duration-300 focus-visible:ring-1 focus-visible:ring-[#2eb872] text-right ${
+                    className={`bg-black/40 border-2 h-14 pr-12 pl-24 text-lg rounded-xl transition-all duration-300 focus-visible:ring-1 focus-visible:ring-[#2eb872] text-right ${
                       !whatsapp 
-                        ? "border-gray-700/30 bg-black/40 shadow-inner" 
+                        ? "border-gray-800" 
                         : "border-[#2eb872]/30 bg-[#121f1a]"
                     }`}
                     value={whatsapp}
@@ -209,7 +205,7 @@ function UnifiedHomeContent() {
                     });
                   }
                 }}
-                className="w-full h-14 bg-[#2eb872] hover:bg-[#25965d] text-[#05110d] font-bold text-xl rounded-xl shadow-[0_0_20px_rgba(46,184,114,0.3)] transition-all active:scale-95"
+                className="w-full h-14 bg-[#2eb872] hover:bg-[#25965d] text-[#05110d] font-bold text-xl rounded-xl shadow-lg transition-all active:scale-95"
               >
                 أنشئ متجرك الآن ✨
               </Button>
@@ -223,7 +219,7 @@ function UnifiedHomeContent() {
                   onClick={() => handleGoogleAuth(false)}
                   disabled={isLoading}
                   variant="outline"
-                  className="w-full h-14 bg-white text-gray-900 hover:bg-gray-100 border-none rounded-xl flex items-center justify-center gap-3 font-bold shadow-lg shadow-white/5"
+                  className="w-full h-14 bg-white text-gray-900 hover:bg-gray-100 border-none rounded-xl flex items-center justify-center gap-3 font-bold"
                 >
                   <svg className="w-6 h-6" viewBox="0 0 24 24">
                     <path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" fill="#4285F4"/>
@@ -236,15 +232,15 @@ function UnifiedHomeContent() {
               </div>
             </div>
           ) : (
-            <div className="space-y-8 animate-in zoom-in duration-500">
+            <div className="space-y-8">
               <div className="text-center space-y-4">
-                <div className="inline-flex items-center justify-center w-20 h-20 rounded-full bg-[#2eb872]/20 text-[#2eb872] mb-2">
-                  <svg className="w-10 h-10" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <div className="inline-flex items-center justify-center w-16 h-16 rounded-full bg-[#2eb872]/20 text-[#2eb872] mb-2">
+                  <svg className="w-8 h-8" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M5 13l4 4L19 7" />
                   </svg>
                 </div>
-                <h2 className="text-3xl font-bold text-[#2eb872]">رائع! ابدأ متجرك الآن</h2>
-                <p className="text-gray-400">الخطوة الأخيرة: سجل دخولك بجوجل لتفعيل متجرك</p>
+                <h2 className="text-2xl font-bold text-[#2eb872]">رائع! ابدأ متجرك الآن</h2>
+                <p className="text-gray-400 text-sm">الخطوة الأخيرة: سجل دخولك بجوجل لتفعيل متجرك</p>
               </div>
 
               <Button

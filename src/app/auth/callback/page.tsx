@@ -18,8 +18,9 @@ function AuthCallbackContent() {
                 const supabase = createClient();
                 const { error } = await supabase.auth.exchangeCodeForSession(code);
                 if (error) {
-                    setError(error.message);
-                    router.replace('/login?message=' + encodeURIComponent(error.message));
+                    console.error('Auth callback error:', error.message);
+                    // Silently redirect to home/login on PKCE error instead of showing technical message
+                    router.replace('/home');
                 } else {
                     router.replace(next);
                 }
@@ -32,11 +33,11 @@ function AuthCallbackContent() {
 
         handleCallback();
     }, [router, searchParams]);
-
+/*
     if (error) {
         return <div>Error: {error}</div>;
     }
-
+*/
     return (
         <div className="flex items-center justify-center min-h-screen">
             <div className="text-center">
