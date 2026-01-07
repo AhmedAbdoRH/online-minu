@@ -52,7 +52,7 @@ export function BottomNav() {
 
       // Fetch items count
       const { count } = await supabase
-        .from("items")
+        .from("menu_items")
         .select("*", { count: 'exact', head: true })
         .eq("catalog_id", catalogData.id);
       

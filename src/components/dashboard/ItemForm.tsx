@@ -137,21 +137,26 @@ export function ItemForm({ catalogId, catalogPlan, categories, item, onSuccess, 
   });
 
   const onSubmit = async (values: z.infer<typeof formSchema>) => {
+    console.log('--- Start onSubmit ---');
     // Prevent multiple submissions
     const isSubmitting = form.formState.isSubmitting;
+    console.log('isSubmitting state:', isSubmitting);
     if (isSubmitting) {
+      console.log('Submission blocked: already submitting');
       return;
     }
 
     // Create unique submission ID
     const currentSubmissionId = `${Date.now()}-${Math.random().toString(36).substring(2)}`;
+    console.log('Current submission ID:', currentSubmissionId);
     if (submissionId === currentSubmissionId) {
+      console.log('Submission blocked: duplicate ID');
       return;
     }
     setSubmissionId(currentSubmissionId);
 
     try {
-      console.log('Form submitted with values:', values);
+      console.log('Form validated values:', values);
 
       const formData = new FormData();
       formData.append('catalogId', catalogId.toString());
@@ -160,14 +165,13 @@ export function ItemForm({ catalogId, catalogPlan, categories, item, onSuccess, 
 
       // Handle pricing based on type
       if (values.pricing_type === 'multi' && values.variants && values.variants.length > 0) {
-        // Send variants as JSON string
+        console.log('Handling multi-pricing variants:', values.variants);
         formData.append('variants', JSON.stringify(values.variants));
-        // Find the minimum price to send as a fallback/default price
         const minPrice = Math.min(...values.variants.map(v => v.price));
         formData.append('price', minPrice.toString());
       } else {
+        console.log('Handling unified pricing:', values.price);
         formData.append('price', (values.price || 0).toString());
-        // Ensure to clear variants if switching back to unified
         formData.append('variants', JSON.stringify([]));
       }
 
@@ -176,6 +180,7 @@ export function ItemForm({ catalogId, catalogPlan, categories, item, onSuccess, 
       if (values.main_image) {
         console.log('Compressing main image...');
         const compressedMain = await compressImage(values.main_image);
+        console.log('Main image compressed successfully');
         formData.append('main_image', compressedMain);
       }
 
@@ -185,31 +190,34 @@ export function ItemForm({ catalogId, catalogPlan, categories, item, onSuccess, 
           const compressedImg = await compressImage(img);
           formData.append('additional_images', compressedImg);
         }
+        console.log('Additional images compressed successfully');
       }
 
-      console.log('Sending form data...');
+      console.log('Calling server action (createItem/updateItem)...');
       const result = item ? await updateItem(item.id, formData) : await createItem(formData);
 
-      console.log('Server response:', result);
+      console.log('Server response received:', result);
 
       if (result.error) {
+        console.error('Server returned error:', result.error);
         if (result.error === 'LIMIT_REACHED') {
           setShowUpgradeAlert(true);
           return;
         }
         toast({ title: 'خطأ', description: result.error, variant: 'destructive' });
       } else {
+        console.log('Success! Resetting form...');
         toast({ title: 'نجاح!', description: `تم ${item ? 'تحديث' : 'إنشاء'} المنتج بنجاح.` });
         form.reset();
-        console.log('onSuccess called');
-        // Introduce a small delay to allow revalidatePath to complete
         setTimeout(() => {
           onSuccess?.();
         }, 100);
       }
     } catch (error) {
-      console.error('Form submission error:', error);
+      console.error('CRITICAL: Form submission catch block:', error);
       toast({ title: 'خطأ', description: 'حدث خطأ غير متوقع', variant: 'destructive' });
+    } finally {
+      console.log('--- End onSubmit ---');
     }
   };
 
