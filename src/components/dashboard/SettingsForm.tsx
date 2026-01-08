@@ -245,7 +245,7 @@ export function SettingsForm({ catalog }: { catalog: Catalog }) {
           </div>
 
           {/* Logo Upload Area */}
-          <div className="absolute -bottom-10 left-1/2 -translate-x-1/2">
+          <div className="absolute -bottom-10 left-1/2 -translate-x-1/2 z-[60]">
             <AnimatePresence>
               {showTooltips && (
                 <motion.div
@@ -261,7 +261,7 @@ export function SettingsForm({ catalog }: { catalog: Catalog }) {
                     scale: { repeat: Infinity, duration: 2, ease: "easeInOut" },
                     duration: 0.3
                   }}
-                  className="absolute left-[-40%] -translate-x-full bottom-full mb-6 z-[60] pointer-events-none w-[240px] sm:w-[280px]"
+                  className="absolute left-[-40%] -translate-x-full bottom-full mb-6 z-[70] pointer-events-none w-[240px] sm:w-[280px]"
                 >
                   <div className="bg-brand-primary text-white p-4 rounded-2xl shadow-2xl flex flex-col items-center gap-2 border border-white/20 pointer-events-auto text-center relative">
                     <div className="flex items-center gap-2 justify-center">
@@ -306,7 +306,7 @@ export function SettingsForm({ catalog }: { catalog: Catalog }) {
                 type="file"
                 name="logo"
                 accept="image/*"
-                className="absolute inset-0 h-full w-full opacity-0 cursor-pointer z-50 pointer-events-auto p-0 border-0 rounded-full"
+                className="absolute inset-0 h-full w-full opacity-0 cursor-pointer z-[70] pointer-events-auto p-0 border-0 rounded-full"
                 onClick={() => console.log('SettingsForm: logo input clicked')}
                 onChange={handleLogoChange}
               />

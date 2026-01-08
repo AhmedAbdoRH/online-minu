@@ -3,7 +3,6 @@ import { redirect } from "next/navigation";
 import Header from "@/components/common/Header";
 import { DashboardNav } from "@/components/dashboard/DashboardNav";
 import { Toaster } from "@/components/ui/toaster";
-import { SupportButton } from "@/components/dashboard/SupportButton";
 import { BottomNav } from "@/components/dashboard/BottomNav";
 import { cn } from "@/lib/utils";
 
@@ -41,7 +40,6 @@ export default async function DashboardLayout({
           {children}
         </main>
       </div>
-      {catalog && <SupportButton />}
       {catalog && <BottomNav />}
     </div>
   );

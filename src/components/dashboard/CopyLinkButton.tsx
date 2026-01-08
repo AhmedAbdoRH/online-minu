@@ -25,7 +25,7 @@ export function CopyLinkButton({ url }: CopyLinkButtonProps) {
     <Button
       variant="default"
       size="sm"
-      className="flex-1 sm:flex-none gap-2 bg-green-500 hover:bg-green-600 text-xs sm:text-sm"
+      className="flex-1 sm:flex-none gap-2 bg-slate-100 hover:bg-slate-200 text-slate-700 transition-all shadow-sm border border-slate-200 text-xs sm:text-sm"
       onClick={handleCopy}
     >
       <Clipboard className="h-4 w-4" />

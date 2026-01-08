@@ -10,6 +10,7 @@ import {
   Tags,
   LogOut,
   PanelLeft,
+  Menu,
   MessageCircle,
   Zap,
   Package as PackageIcon,
@@ -31,6 +32,7 @@ import { usePathname } from 'next/navigation';
 import { cn } from '@/lib/utils';
 import { APP_NAME } from '@/lib/constants';
 import { ThemeToggle } from '@/components/ui/theme-toggle';
+import { SupportButton } from './SupportButton';
 
 const navItems = [
   { href: '/dashboard', icon: Home, label: 'لوحة التحكم' },
@@ -178,8 +180,8 @@ export function DashboardNav({ user, catalog }: { user: User; catalog: Catalog |
       <header className="sticky top-0 z-30 flex h-auto min-h-14 items-center gap-4 border-b bg-background px-4 pt-10 pb-2 sm:pt-0 sm:static sm:h-auto sm:border-0 sm:bg-transparent sm:px-6 sm:pr-20">
         <Sheet open={isSheetOpen} onOpenChange={setIsSheetOpen}>
           <SheetTrigger asChild>
-            <Button size="icon" variant="outline" className="sm:hidden">
-              <PanelLeft className="h-5 w-5 transform scale-x-[-1]" />
+            <Button size="icon" variant="ghost" className="sm:hidden text-foreground">
+              <Menu className="h-6 w-6" />
               <span className="sr-only">فتح القائمة</span>
             </Button>
           </SheetTrigger>
@@ -273,6 +275,10 @@ export function DashboardNav({ user, catalog }: { user: User; catalog: Catalog |
             <p className="hidden md:block text-xs text-muted-foreground border-r pr-4 truncate">نظرة عامة على متجرك الإلكتروني</p>
           </div>
         )}
+
+        <div className="mr-auto">
+          <SupportButton />
+        </div>
       </header>
     </TooltipProvider>
   );
