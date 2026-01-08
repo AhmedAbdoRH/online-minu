@@ -111,7 +111,7 @@ export function SettingsForm({ catalog }: { catalog: Catalog }) {
     },
   });
 
-  const handleLogoChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleLogoChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
     console.log('SettingsForm: handleLogoChange called', e?.target?.files);
     const file = e.target.files?.[0];
     if (file) {
@@ -121,10 +121,15 @@ export function SettingsForm({ catalog }: { catalog: Catalog }) {
         setLogoPreview(reader.result as string);
       };
       reader.readAsDataURL(file);
+      
+      // Auto-submit after state updates
+      setTimeout(() => {
+        form.handleSubmit((values) => onSubmit(values, file, coverFile))();
+      }, 100);
     }
   };
 
-  const handleCoverChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleCoverChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
     console.log('SettingsForm: handleCoverChange called', e?.target?.files);
     const file = e.target.files?.[0];
     if (file) {
@@ -134,10 +139,15 @@ export function SettingsForm({ catalog }: { catalog: Catalog }) {
         setCoverPreview(reader.result as string);
       };
       reader.readAsDataURL(file);
+
+      // Auto-submit after state updates
+      setTimeout(() => {
+        form.handleSubmit((values) => onSubmit(values, logoFile, file))();
+      }, 100);
     }
   };
 
-  const onSubmit = async (values: z.infer<typeof formSchema>) => {
+  const onSubmit = async (values: z.infer<typeof formSchema>, manualLogo?: File | null, manualCover?: File | null) => {
     setIsSubmitting(true);
 
     try {
@@ -151,14 +161,16 @@ export function SettingsForm({ catalog }: { catalog: Catalog }) {
       formData.append('theme', selectedTheme);
       formData.append('hide_footer', hideFooter.toString());
 
-      // Handle logo file from state
-      if (logoFile) {
-        formData.append('logo', logoFile);
+      // Use manually passed file or state file
+      const finalLogo = manualLogo !== undefined ? manualLogo : logoFile;
+      const finalCover = manualCover !== undefined ? manualCover : coverFile;
+
+      if (finalLogo) {
+        formData.append('logo', finalLogo);
       }
 
-      // Handle cover file from state
-      if (coverFile) {
-        formData.append('cover', coverFile);
+      if (finalCover) {
+        formData.append('cover', finalCover);
       }
 
       const result = await updateCatalog(null, formData);
