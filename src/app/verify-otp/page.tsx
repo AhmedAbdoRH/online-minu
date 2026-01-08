@@ -69,7 +69,9 @@ function VerifyOtpContent() {
                             <Input
                                 id="otp"
                                 name="otp"
-                                type="text"
+                                type="tel"
+                                inputMode="numeric"
+                                pattern="[0-9]*"
                                 required
                                 className="text-center text-lg tracking-widest"
                                 maxLength={6}

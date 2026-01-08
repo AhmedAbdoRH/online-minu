@@ -408,13 +408,14 @@ export function OnboardingForm({ userPhone }: OnboardingFormProps) {
                         <Input
                           id="whatsapp_number"
                           name="whatsapp_number"
+                          inputMode="tel"
                           placeholder="1234567890"
                           className="h-20 pr-14 text-2xl bg-background/80 border-2 border-border/50 focus:border-primary transition-all font-mono rounded-3xl shadow-lg backdrop-blur-sm text-right font-black"
                           value={formData.whatsapp_number}
                           onChange={(e) => handleInputChange('whatsapp_number', e.target.value)}
                           required
                           type="tel"
-                          pattern="[0-9]{7,15}"
+                          pattern="[0-9]*"
                         />
                       </div>
                     </div>

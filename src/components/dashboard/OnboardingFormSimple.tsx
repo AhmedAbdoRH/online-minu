@@ -163,6 +163,8 @@ export function OnboardingFormSimple({ onSubmit, isSubmitting }: OnboardingFormS
                 <Phone className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-gray-400" />
                 <Input
                   type="tel"
+                  inputMode="tel"
+                  pattern="[0-9]*"
                   placeholder="رقم الواتساب"
                   value={phoneNumber}
                   onChange={(e) => {
