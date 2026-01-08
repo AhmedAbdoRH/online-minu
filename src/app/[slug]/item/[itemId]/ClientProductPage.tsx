@@ -227,6 +227,8 @@ export default function ClientProductPage() {
                             </div>
                             <Link
                                 href={`/${catalog.name}`}
+                                target="_blank"
+                                rel="noopener noreferrer"
                                 className="text-sm text-brand-primary hover:text-brand-primary/80"
                             >
                                 استعرض المتجر كامل
