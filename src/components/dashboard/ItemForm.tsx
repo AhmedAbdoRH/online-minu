@@ -213,7 +213,7 @@ export function ItemForm({ catalogId, categories, item, onSuccess, onCancel, isP
                                    onSuccess?.();
                                    router.push('/dashboard/categories');
                                  }}
-                                 className="w-full flex items-center justify-center gap-2 px-4 py-2.5 text-sm font-black text-emerald-800 dark:text-emerald-300 bg-emerald-100 dark:bg-emerald-500/20 border-2 border-emerald-300 dark:border-emerald-500/40 rounded-xl transition-all hover:bg-emerald-200 dark:hover:bg-emerald-500/30 hover:border-emerald-400 dark:hover:border-emerald-500/60 group"
+                                 className="w-full flex items-center justify-center gap-2 px-4 py-2.5 text-sm font-black text-emerald-800 dark:text-emerald-300 bg-emerald-100 dark:bg-emerald-500/20 border-2 border-emerald-300 dark:border-emerald-500/40 rounded-xl transition-all hover:bg-emerald-200 dark:hover:bg-emerald-500/30 hover:border-emerald-400 dark:hover:bg-emerald-500/60 group"
                                >
                                  <PlusCircle className="h-5 w-5 group-hover:rotate-90 transition-transform duration-300" />
                                  <span>إضافة تصنيف جديد</span>
@@ -221,8 +221,18 @@ export function ItemForm({ catalogId, categories, item, onSuccess, onCancel, isP
                              </div>
   
                             {categories.map((category) => (
-                              <SelectItem key={category.id} value={category.id.toString()} className="focus:bg-brand-primary/10 dark:focus:bg-brand-primary/20 rounded-lg py-3 dark:text-slate-200 text-right flex-row-reverse">
-                                {category.name}
+                              <SelectItem 
+                                key={category.id} 
+                                value={category.id.toString()} 
+                                className="relative rounded-sm py-3 mb-2 focus:bg-brand-primary focus:text-white cursor-pointer transition-all border border-transparent pr-4 pl-4 overflow-hidden group"
+                              >
+                                <div className="flex items-center justify-end w-full relative z-10">
+                                  <span className="font-bold text-right">{category.name}</span>
+                                </div>
+                                {/* Distinct Background Strip - Sharp Edges */}
+                                 <div className="absolute inset-y-0 right-0 left-0 bg-brand-primary/20 dark:bg-brand-primary/30 rounded-none group-focus:bg-transparent transition-colors" />
+                                 {/* Accent border-strip on the far right - Sharp Edges */}
+                                 <div className="absolute right-0 top-0 bottom-0 w-2 bg-brand-primary" />
                               </SelectItem>
                             ))}
                          </SelectContent>

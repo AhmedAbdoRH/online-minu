@@ -69,13 +69,22 @@ export function SettingsForm({ catalog }: { catalog: Catalog }) {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [showTooltips, setShowTooltips] = useState(false);
 
+  // File states for previews and actual files
+  const [logoFile, setLogoFile] = useState<File | null>(null);
+  const [coverFile, setCoverFile] = useState<File | null>(null);
+  const [logoPreview, setLogoPreview] = useState<string | null>(catalog.logo_url || null);
+  const [coverPreview, setCoverPreview] = useState<string | null>(catalog.cover_url || null);
+
+  const [selectedTheme, setSelectedTheme] = useState(catalog.theme || 'default');
+  const [hideFooter, setHideFooter] = useState(catalog.hide_footer || false);
+
   useEffect(() => {
     // Show tooltips if logo or cover are missing
-    // We check both but the user emphasized the logo
-    const isMissingLogo = !catalog.logo_url;
-    const isMissingCover = !catalog.cover_url;
+    // Hide if both exist OR if user has selected files locally
+    const hasLogo = catalog.logo_url || logoFile;
+    const hasCover = catalog.cover_url || coverFile;
     
-    if (isMissingLogo || isMissingCover) {
+    if (!hasLogo || !hasCover) {
       const timer = setTimeout(() => {
         setShowTooltips(true);
       }, 1500);
@@ -83,21 +92,13 @@ export function SettingsForm({ catalog }: { catalog: Catalog }) {
     } else {
       setShowTooltips(false);
     }
-  }, [catalog.logo_url, catalog.cover_url]);
+  }, [catalog.logo_url, catalog.cover_url, logoFile, coverFile]);
 
   const dismissTooltips = () => {
     setShowTooltips(false);
   };
 
-  const [selectedTheme, setSelectedTheme] = useState(catalog.theme || 'default');
-  const [hideFooter, setHideFooter] = useState(catalog.hide_footer || false);
   const isPro = catalog.plan === 'pro' || catalog.plan === 'business';
-
-  // File states for previews and actual files
-  const [logoFile, setLogoFile] = useState<File | null>(null);
-  const [coverFile, setCoverFile] = useState<File | null>(null);
-  const [logoPreview, setLogoPreview] = useState<string | null>(catalog.logo_url || null);
-  const [coverPreview, setCoverPreview] = useState<string | null>(catalog.cover_url || null);
 
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),

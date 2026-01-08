@@ -508,11 +508,20 @@ export function OnboardingForm({ userPhone }: OnboardingFormProps) {
                     </label>
                   </div>
 
-                  <div className="bg-muted/30 p-5 rounded-3xl border border-border/50">
-                    <p className="text-lg text-center text-muted-foreground italic font-bold leading-relaxed">
-                      💡 يمكنك تخطي هذه الخطوة الآن وإضافة اللوجو لاحقاً من الإعدادات.
-                    </p>
-                  </div>
+                  <AnimatePresence>
+                    {!formData.logo && (
+                      <motion.div 
+                        initial={{ opacity: 0, height: 0 }}
+                        animate={{ opacity: 1, height: 'auto' }}
+                        exit={{ opacity: 0, height: 0 }}
+                        className="bg-muted/30 p-5 rounded-3xl border border-border/50 overflow-hidden"
+                      >
+                        <p className="text-lg text-center text-muted-foreground italic font-bold leading-relaxed">
+                          💡 يمكنك تخطي هذه الخطوة الآن وإضافة اللوجو لاحقاً من الإعدادات.
+                        </p>
+                      </motion.div>
+                    )}
+                  </AnimatePresence>
                 </div>
               )}
             </motion.div>
