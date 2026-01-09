@@ -126,19 +126,31 @@ export function ItemForm({ catalogId, categories, item, onSuccess, onCancel, isP
       formData.append('category_id', values.category_id);
 
       if (values.main_image) {
-        console.log('Compressing main image...');
-        const compressedMain = await compressImage(values.main_image);
-        console.log('Main image compressed successfully');
-        formData.append('images', compressedMain);
+        console.log('Main image details:', { name: values.main_image.name, size: values.main_image.size, type: values.main_image.type });
+        try {
+          console.log('Compressing main image...');
+          const compressedMain = await compressImage(values.main_image);
+          console.log('Main image compressed successfully, size:', compressedMain.size);
+          formData.append('images', compressedMain, compressedMain.name);
+        } catch (compError) {
+          console.error('Main image compression failed, using original:', compError);
+          formData.append('images', values.main_image);
+        }
       }
 
       if (values.additional_images && values.additional_images.length > 0) {
-        console.log(`Compressing ${values.additional_images.length} additional images...`);
-        for (const img of values.additional_images) {
-          const compressedImg = await compressImage(img);
-          formData.append('images', compressedImg);
+        console.log(`Processing ${values.additional_images.length} additional images...`);
+        for (let i = 0; i < values.additional_images.length; i++) {
+          const img = values.additional_images[i];
+          try {
+            console.log(`Compressing additional image ${i+1}...`);
+            const compressedImg = await compressImage(img);
+            formData.append('images', compressedImg, compressedImg.name);
+          } catch (compError) {
+            console.error(`Additional image ${i+1} compression failed, using original:`, compError);
+            formData.append('images', img);
+          }
         }
-        console.log('Additional images compressed successfully');
       }
 
       console.log('Calling server action (createItem/updateItem)...');

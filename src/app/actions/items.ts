@@ -47,13 +47,30 @@ async function uploadImage(
     // Create a safe filename (encode Arabic and special characters)
     const timestamp = Date.now();
     const randomSuffix = Math.random().toString(36).substring(2, 8);
-    const ext = image instanceof File ? image.name.split('.').pop() || 'jpg' : 'jpg';
+    
+    // تحسين استخراج الامتداد للتعامل مع الحالات التي يكون فيها الاسم مفقوداً أو غير صالح
+    let ext = 'jpg';
+    if (image instanceof File && image.name) {
+      const parts = image.name.split('.');
+      if (parts.length > 1) ext = parts.pop() || 'jpg';
+    } else if (image.type) {
+      ext = image.type.split('/').pop() || 'jpg';
+    }
+    
+    // التأكد من أن الامتداد لا يحتوي على رموز غريبة
+    ext = ext.toLowerCase().replace(/[^a-z0-9]/g, '');
+    if (ext === 'jpeg') ext = 'jpg';
+
     const safeFileName = `${timestamp}-${randomSuffix}.${ext}`;
     const uploadPath = `${userId}/${safeFileName}`;
 
     let contentType = 'image/jpeg';
-    if (image instanceof File) {
-      contentType = image.type === 'image/jpg' ? 'image/jpeg' : image.type;
+    if (image.type) {
+      contentType = image.type;
+    } else if (ext === 'webp') {
+      contentType = 'image/webp';
+    } else if (ext === 'png') {
+      contentType = 'image/png';
     }
 
     console.log('Uploading image:', { uploadPath, contentType, size: image.size });

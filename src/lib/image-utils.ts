@@ -4,7 +4,7 @@ export async function compressImage(file: File): Promise<File> {
   const options = {
     maxSizeMB: 0.2, // أقصى حجم 200 كيلوبايت لضمان السرعة وتوفير المساحة
     maxWidthOrHeight: 1200, // أقصى عرض أو طول 1200 بكسل
-    useWebWorker: true,
+    useWebWorker: false, // تعطيل الـ Web Worker لأنه يسبب مشاكل أحياناً في WebView الأندرويد
     fileType: 'image/webp', // تحويل الصور إلى تنسيق WebP لتقليل الحجم بشكل أكبر
   };
 
