@@ -109,14 +109,14 @@ export function OnboardingFormSimple({ onSubmit, isSubmitting }: OnboardingFormS
       <div className="flex flex-col md:flex-row gap-8 md:gap-12 items-center md:items-start w-full">
         {/* Logo */}
         <div className="flex-shrink-0 w-32 md:w-48 relative flex items-center justify-center animate-in fade-in slide-in-from-top-4 md:slide-in-from-right-8 duration-700">
-            <Image
-              src="/logo.png"
-              alt="Logo"
-              width={180}
-              height={180}
-              className="object-contain w-full h-auto max-h-[100px] md:max-h-none"
-            />
-          </div>
+          <Image
+            src="/logo.png"
+            alt="Logo"
+            width={180}
+            height={180}
+            className="object-contain w-full h-auto max-h-[100px] md:max-h-none"
+          />
+        </div>
 
         <div className="flex-1 text-right w-full animate-in fade-in slide-in-from-bottom-4 md:slide-in-from-left-8 duration-700">
           <h2 className="text-3xl md:text-4xl font-black text-white leading-tight mb-3 md:mb-4 !text-white">
@@ -230,7 +230,7 @@ export function OnboardingFormSimple({ onSubmit, isSubmitting }: OnboardingFormS
 
       {/* Logout Link */}
       <div className="flex justify-center mt-4">
-        <button 
+        <button
           onClick={handleLogout}
           className="flex items-center gap-2 text-white/30 hover:text-red-400 transition-colors text-xs font-medium group"
         >

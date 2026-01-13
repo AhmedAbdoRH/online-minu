@@ -164,8 +164,8 @@ function UnifiedHomeContent() {
                   <Input
                     placeholder="اسم متجرك"
                     className={`bg-black/40 border-2 h-14 pr-12 text-lg rounded-xl transition-all duration-300 focus-visible:ring-1 focus-visible:ring-[#2eb872] text-right ${!storeName
-                        ? "border-gray-800"
-                        : "border-[#2eb872]/30 bg-[#121f1a]"
+                      ? "border-gray-800"
+                      : "border-[#2eb872]/30 bg-[#121f1a]"
                       }`}
                     value={storeName}
                     onChange={(e) => setStoreName(e.target.value)}
