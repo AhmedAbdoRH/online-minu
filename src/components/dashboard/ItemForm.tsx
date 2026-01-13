@@ -89,6 +89,16 @@ export function ItemForm({ catalogId, categories, item, onSuccess, onCancel, isP
   const { toast } = useToast();
   const router = useRouter();
   const [showUpgradeAlert, setShowUpgradeAlert] = useState(false);
+  const [mainPreview, setMainPreview] = useState<string | null>(item?.image_url || null);
+  const [additionalPreviews, setAdditionalPreviews] = useState<string[]>(item?.images?.map((img: any) => img.image_url) || []);
+
+  const generatePreview = (file: File | Blob, callback: (url: string) => void) => {
+    const reader = new FileReader();
+    reader.onloadend = () => {
+      callback(reader.result as string);
+    };
+    reader.readAsDataURL(file);
+  };
 
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
@@ -110,7 +120,10 @@ export function ItemForm({ catalogId, categories, item, onSuccess, onCancel, isP
   const pricingType = form.watch('pricing_type');
 
   const onSubmit = async (values: z.infer<typeof formSchema>) => {
+    let currentStep = 'بداية المعالجة';
     try {
+      console.log('--- START SUBMIT ---');
+      currentStep = 'تجهيز البيانات';
       console.log('Form validated values:', values);
       const formData = new FormData();
       formData.append('catalogId', catalogId.toString());
@@ -131,6 +144,7 @@ export function ItemForm({ catalogId, categories, item, onSuccess, onCancel, isP
       formData.append('category_id', values.category_id);
 
       const MAX_FILE_SIZE = 5 * 1024 * 1024; // 5MB
+      currentStep = 'ضغط ومعالجة الصور';
 
       if (values.main_image) {
         console.log('Main image details:', { name: values.main_image.name, size: values.main_image.size, type: values.main_image.type });
@@ -198,6 +212,7 @@ export function ItemForm({ catalogId, categories, item, onSuccess, onCancel, isP
       }
 
       console.log('Calling server action (createItem/updateItem)...');
+      currentStep = 'إرسال البيانات للخادم';
       const result = item ? await updateItem(item.id, formData) : await createItem(formData);
       console.log('Server response received:', result);
 
@@ -217,9 +232,13 @@ export function ItemForm({ catalogId, categories, item, onSuccess, onCancel, isP
           router.push('/dashboard/items');
         }, 100);
       }
-    } catch (error) {
+    } catch (error: any) {
       console.error('CRITICAL: Form submission catch block:', error);
-      toast({ title: 'خطأ', description: 'حدث خطأ غير متوقع', variant: 'destructive' });
+      toast({
+        title: 'خطأ',
+        description: `فشل عند: ${currentStep}. الخطأ: ${error.message || 'غير معروف'}`,
+        variant: 'destructive'
+      });
     }
   };
 
@@ -461,7 +480,11 @@ export function ItemForm({ catalogId, categories, item, onSuccess, onCancel, isP
                             className="hidden"
                             accept="image/jpeg,image/png,image/jpg,image/webp"
                             onChange={async (e) => {
-                              onChange(e.target.files?.[0]);
+                              const file = e.target.files?.[0];
+                              if (file) {
+                                onChange(file);
+                                generatePreview(file, setMainPreview);
+                              }
                             }}
                             {...rest}
                           />
@@ -469,9 +492,9 @@ export function ItemForm({ catalogId, categories, item, onSuccess, onCancel, isP
                             htmlFor="main-image-upload"
                             className="flex flex-col items-center justify-center w-full aspect-square rounded-2xl border-2 border-dashed border-slate-200 dark:border-slate-700 hover:border-brand-primary/40 bg-slate-50/50 dark:bg-slate-900/50 hover:bg-white dark:hover:bg-slate-900 transition-all cursor-pointer group relative overflow-hidden"
                           >
-                            {value ? (
+                            {mainPreview ? (
                               <>
-                                <img src={URL.createObjectURL(value as File)} alt="Preview" className="w-full h-full object-cover" />
+                                <img src={mainPreview} alt="Preview" className="w-full h-full object-cover" />
                                 <div className="absolute inset-0 bg-black/40 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
                                   <div className="bg-white/20 backdrop-blur-md p-4 rounded-full border border-white/30">
                                     <Plus className="h-8 w-8 text-white" />
@@ -512,15 +535,18 @@ export function ItemForm({ catalogId, categories, item, onSuccess, onCancel, isP
                       </FormLabel>
                       <FormControl>
                         <div className={cn("grid grid-cols-3 gap-4", !isPro && "opacity-50 pointer-events-none")}>
-                          {value && (value as File[]).map((img, index) => (
+                          {additionalPreviews.map((previewUrl, index) => (
                             <div key={index} className="relative aspect-square rounded-xl overflow-hidden group border border-slate-200 dark:border-slate-700">
-                              <img src={URL.createObjectURL(img)} alt="Preview" className="w-full h-full object-cover" />
+                              <img src={previewUrl} alt="Preview" className="w-full h-full object-cover" />
                               <button
                                 type="button"
                                 onClick={() => {
-                                  const newValue = [...(value as File[])];
-                                  newValue.splice(index, 1);
-                                  onChange(newValue);
+                                  const newFiles = [...(value as File[])];
+                                  newFiles.splice(index, 1);
+                                  onChange(newFiles);
+                                  const newPreviews = [...additionalPreviews];
+                                  newPreviews.splice(index, 1);
+                                  setAdditionalPreviews(newPreviews);
                                 }}
                                 className="absolute top-1 right-1 bg-red-500 text-white p-1 rounded-full opacity-0 group-hover:opacity-100 transition-opacity shadow-lg"
                               >
@@ -536,7 +562,14 @@ export function ItemForm({ catalogId, categories, item, onSuccess, onCancel, isP
                             multiple
                             onChange={async (e) => {
                               const files = Array.from(e.target.files || []);
-                              onChange([...(value || []), ...files]);
+                              if (files.length > 0) {
+                                onChange([...(value || []), ...files]);
+                                files.forEach(file => {
+                                  generatePreview(file, (url) => {
+                                    setAdditionalPreviews(prev => [...prev, url]);
+                                  });
+                                });
+                              }
                             }}
                             {...rest}
                           />
