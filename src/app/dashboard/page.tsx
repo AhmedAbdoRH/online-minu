@@ -3,6 +3,7 @@ import { redirect } from "next/navigation";
 import { AutoCatalogCreator } from "@/components/dashboard/AutoCatalogCreator";
 import { CopyLinkButton } from "@/components/dashboard/CopyLinkButton";
 import { QRCodeButton } from "@/components/dashboard/QRCodeButton";
+import { StorePreviewModal } from "@/components/dashboard/StorePreviewModal";
 import { SettingsForm } from "@/components/dashboard/SettingsForm";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -128,12 +129,7 @@ export default async function DashboardPage() {
               <QRCodeButton url={qrCodeUrl} storeName={catalog.name} />
             </div>
             <div className="flex gap-2 w-full sm:w-auto">
-              <Button variant="default" size="sm" className="flex-1 sm:flex-none gap-1.5 text-xs sm:text-sm bg-gradient-to-r from-[#006060] to-[#8B8000] hover:brightness-110 transition-all shadow-lg border-0 text-white font-bold" asChild>
-                <Link href={catalogUrl} target="_blank" rel="noopener noreferrer">
-                  <Eye className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
-                  عرض المتجر
-                </Link>
-              </Button>
+              <StorePreviewModal url={catalogUrl} storeName={catalog.display_name || catalog.name} />
               <CopyLinkButton url={catalogUrl} />
             </div>
           </CardContent>
